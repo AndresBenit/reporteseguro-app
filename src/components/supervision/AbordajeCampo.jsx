@@ -7,6 +7,7 @@ const AbordajeCampo = () => {
     colaboradorId: '',
     colaboradorNombre: '',
     colaboradorArea: '',
+    supervisorReporta: '',
     lugarLabor: '',
     hallazgo: '',
     abordaje: ''
@@ -90,7 +91,7 @@ const AbordajeCampo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!form.colaboradorId || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
+    if (!form.colaboradorId || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
       setMensaje('❌ Por favor completa todos los campos obligatorios');
       setTimeout(() => setMensaje(''), 3000);
       return;
@@ -106,6 +107,7 @@ const AbordajeCampo = () => {
           nombre: form.colaboradorNombre,
           area: form.colaboradorArea
         },
+        supervisorReporta: form.supervisorReporta.trim(),
         lugarLabor: form.lugarLabor.trim(),
         hallazgo: form.hallazgo.trim(),
         abordaje: form.abordaje.trim()
@@ -117,7 +119,7 @@ const AbordajeCampo = () => {
         tipoReporte: 'abordaje',
         descripcion: form.hallazgo.trim(),
         abordaje: form.abordaje.trim(),
-        reportante: form.colaboradorNombre,
+        reportante: form.supervisorReporta.trim(),
         area: form.colaboradorArea,
         estado: 'pendiente'
       });
@@ -127,6 +129,7 @@ const AbordajeCampo = () => {
         colaboradorId: '',
         colaboradorNombre: '',
         colaboradorArea: '',
+        supervisorReporta: '',
         lugarLabor: '',
         hallazgo: '',
         abordaje: ''
@@ -344,6 +347,21 @@ const AbordajeCampo = () => {
                 <strong>{form.colaboradorNombre}</strong> - {form.colaboradorArea}
               </div>
             )}
+          </div>
+
+          {/* Supervisor que Reporta */}
+          <div className="form-group">
+            <label className="form-label">👨‍💼 Supervisor que Reporta *</label>
+            <input
+              type="text"
+              name="supervisorReporta"
+              placeholder="Nombre del supervisor que realizó el abordaje"
+              value={form.supervisorReporta}
+              onChange={handleChange}
+              className="form-input"
+              required
+              style={{ width: '100%' }}
+            />
           </div>
 
           {/* Lugar de Labor */}

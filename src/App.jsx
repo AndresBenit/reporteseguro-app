@@ -4,8 +4,8 @@ import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./services/firebase";
 
 // Componentes principales
-import Login from "./components/auth/Login";
-import MainLayout from "./components/common/MainLayout";
+import LoginMejorado from "./components/auth/LoginMejorado";
+import MainLayoutMejorado from "./components/common/MainLayoutMejorado";
 import MainDashboard from "./components/dashboard/MainDashboard";
 import ReportTypeSelector from "./components/reports/ReportTypeSelector";
 import ReporteList from "./components/reports/ReporteList";
@@ -108,7 +108,7 @@ function App() {
         {/* Ruta de login */}
         <Route
           path="/login"
-          element={!user ? <Login /> : <Navigate to="/" replace />}
+          element={!user ? <LoginMejorado /> : <Navigate to="/" replace />}
         />
         
         {/* Rutas protegidas */}
@@ -116,7 +116,7 @@ function App() {
           path="/*"
           element={
             user ? (
-              <MainLayout user={user} onLogout={handleLogout} reportes={reportes}>
+              <MainLayoutMejorado user={user} onLogout={handleLogout} reportes={reportes}>
                 <Routes>
                   {/* Dashboard principal */}
                   <Route
@@ -171,7 +171,7 @@ function App() {
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </MainLayout>
+              </MainLayoutMejorado>
             ) : (
               <Navigate to="/login" replace />
             )

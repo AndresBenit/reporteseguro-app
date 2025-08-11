@@ -398,7 +398,7 @@ const ReportesHistorialMejorado = () => {
                 <th>Fecha</th>
                 <th>Descripción</th>
                 <th>Área</th>
-                <th>Reportante</th>
+                <th>Supervisor</th>
                 <th>Severidad</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -421,7 +421,7 @@ const ReportesHistorialMejorado = () => {
                     </div>
                   </td>
                   <td>{reporte.area || reporte.lugarLabor || 'N/A'}</td>
-                  <td>{reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}</td>
+                  <td>{reporte.supervisorReporta || reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}</td>
                   <td>
                     {reporte.severidad && (
                       <span style={{
@@ -778,9 +778,21 @@ const ReportesHistorialMejorado = () => {
               <div>
                 <strong>Área:</strong> {selectedReporte.area || selectedReporte.lugarLabor || 'N/A'}
               </div>
-              <div>
-                <strong>Reportante:</strong> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
-              </div>
+              {selectedReporte.supervisorReporta && (
+                <div>
+                  <strong>Supervisor que Reporta:</strong> {selectedReporte.supervisorReporta}
+                </div>
+              )}
+              {selectedReporte.colaborador && (
+                <div>
+                  <strong>Colaborador Involucrado:</strong> {selectedReporte.colaborador.nombre} ({selectedReporte.colaborador.area})
+                </div>
+              )}
+              {!selectedReporte.supervisorReporta && (
+                <div>
+                  <strong>Reportante:</strong> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
+                </div>
+              )}
               {selectedReporte.severidad && (
                 <div>
                   <strong>Severidad:</strong> 

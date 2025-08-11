@@ -267,7 +267,7 @@ const ReportesHistorial = () => {
                 <th>Fecha</th>
                 <th>Descripción</th>
                 <th>Área</th>
-                <th>Reportante</th>
+                <th>Supervisor</th>
                 <th>Severidad</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -290,7 +290,7 @@ const ReportesHistorial = () => {
                     </div>
                   </td>
                   <td>{reporte.area || reporte.lugarLabor || 'N/A'}</td>
-                  <td>{reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}</td>
+                  <td>{reporte.supervisorReporta || reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}</td>
                   <td>
                     {reporte.severidad && (
                       <span style={{
@@ -545,6 +545,7 @@ const ReportesHistorial = () => {
                     <th style={{ padding: '12px', textAlign: 'left', color: '#92400e' }}>Fecha</th>
                     <th style={{ padding: '12px', textAlign: 'left', color: '#92400e' }}>Tipo Original</th>
                     <th style={{ padding: '12px', textAlign: 'left', color: '#92400e' }}>Descripción</th>
+                    <th style={{ padding: '12px', textAlign: 'left', color: '#92400e' }}>Supervisor</th>
                     <th style={{ padding: '12px', textAlign: 'left', color: '#92400e' }}>Estado</th>
                   </tr>
                 </thead>
@@ -559,6 +560,9 @@ const ReportesHistorial = () => {
                       </td>
                       <td style={{ padding: '12px' }}>
                         {reporte.descripcion || reporte.hallazgo || 'N/A'}
+                      </td>
+                      <td style={{ padding: '12px' }}>
+                        {reporte.supervisorReporta || reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}
                       </td>
                       <td style={{ padding: '12px' }}>
                         <select
@@ -662,12 +666,19 @@ const ReportesHistorial = () => {
               <div>
                 <strong>Área:</strong> {selectedReporte.area || selectedReporte.lugarLabor || 'N/A'}
               </div>
-              <div>
-                <strong>Reportante:</strong> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
-              </div>
+              {selectedReporte.supervisorReporta && (
+                <div>
+                  <strong>Supervisor que Reporta:</strong> {selectedReporte.supervisorReporta}
+                </div>
+              )}
               {selectedReporte.colaborador && (
                 <div>
-                  <strong>Colaborador:</strong> {selectedReporte.colaborador.nombre} ({selectedReporte.colaborador.area})
+                  <strong>Colaborador Involucrado:</strong> {selectedReporte.colaborador.nombre} ({selectedReporte.colaborador.area})
+                </div>
+              )}
+              {!selectedReporte.supervisorReporta && (
+                <div>
+                  <strong>Reportante:</strong> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
                 </div>
               )}
               {selectedReporte.severidad && (
