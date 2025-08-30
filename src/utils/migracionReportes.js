@@ -1,5 +1,4 @@
-import { collection, getDocs, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../services/firebase';
+import { dbHelpers, supabase } from '../services/supabase';
 
 /**
  * Script para migrar reportes existentes al nuevo formato con historial de estados
@@ -9,13 +8,7 @@ export const migrarReportesANuevoFormato = async () => {
   
   try {
     // Obtener todos los reportes
-    const reportesRef = collection(db, 'reportes');
-    const snapshot = await getDocs(reportesRef);
-    
-    const reportes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const reportes = await dbHelpers.getAll('reportes');
     
     console.log(`📊 Encontrados ${reportes.length} reportes para migrar`);
     
@@ -31,7 +24,7 @@ export const migrarReportesANuevoFormato = async () => {
         }
         
         // Crear historial inicial basado en el estado actual
-        const ahora = new Date();
+        const ahora = new Date().toISOString();
         const estadoActual = reporte.estado || 'pendiente';
         
         const historialInicial = {
@@ -56,7 +49,7 @@ export const migrarReportesANuevoFormato = async () => {
         if (!reporte.prioridad) updateData.prioridad = null;
         if (!reporte.fechaEstimada) updateData.fechaEstimada = null;
         
-        await updateDoc(doc(db, 'reportes', reporte.id), updateData);
+        await dbHelpers.update('reportes', reporte.id, updateData);
         
         migrados++;
         console.log(`✅ Reporte ${reporte.id} migrado exitosamente`);
@@ -92,19 +85,13 @@ export const limpiarHistorialReportes = async () => {
   console.log('🧹 Limpiando historial de reportes...');
   
   try {
-    const reportesRef = collection(db, 'reportes');
-    const snapshot = await getDocs(reportesRef);
-    
-    const reportes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const reportes = await dbHelpers.getAll('reportes');
     
     let limpiados = 0;
     
     for (const reporte of reportes) {
       try {
-        await updateDoc(doc(db, 'reportes', reporte.id), {
+        await dbHelpers.update('reportes', reporte.id, {
           historialEstados: null,
           fechaUltimaActualizacion: null,
           asignadoA: null,
@@ -136,13 +123,7 @@ export const verificarIntegridadDatos = async () => {
   console.log('🔍 Verificando integridad de datos...');
   
   try {
-    const reportesRef = collection(db, 'reportes');
-    const snapshot = await getDocs(reportesRef);
-    
-    const reportes = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
+    const reportes = await dbHelpers.getAll('reportes');
     
     const estadisticas = {
       total: reportes.length,

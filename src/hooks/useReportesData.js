@@ -1,11 +1,5 @@
 import { useEffect, useState } from 'react';
-import { db } from '../services/firebase';
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy
-} from 'firebase/firestore';
+import { dbHelpers } from '../services/supabase';
 import { getEstadisticasColaboradores } from '../utils/scripts/migrateColaboradores';
 
 const useReportesData = (user) => {
@@ -21,29 +15,27 @@ const useReportesData = (user) => {
     }
 
     // Cargar reportes
-    const reportesRef = collection(db, "reportes");
-    const reportesQuery = query(reportesRef, orderBy('fecha', 'desc'));
-    
-    const unsubReportes = onSnapshot(
-      reportesQuery, 
-      (snapshot) => {
-        try {
-          const data = snapshot.docs.map((doc) => ({ 
-            id: doc.id, 
-            ...doc.data() 
-          }));
-          setReportes(data);
-          setError(null);
-        } catch (err) {
-          console.error("Error procesando reportes:", err);
-          setError("Error al procesar los datos de reportes");
-        }
-      },
-      (err) => {
+    const fetchReportes = async () => {
+      try {
+        const data = await dbHelpers.getAll('reportes', {
+          orderBy: 'fecha',
+          ascending: false
+        });
+        setReportes(data);
+        setError(null);
+      } catch (err) {
         console.error("Error obteniendo reportes:", err);
         setError("Error conectando con la base de datos");
       }
-    );
+    };
+
+    fetchReportes();
+
+    // Set up real-time subscription
+    const subscription = dbHelpers.subscribe('reportes', (payload) => {
+      console.log('Reportes updated:', payload);
+      fetchReportes();
+    });
 
     // Cargar estadísticas de colaboradores
     const loadColaboradoresStats = async () => {
@@ -60,7 +52,9 @@ const useReportesData = (user) => {
     setLoading(false);
 
     return () => {
-      unsubReportes();
+      if (subscription) {
+        subscription.unsubscribe();
+      }
     };
   }, [user]);
 

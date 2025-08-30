@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebase';
-import { collection, addDoc, onSnapshot, serverTimestamp } from 'firebase/firestore';
+import { supabase, dbHelpers } from '../../services/supabase';
 
 const AbordajeCampo = () => {
   const [form, setForm] = useState({
@@ -24,12 +23,15 @@ const AbordajeCampo = () => {
 
   // Cargar colaboradores
   useEffect(() => {
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const unsubscribe = onSnapshot(colaboradoresRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setColaboradores(data.sort((a, b) => a.nombre.localeCompare(b.nombre)));
-    });
-    return () => unsubscribe();
+    const loadColaboradores = async () => {
+      try {
+        const data = await dbHelpers.getAll('colaboradores', { orderBy: 'nombre' });
+        setColaboradores(data);
+      } catch (error) {
+        console.error('Error loading colaboradores:', error);
+      }
+    };
+    loadColaboradores();
   }, []);
 
   // Filtrar colaboradores para autocompletado
@@ -101,7 +103,7 @@ const AbordajeCampo = () => {
     try {
       // Guardar abordaje
       const abordajeData = {
-        fecha: serverTimestamp(),
+        fecha: new Date().toISOString(),
         colaborador: {
           id: form.colaboradorId,
           nombre: form.colaboradorNombre,
@@ -110,19 +112,16 @@ const AbordajeCampo = () => {
         supervisorReporta: form.supervisorReporta.trim(),
         lugarLabor: form.lugarLabor.trim(),
         hallazgo: form.hallazgo.trim(),
-        abordaje: form.abordaje.trim()
-      };
-
-      await addDoc(collection(db, 'reportes'), {
-        ...abordajeData,
+        abordaje: form.abordaje.trim(),
         tipo: 'Nuevo Abordaje en Campo',
         tipoReporte: 'abordaje',
         descripcion: form.hallazgo.trim(),
-        abordaje: form.abordaje.trim(),
         reportante: form.supervisorReporta.trim(),
         area: form.colaboradorArea,
         estado: 'pendiente'
-      });
+      };
+
+      await dbHelpers.create('reportes', abordajeData);
       
       // Limpiar formulario
       setForm({

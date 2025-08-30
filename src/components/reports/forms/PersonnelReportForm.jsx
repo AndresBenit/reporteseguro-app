@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { db } from "../../../services/firebase";
+import { dbHelpers } from "../../../services/supabase";
 import { Icon } from "../../common/Icons";
 
 const PersonnelReportForm = ({ onBack }) => {
@@ -43,10 +42,9 @@ const PersonnelReportForm = ({ onBack }) => {
 
     setEnviando(true);
     try {
-      const ref = collection(db, "reportes");
-      await addDoc(ref, { 
+      await dbHelpers.create('reportes', { 
         ...form,
-        fecha: serverTimestamp(),
+        fecha: new Date().toISOString(),
         reportante: form.reportante || "Anónimo",
         tipoReporte: "personal",
         prioridad: "normal"

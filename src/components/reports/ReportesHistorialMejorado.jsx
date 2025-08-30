@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, updateDoc, doc } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { dbHelpers, supabase } from '../../services/supabase';
 import { Icon } from '../common/Icons';
 
 const ReportesHistorialMejorado = () => {
@@ -30,28 +29,45 @@ const ReportesHistorialMejorado = () => {
   const reportesPorPagina = 10;
 
   useEffect(() => {
-    const reportesRef = collection(db, 'reportes');
-    let q = query(reportesRef, orderBy('fecha', 'desc'));
+    const fetchReportes = async () => {
+      try {
+        const data = await dbHelpers.getAll('reportes', {
+          orderBy: 'fecha',
+          ascending: false
+        });
+        const processedData = data.map(item => ({
+          ...item,
+          fecha: item.fecha ? new Date(item.fecha) : null
+        }));
+        setReportes(processedData);
+      } catch (error) {
+        console.error('Error fetching reportes:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        fecha: doc.data().fecha?.toDate()
-      }));
-      setReportes(data);
-      setLoading(false);
+    fetchReportes();
+
+    // Set up real-time subscription
+    const subscription = dbHelpers.subscribe('reportes', (payload) => {
+      console.log('Reportes updated:', payload);
+      // Refresh data when changes occur
+      fetchReportes();
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   // Función para actualizar estado con historial
   const actualizarEstadoConHistorial = async (reporteId, estado, comentario = '') => {
     setUpdating(reporteId);
     try {
-      const reporteRef = doc(db, 'reportes', reporteId);
-      const ahora = new Date();
+      const ahora = new Date().toISOString();
       
       // Buscar el reporte actual para mantener el historial
       const reporteActual = reportes.find(r => r.id === reporteId);
@@ -67,7 +83,7 @@ const ReportesHistorialMejorado = () => {
         }
       ];
 
-      await updateDoc(reporteRef, {
+      await dbHelpers.update(reporteId, {
         estado: estado,
         historialEstados: nuevoHistorial,
         fechaUltimaActualizacion: ahora
@@ -855,7 +871,7 @@ const ReportesHistorialMejorado = () => {
                             {historia.estado}
                           </span>
                           <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                            {formatearFecha(historia.fecha?.toDate ? historia.fecha.toDate() : new Date(historia.fecha))}
+                            {formatearFecha(new Date(historia.fecha))}
                           </span>
                         </div>
                         {historia.comentario && (

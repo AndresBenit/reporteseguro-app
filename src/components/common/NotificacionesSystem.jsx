@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { collection, onSnapshot, query, where, orderBy, updateDoc, doc, addDoc } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { dbHelpers, supabase } from '../../services/supabase';
 
 /**
  * Hook para manejar notificaciones en tiempo real
@@ -11,35 +10,50 @@ export const useNotificaciones = (usuario = 'admin') => {
   const [noLeidasCount, setNoLeidasCount] = useState(0);
 
   useEffect(() => {
-    // Suscribirse a notificaciones del usuario actual
-    const notificacionesRef = collection(db, 'notificaciones');
-    const q = query(
-      notificacionesRef,
-      where('usuarios', 'array-contains', usuario),
-      orderBy('fecha', 'desc')
-    );
+    const fetchNotificaciones = async () => {
+      try {
+        // Get notifications for the user
+        const { data: notificaciones } = await supabase
+          .from('notificaciones')
+          .select('*')
+          .contains('usuarios', [usuario])
+          .order('fecha', { ascending: false });
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        fecha: doc.data().fecha?.toDate()
-      }));
-      
-      setNotificaciones(data);
-      setNoLeidasCount(data.filter(n => !n.leida).length);
-      setLoading(false);
+        const processedData = (notificaciones || []).map(notif => ({
+          ...notif,
+          fecha: new Date(notif.fecha)
+        }));
+        
+        setNotificaciones(processedData);
+        setNoLeidasCount(processedData.filter(n => !n.leida).length);
+      } catch (error) {
+        console.error('Error fetching notificaciones:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNotificaciones();
+
+    // Set up real-time subscription
+    const subscription = dbHelpers.subscribe('notificaciones', (payload) => {
+      console.log('Notificaciones updated:', payload);
+      fetchNotificaciones();
     });
 
-    return () => unsubscribe();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, [usuario]);
 
   // Marcar notificación como leída
   const marcarLeida = useCallback(async (notificacionId) => {
     try {
-      await updateDoc(doc(db, 'notificaciones', notificacionId), {
+      await dbHelpers.update('notificaciones', notificacionId, {
         leida: true,
-        fechaLeida: new Date()
+        fechaLeida: new Date().toISOString()
       });
     } catch (error) {
       console.error('Error marcando notificación como leída:', error);
@@ -50,9 +64,9 @@ export const useNotificaciones = (usuario = 'admin') => {
   const marcarTodasLeidas = useCallback(async () => {
     const noLeidas = notificaciones.filter(n => !n.leida);
     const promises = noLeidas.map(notif => 
-      updateDoc(doc(db, 'notificaciones', notif.id), {
+      dbHelpers.update('notificaciones', notif.id, {
         leida: true,
-        fechaLeida: new Date()
+        fechaLeida: new Date().toISOString()
       })
     );
     
@@ -84,12 +98,12 @@ export const useNotificaciones = (usuario = 'admin') => {
         usuarios,
         prioridad,
         accion,
-        fecha: new Date(),
+        fecha: new Date().toISOString(),
         leida: false,
         creadoPor: usuario
       };
 
-      await addDoc(collection(db, 'notificaciones'), notificacion);
+      await dbHelpers.create('notificaciones', notificacion);
       return { success: true };
     } catch (error) {
       console.error('Error creando notificación:', error);
@@ -464,9 +478,7 @@ export const useNotificacionesAutomaticas = (reportes = []) => {
         if (!reporte.fechaEstimada || ['resuelto', 'cerrado'].includes(reporte.estado)) {
           return false;
         }
-        const fechaEstimada = reporte.fechaEstimada.toDate ? 
-          reporte.fechaEstimada.toDate() : 
-          new Date(reporte.fechaEstimada);
+        const fechaEstimada = new Date(reporte.fechaEstimada);
         return fechaEstimada < ahora;
       });
 

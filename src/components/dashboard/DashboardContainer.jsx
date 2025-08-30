@@ -76,7 +76,7 @@ const Dashboard = ({ user, onLogout }) => {
   const eliminarReporte = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este reporte?")) {
       try {
-        await deleteDoc(doc(db, "reportes", id));
+        await dbHelpers.delete('reportes', id);
       } catch (err) {
         console.error("Error eliminando reporte:", err);
         alert("Error al eliminar el reporte");
@@ -86,7 +86,7 @@ const Dashboard = ({ user, onLogout }) => {
 
   const actualizarEstado = async (id, estado) => {
     try {
-      await updateDoc(doc(db, "reportes", id), { estado });
+      await dbHelpers.update('reportes', id, { estado });
     } catch (err) {
       console.error("Error actualizando estado:", err);
       alert("Error al actualizar el estado");

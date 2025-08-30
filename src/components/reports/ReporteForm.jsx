@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../../services/firebase";
+import { dbHelpers, storageHelpers } from "../../services/supabase";
 
 const initialState = {
   tipo: "Condición Insegura",
@@ -146,9 +144,8 @@ const ReporteForm = () => {
       // Crear referencia única para la imagen
       const timestamp = Date.now();
       const fileName = `reportes/${timestamp}_${selectedImage.name.replace(/\s+/g, '_')}`;
-      const imageRef = ref(storage, fileName);
       
-      // Simular progreso (Firebase uploadBytes no tiene onProgress built-in)
+      // Simular progreso
       const simulateProgress = () => {
         let progress = 0;
         const interval = setInterval(() => {
@@ -166,14 +163,14 @@ const ReporteForm = () => {
       const progressInterval = simulateProgress();
       
       // Subir imagen
-      const snapshot = await uploadBytes(imageRef, selectedImage);
+      const uploadResult = await storageHelpers.upload('images', fileName, selectedImage);
       
       // Finalizar progreso
       clearInterval(progressInterval);
       setUploadProgress(100);
       
-      // Obtener URL de descarga
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      // Obtener URL pública
+      const downloadURL = storageHelpers.getPublicUrl('images', uploadResult.path);
       
       // Pequeña pausa para mostrar el 100%
       await new Promise(resolve => setTimeout(resolve, 500));
@@ -213,11 +210,10 @@ const ReporteForm = () => {
         }
       }
 
-      const ref = collection(db, "reportes");
-      await addDoc(ref, { 
+      await dbHelpers.create('reportes', { 
         ...form,
         fotoUrl,
-        fecha: serverTimestamp(),
+        fecha: new Date().toISOString(),
         reportante: form.reportante || "Anónimo"
       });
       

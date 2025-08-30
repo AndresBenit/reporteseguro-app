@@ -1,6 +1,5 @@
 // Script completo de migración de colaboradores
-import { db } from '../../services/firebase.js';
-import { collection, addDoc, getDocs, query, where, deleteDoc } from 'firebase/firestore';
+import { dbHelpers, supabase } from '../../services/supabase.js';
 
 // Datos completos de colaboradores del Excel
 const colaboradoresData = {
@@ -86,7 +85,6 @@ export const migrateColaboradores = async () => {
   try {
     console.log('🚀 Iniciando migración de 72 colaboradores...');
     
-    const colaboradoresRef = collection(db, 'colaboradores');
     let totalMigrados = 0;
     let yaExisten = 0;
     let errores = 0;
@@ -94,18 +92,22 @@ export const migrateColaboradores = async () => {
     // Migrar Centro Industrial
     for (const colaborador of colaboradoresData.centroIndustrial) {
       try {
-        const q = query(colaboradoresRef, where("cedula", "==", colaborador.cedula));
-        const querySnapshot = await getDocs(q);
+        // Check if colaborador already exists
+        const { data: existingColaboradores } = await supabase
+          .from('colaboradores')
+          .select('*')
+          .eq('cedula', colaborador.cedula)
+          .limit(1);
         
-        if (querySnapshot.empty) {
-          await addDoc(colaboradoresRef, {
+        if (!existingColaboradores || existingColaboradores.length === 0) {
+          await dbHelpers.create('colaboradores', {
             nombre: colaborador.nombre.trim(),
             cedula: colaborador.cedula,
             area: 'Centro Industrial',
             departamento: 'Centro Industrial',
             activo: true,
-            fechaCreacion: new Date(),
-            fechaActualizacion: new Date(),
+            fechaCreacion: new Date().toISOString(),
+            fechaActualizacion: new Date().toISOString(),
             item: colaborador.item,
             tipoColaborador: 'Operativo'
           });
@@ -122,18 +124,22 @@ export const migrateColaboradores = async () => {
     // Migrar Hornos Solera
     for (const colaborador of colaboradoresData.hornosSolera) {
       try {
-        const q = query(colaboradoresRef, where("cedula", "==", colaborador.cedula));
-        const querySnapshot = await getDocs(q);
+        // Check if colaborador already exists
+        const { data: existingColaboradores } = await supabase
+          .from('colaboradores')
+          .select('*')
+          .eq('cedula', colaborador.cedula)
+          .limit(1);
         
-        if (querySnapshot.empty) {
-          await addDoc(colaboradoresRef, {
+        if (!existingColaboradores || existingColaboradores.length === 0) {
+          await dbHelpers.create('colaboradores', {
             nombre: colaborador.nombre.trim(),
             cedula: colaborador.cedula,
             area: 'Hornos Solera',
             departamento: 'Hornos Solera',
             activo: true,
-            fechaCreacion: new Date(),
-            fechaActualizacion: new Date(),
+            fechaCreacion: new Date().toISOString(),
+            fechaActualizacion: new Date().toISOString(),
             item: colaborador.item,
             tipoColaborador: 'Operativo'
           });
@@ -166,8 +172,7 @@ export const migrateColaboradores = async () => {
 
 export const getEstadisticasColaboradores = async () => {
   try {
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const querySnapshot = await getDocs(colaboradoresRef);
+    const colaboradores = await dbHelpers.getAll('colaboradores');
     
     const stats = {
       total: 0,
@@ -180,11 +185,7 @@ export const getEstadisticasColaboradores = async () => {
     };
 
     // Procesar datos de forma optimizada
-    const colaboradores = [];
-    querySnapshot.forEach((doc) => {
-      const data = { id: doc.id, ...doc.data() };
-      colaboradores.push(data);
-      
+    colaboradores.forEach((data) => {
       stats.total++;
       
       // Contar por área
@@ -224,16 +225,12 @@ export const getEstadisticasColaboradores = async () => {
 
 export const getColaboradoresActivos = async () => {
   try {
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const q = query(colaboradoresRef, where('activo', '==', true));
-    const querySnapshot = await getDocs(q);
-    
-    const colaboradores = [];
-    querySnapshot.forEach((doc) => {
-      colaboradores.push({ id: doc.id, ...doc.data() });
+    const colaboradores = await dbHelpers.getAll('colaboradores', {
+      filters: { activo: true },
+      orderBy: 'nombre',
+      ascending: true
     });
     
-    colaboradores.sort((a, b) => a.nombre.localeCompare(b.nombre));
     return colaboradores;
   } catch (error) {
     console.error('Error obteniendo colaboradores activos:', error);

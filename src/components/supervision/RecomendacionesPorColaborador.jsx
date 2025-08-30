@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebase';
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { dbHelpers } from '../../services/supabase';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend } from 'recharts';
 
 const RecomendacionesPorColaborador = () => {
@@ -10,24 +9,36 @@ const RecomendacionesPorColaborador = () => {
   const [selectedColaborador, setSelectedColaborador] = useState(null);
 
   useEffect(() => {
-    // Cargar reportes
-    const reportesRef = collection(db, 'reportes');
-    const unsubReportes = onSnapshot(reportesRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setReportes(data);
+    const fetchData = async () => {
+      try {
+        // Cargar reportes
+        const reportesData = await dbHelpers.getAll('reportes');
+        setReportes(reportesData);
+
+        // Cargar colaboradores
+        const colaboradoresData = await dbHelpers.getAll('colaboradores');
+        setColaboradores(colaboradoresData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up real-time subscriptions
+    const reportesSubscription = dbHelpers.subscribe('reportes', () => {
+      fetchData();
     });
 
-    // Cargar colaboradores
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const unsubColaboradores = onSnapshot(colaboradoresRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setColaboradores(data);
-      setLoading(false);
+    const colaboradoresSubscription = dbHelpers.subscribe('colaboradores', () => {
+      fetchData();
     });
 
     return () => {
-      unsubReportes();
-      unsubColaboradores();
+      if (reportesSubscription) reportesSubscription.unsubscribe();
+      if (colaboradoresSubscription) colaboradoresSubscription.unsubscribe();
     };
   }, []);
 
@@ -52,7 +63,7 @@ const RecomendacionesPorColaborador = () => {
         medios: reportesColaborador.filter(r => r.severidad === 'media').length,
         bajos: reportesColaborador.filter(r => r.severidad === 'baja').length,
         ultimoReporte: reportesColaborador.length > 0 ? 
-          reportesColaborador.sort((a, b) => b.fecha?.toDate() - a.fecha?.toDate())[0] : null
+          reportesColaborador.sort((a, b) => new Date(b.fecha) - new Date(a.fecha))[0] : null
       };
     });
 

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebase';
-import { collection, onSnapshot, query, where, orderBy } from 'firebase/firestore';
+import { dbHelpers } from '../../services/supabase';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const PerfilIndividual = () => {
@@ -16,32 +15,40 @@ const PerfilIndividual = () => {
   const [colaboradoresFiltrados, setColaboradoresFiltrados] = useState([]);
 
   useEffect(() => {
-    // Cargar colaboradores
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const unsubColaboradores = onSnapshot(colaboradoresRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setColaboradores(data.sort((a, b) => a.nombre.localeCompare(b.nombre)));
-    });
+    const fetchData = async () => {
+      try {
+        // Cargar colaboradores
+        const colaboradoresData = await dbHelpers.getAll('colaboradores', {
+          orderBy: 'nombre',
+          ascending: true
+        });
+        setColaboradores(colaboradoresData);
 
-    // Cargar recomendaciones
-    const recomendacionesRef = collection(db, 'recomendaciones_campo');
-    const unsubRecomendaciones = onSnapshot(recomendacionesRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRecomendaciones(data);
-    });
+        // Cargar recomendaciones
+        const recomendacionesData = await dbHelpers.getAll('recomendaciones_campo');
+        setRecomendaciones(recomendacionesData);
 
-    // Cargar abordajes
-    const abordajesRef = collection(db, 'abordajes_campo');
-    const unsubAbordajes = onSnapshot(abordajesRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setAbordajes(data);
-      setLoading(false);
-    });
+        // Cargar abordajes
+        const abordajesData = await dbHelpers.getAll('abordajes_campo');
+        setAbordajes(abordajesData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+
+    // Set up real-time subscriptions
+    const colaboradoresSubscription = dbHelpers.subscribe('colaboradores', () => fetchData());
+    const recomendacionesSubscription = dbHelpers.subscribe('recomendaciones_campo', () => fetchData());
+    const abordajesSubscription = dbHelpers.subscribe('abordajes_campo', () => fetchData());
 
     return () => {
-      unsubColaboradores();
-      unsubRecomendaciones();
-      unsubAbordajes();
+      if (colaboradoresSubscription) colaboradoresSubscription.unsubscribe();
+      if (recomendacionesSubscription) recomendacionesSubscription.unsubscribe();
+      if (abordajesSubscription) abordajesSubscription.unsubscribe();
     };
   }, []);
 
@@ -102,7 +109,7 @@ const PerfilIndividual = () => {
     const todasIntervenciones = [...recsColaborador, ...abordajesColaborador]
       .sort((a, b) => {
         if (!a.fecha || !b.fecha) return 0;
-        return b.fecha.toDate() - a.fecha.toDate();
+        return new Date(b.fecha) - new Date(a.fecha);
       });
     
     return todasIntervenciones;
@@ -116,7 +123,7 @@ const PerfilIndividual = () => {
       .filter(rec => rec.colaborador?.id === selectedColaborador.id)
       .sort((a, b) => {
         if (!a.fecha || !b.fecha) return 0;
-        return b.fecha.toDate() - a.fecha.toDate();
+        return new Date(b.fecha) - new Date(a.fecha);
       });
   };
 
@@ -163,8 +170,8 @@ const PerfilIndividual = () => {
     }
 
     todasIntervenciones.forEach(intervencion => {
-      if (intervencion.fecha && intervencion.fecha.toDate) {
-        const fechaInt = intervencion.fecha.toDate();
+      if (intervencion.fecha) {
+        const fechaInt = new Date(intervencion.fecha);
         const mesIndex = meses.findIndex(m => 
           m.fecha.getMonth() === fechaInt.getMonth() && 
           m.fecha.getFullYear() === fechaInt.getFullYear()
@@ -436,7 +443,7 @@ const PerfilIndividual = () => {
                 </div>
                 {stats.ultimaIntervencion && (
                   <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '10px' }}>
-                    Última: {stats.ultimaIntervencion.toDate().toLocaleDateString('es-ES')}
+                    Última: {new Date(stats.ultimaIntervencion).toLocaleDateString('es-ES')}
                   </div>
                 )}
               </div>
@@ -603,7 +610,7 @@ const PerfilIndividual = () => {
                               fontWeight: '600', 
                               color: intervencion.tipo === 'recomendacion' ? '#92400e' : '#065f46'
                             }}>
-                              📅 {intervencion.fecha?.toDate().toLocaleDateString('es-ES')} • 📍 {intervencion.lugarLabor}
+                              📅 {new Date(intervencion.fecha).toLocaleDateString('es-ES')} • 📍 {intervencion.lugarLabor}
                             </div>
                           </div>
                           {intervencion.fotoFirmada && (

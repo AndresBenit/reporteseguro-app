@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { db, storage } from "../../services/firebase";
-import {
-  collection,
-  addDoc,
-  onSnapshot,
-  serverTimestamp,
-} from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { dbHelpers, storageHelpers, supabase } from "../../services/supabase";
 
 const SupervisionCampo = () => {
   const [form, setForm] = useState({
@@ -34,12 +27,31 @@ const SupervisionCampo = () => {
 
   // Cargar colaboradores
   useEffect(() => {
-    const colaboradoresRef = collection(db, "colaboradores");
-    const unsubscribe = onSnapshot(colaboradoresRef, (snapshot) => {
-      const data = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      setColaboradores(data.sort((a, b) => a.nombre.localeCompare(b.nombre)));
+    const fetchColaboradores = async () => {
+      try {
+        const data = await dbHelpers.getAll('colaboradores', {
+          orderBy: 'nombre',
+          ascending: true
+        });
+        setColaboradores(data);
+      } catch (error) {
+        console.error('Error fetching colaboradores:', error);
+      }
+    };
+
+    fetchColaboradores();
+
+    // Set up real-time subscription
+    const subscription = dbHelpers.subscribe('colaboradores', (payload) => {
+      console.log('Colaboradores updated:', payload);
+      fetchColaboradores();
     });
-    return () => unsubscribe();
+
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   // Filtrar colaboradores para autocompletado
@@ -175,7 +187,6 @@ const SupervisionCampo = () => {
         /\s+/g,
         "_"
       )}`;
-      const imageRef = ref(storage, fileName);
 
       // Simular progreso
       const simulateProgress = () => {
@@ -193,12 +204,12 @@ const SupervisionCampo = () => {
       };
 
       const progressInterval = simulateProgress();
-      const snapshot = await uploadBytes(imageRef, selectedImage);
+      const uploadResult = await storageHelpers.upload('images', fileName, selectedImage);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      const downloadURL = await getDownloadURL(snapshot.ref);
+      const downloadURL = storageHelpers.getPublicUrl('images', uploadResult.path);
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setUploadingImage(false);
@@ -249,7 +260,7 @@ const SupervisionCampo = () => {
 
       // Guardar recomendación
       const recomendacionData = {
-        fecha: serverTimestamp(),
+        fecha: new Date().toISOString(),
         colaborador: {
           id: form.colaboradorId,
           nombre: form.colaboradorNombre,
@@ -260,18 +271,15 @@ const SupervisionCampo = () => {
         hallazgo: form.hallazgo.trim(),
         recomendacion: form.recomendacion.trim(),
         fotoFirmada: fotoUrl,
-      };
-
-      await addDoc(collection(db, "reportes"), {
-        ...recomendacionData,
         tipo: "Nueva Recomendación",
         tipoReporte: "recomendacion",
         descripcion: form.hallazgo.trim(),
-        recomendacion: form.recomendacion.trim(),
         reportante: form.supervisorReporta.trim(),
         area: form.colaboradorArea,
         estado: "pendiente",
-      });
+      };
+
+      await dbHelpers.create('reportes', recomendacionData);
 
       // Limpiar formulario
       setForm({

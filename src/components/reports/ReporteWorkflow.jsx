@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { doc, updateDoc, collection, addDoc, query, where, onSnapshot } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { dbHelpers } from '../../services/supabase';
 
 /**
  * Hook para manejar el workflow de estados de reportes
@@ -120,14 +119,17 @@ export const useReporteWorkflow = () => {
         fechaEstimada: fechaEstimada || null
       };
 
-      // Agregar a historial (usando array union o leer-modificar-escribir)
-      const reporteRef = doc(db, 'reportes', reporteId);
+      // Actualizar reporte con historial
+      // En Supabase, necesitamos obtener el registro actual, modificar el historial y actualizar
+      const reporteActual = await dbHelpers.getById('reportes', reporteId);
+      const historialExistente = reporteActual.historialEstados || {};
       
-      // Para simplificar, usamos un enfoque de leer-modificar-escribir
-      // En producción, considera usar transacciones de Firestore
-      await updateDoc(reporteRef, {
+      await dbHelpers.update('reportes', reporteId, {
         ...updateData,
-        [`historialEstados.${Date.now()}`]: entradaHistorial
+        historialEstados: {
+          ...historialExistente,
+          [Date.now().toString()]: entradaHistorial
+        }
       });
 
       // Crear notificación si se especifica
@@ -170,7 +172,7 @@ export const useReporteWorkflow = () => {
         tipo: 'cambio_estado'
       };
 
-      await addDoc(collection(db, 'notificaciones'), notificacion);
+      await dbHelpers.create('notificaciones', notificacion);
     } catch (error) {
       console.error('Error creando notificación:', error);
     }
