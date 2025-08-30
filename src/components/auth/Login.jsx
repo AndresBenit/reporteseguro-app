@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../services/firebase";
+import { authHelpers } from "../../services/supabase";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -24,21 +23,19 @@ const Login = () => {
     }
 
     try {
-      await signInWithEmailAndPassword(auth, form.email, form.password);
+      await authHelpers.signIn(form.email, form.password);
     } catch (error) {
       console.error("Error de autenticación:", error);
       
       // Mensajes de error más amigables
       const errorMessages = {
-        "auth/user-not-found": "No existe una cuenta con este email",
-        "auth/wrong-password": "Contraseña incorrecta",
-        "auth/invalid-email": "El formato del email no es válido",
-        "auth/invalid-credential": "Credenciales inválidas",
-        "auth/too-many-requests": "Demasiados intentos fallidos. Intenta más tarde",
-        "auth/network-request-failed": "Error de conexión. Verifica tu internet"
+        "Invalid login credentials": "Credenciales inválidas",
+        "Email not confirmed": "Email no confirmado. Revisa tu bandeja de entrada",
+        "Invalid email": "El formato del email no es válido",
+        "Too many requests": "Demasiados intentos fallidos. Intenta más tarde"
       };
       
-      setError(errorMessages[error.code] || "Error de autenticación. Intenta nuevamente.");
+      setError(errorMessages[error.message] || "Error de autenticación. Intenta nuevamente.");
     }
     
     setLoading(false);

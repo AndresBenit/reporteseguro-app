@@ -1,5 +1,15 @@
 import { useEffect, useState } from "react";
-import { supabase, dbHelpers } from "../services/supabase";
+import { db } from "../services/firebase";
+import {
+  collection,
+  onSnapshot,
+  deleteDoc,
+  updateDoc,
+  doc,
+  addDoc,
+  serverTimestamp
+} from "firebase/firestore";
+import { migrarReportesANuevoFormato } from '../utils/migracionReportes';
 
 export const useReportes = () => {
   const [reportes, setReportes] = useState([]);
@@ -8,62 +18,89 @@ export const useReportes = () => {
   const [updating, setUpdating] = useState(new Set());
 
   useEffect(() => {
-    loadReportes();
+    const ref = collection(db, "reportes");
+    // QUITAR EL FILTRO DE FECHA - TRAER TODOS LOS REPORTES
+    // const q = query(ref, orderBy("fecha", "desc"));
     
-    // Suscripción en tiempo real
-    const subscription = dbHelpers.subscribe('reportes', (payload) => {
-      console.log('🔄 Real-time update:', payload);
-      
-      switch (payload.eventType) {
-        case 'INSERT':
-          setReportes(prev => [payload.new, ...prev]);
-          break;
-        case 'UPDATE':
-          setReportes(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
-          break;
-        case 'DELETE':
-          setReportes(prev => prev.filter(r => r.id !== payload.old.id));
-          break;
-        default:
-          break;
+    const unsub = onSnapshot(
+      ref, // SIN QUERY - TRAER TODO
+      (snap) => {
+        try {
+          console.log('🔄 Firebase snapshot - Total docs:', snap.docs.length);
+          
+          const data = snap.docs.map((d) => {
+            console.log('Doc ID:', d.id, 'Data:', d.data());
+            return { 
+              id: d.id, 
+              ...d.data(),
+              fecha: d.data().fecha?.toDate ? d.data().fecha.toDate() : d.data().fecha || new Date()
+            };
+          });
+          
+          // ORDENAR EN JAVASCRIPT EN LUGAR DE FIREBASE
+          data.sort((a, b) => {
+            const fechaA = a.fecha instanceof Date ? a.fecha : new Date(a.fecha);
+            const fechaB = b.fecha instanceof Date ? b.fecha : new Date(b.fecha);
+            return fechaB - fechaA;
+          });
+          
+          console.log('✅ Reportes cargados:', data.length);
+          setReportes(data);
+          setLoading(false);
+          setError(null);
+        } catch (err) {
+          console.error("Error procesando datos:", err);
+          setError("Error al procesar los datos");
+          setLoading(false);
+        }
+      },
+      (err) => {
+        console.error("Error obteniendo reportes:", err);
+        setError("Error conectando con la base de datos");
+        setLoading(false);
       }
-    });
-
-    return () => {
-      subscription?.unsubscribe();
-    };
+    );
+    
+    return () => unsub();
   }, []);
 
-  const loadReportes = async () => {
-    try {
-      setLoading(true);
-      console.log('🔄 Cargando reportes desde Supabase...');
-      
-      const data = await dbHelpers.getAll('reportes', {
-        orderBy: 'fecha_creacion',
-        ascending: false
-      });
-      
-      console.log('✅ Reportes cargados:', data.length);
-      setReportes(data);
-      setError(null);
-    } catch (err) {
-      console.error("❌ Error cargando reportes:", err);
-      setError("Error conectando con la base de datos");
-    } finally {
-      setLoading(false);
+  // Migración automática - se ejecuta una vez al cargar
+  useEffect(() => {
+    const ejecutarMigracionAutomatica = async () => {
+      // Solo ejecutar si hay reportes y alguno no tiene historial
+      if (reportes.length > 0) {
+        const reportesSinHistorial = reportes.filter(r => !r.historialEstados);
+        
+        if (reportesSinHistorial.length > 0) {
+          console.log(`🔄 Ejecutando migración automática para ${reportesSinHistorial.length} reportes...`);
+          try {
+            const resultado = await migrarReportesANuevoFormato();
+            console.log('✅ Migración automática completada:', resultado);
+          } catch (error) {
+            console.warn('⚠️ Error en migración automática:', error);
+          }
+        }
+      }
+    };
+    
+    // Solo ejecutar la migración si no estamos cargando
+    if (!loading && reportes.length > 0) {
+      ejecutarMigracionAutomatica();
     }
-  };
+  }, [reportes, loading]);
 
   const eliminarReporte = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este reporte? Esta acción no se puede deshacer.")) {
       try {
-        console.log(`🗑️ Eliminando reporte ${id} de Supabase...`);
+        console.log(`🗑️ Eliminando reporte ${id} de Firebase...`);
         setUpdating(prev => new Set([...prev, id]));
         
-        await dbHelpers.delete('reportes', id);
+        // Eliminar de Firebase
+        await deleteDoc(doc(db, "reportes", id));
         
         console.log(`✅ Reporte ${id} eliminado exitosamente`);
+        
+        // Opcional: Mostrar confirmación
         alert("Reporte eliminado exitosamente");
         
       } catch (err) {
@@ -86,10 +123,12 @@ export const useReportes = () => {
       
       const updateData = { 
         estado,
-        fecha_ultima_actualizacion: new Date().toISOString()
+        fechaUltimaActualizacion: serverTimestamp()
       };
       
-      await dbHelpers.update('reportes', id, updateData);
+      console.log('Update data:', updateData);
+      
+      await updateDoc(doc(db, "reportes", id), updateData);
       
       console.log(`✅ Estado actualizado exitosamente`);
       
@@ -118,11 +157,11 @@ export const useReportes = () => {
         fechaEstimada = null
       } = datos;
 
-      const ahora = new Date().toISOString();
+      const ahora = new Date();
       
       // Obtener el reporte actual para mantener el historial existente
       const reporteActual = reportes.find(r => r.id === id);
-      const historialExistente = reporteActual?.historial_estados || {};
+      const historialExistente = reporteActual?.historialEstados || {};
       
       // Crear nueva entrada de historial
       const nuevaEntrada = {
@@ -130,9 +169,9 @@ export const useReportes = () => {
         fecha: ahora,
         comentario,
         usuario,
-        asignado_a: asignadoA,
+        asignadoA,
         prioridad,
-        fecha_estimada: fechaEstimada
+        fechaEstimada
       };
       
       const nuevoHistorial = {
@@ -142,16 +181,16 @@ export const useReportes = () => {
 
       const updateData = {
         estado: nuevoEstado,
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: ahora
+        historialEstados: nuevoHistorial,
+        fechaUltimaActualizacion: ahora
       };
 
       // Agregar campos opcionales solo si se proporcionan
-      if (asignadoA !== null) updateData.asignado_a = asignadoA;
+      if (asignadoA !== null) updateData.asignadoA = asignadoA;
       if (prioridad !== null) updateData.prioridad = prioridad;
-      if (fechaEstimada !== null) updateData.fecha_estimada = fechaEstimada;
+      if (fechaEstimada !== null) updateData.fechaEstimada = fechaEstimada;
 
-      await dbHelpers.update('reportes', id, updateData);
+      await updateDoc(doc(db, "reportes", id), updateData);
       
       return { success: true };
       
@@ -182,15 +221,15 @@ export const useReportes = () => {
       setUpdating(prev => new Set([...prev, id]));
       
       const reporteActual = reportes.find(r => r.id === id);
-      const historialExistente = reporteActual?.historial_estados || {};
+      const historialExistente = reporteActual?.historialEstados || {};
       
       const nuevaEntrada = {
         estado: reporteActual?.estado || 'pendiente',
-        fecha: new Date().toISOString(),
+        fecha: new Date(),
         comentario: comentario || `Prioridad cambiada a ${prioridad}`,
         usuario: 'Sistema',
         prioridad,
-        cambio_prioridad: true
+        cambioPrioridad: true
       };
       
       const nuevoHistorial = {
@@ -198,10 +237,10 @@ export const useReportes = () => {
         [Date.now().toString()]: nuevaEntrada
       };
 
-      await dbHelpers.update('reportes', id, {
+      await updateDoc(doc(db, "reportes", id), {
         prioridad,
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: new Date().toISOString()
+        historialEstados: nuevoHistorial,
+        fechaUltimaActualizacion: new Date()
       });
       
       return { success: true };
@@ -224,14 +263,14 @@ export const useReportes = () => {
       setUpdating(prev => new Set([...prev, id]));
       
       const reporteActual = reportes.find(r => r.id === id);
-      const historialExistente = reporteActual?.historial_estados || {};
+      const historialExistente = reporteActual?.historialEstados || {};
       
       const nuevaEntrada = {
         estado: reporteActual?.estado || 'pendiente',
-        fecha: new Date().toISOString(),
+        fecha: new Date(),
         comentario,
         usuario,
-        solo_comentario: true
+        soloComentario: true
       };
       
       const nuevoHistorial = {
@@ -239,9 +278,9 @@ export const useReportes = () => {
         [Date.now().toString()]: nuevaEntrada
       };
 
-      await dbHelpers.update('reportes', id, {
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: new Date().toISOString()
+      await updateDoc(doc(db, "reportes", id), {
+        historialEstados: nuevoHistorial,
+        fechaUltimaActualizacion: new Date()
       });
       
       return { success: true };
@@ -258,39 +297,6 @@ export const useReportes = () => {
     }
   };
 
-  // Nueva función: Crear reporte
-  const crearReporte = async (datosReporte) => {
-    try {
-      const ahora = new Date().toISOString();
-      
-      // Obtener usuario actual
-      const { data: { user } } = await supabase.auth.getUser();
-      
-      const nuevoReporte = {
-        ...datosReporte,
-        fecha_creacion: ahora,
-        fecha_ultima_actualizacion: ahora,
-        creado_por: user?.id || 'anonimo',
-        estado: datosReporte.estado || 'pendiente',
-        historial_estados: {
-          [Date.now().toString()]: {
-            estado: datosReporte.estado || 'pendiente',
-            fecha: ahora,
-            comentario: 'Reporte creado',
-            usuario: user?.email || 'Sistema'
-          }
-        }
-      };
-
-      const result = await dbHelpers.create('reportes', nuevoReporte);
-      return result;
-      
-    } catch (err) {
-      console.error("Error creando reporte:", err);
-      throw new Error("Error al crear el reporte");
-    }
-  };
-
   // Nueva función: Obtener estadísticas de reportes
   const getEstadisticas = () => {
     const stats = {
@@ -299,7 +305,7 @@ export const useReportes = () => {
       enProceso: reportes.filter(r => ['asignado', 'en_proceso'].includes(r.estado)).length,
       resueltos: reportes.filter(r => ['resuelto', 'cerrado'].includes(r.estado)).length,
       vencidos: 0,
-      sinAsignar: reportes.filter(r => !r.asignado_a).length,
+      sinAsignar: reportes.filter(r => !r.asignadoA).length,
       porSeveridad: {
         baja: reportes.filter(r => r.severidad === 'baja').length,
         media: reportes.filter(r => r.severidad === 'media').length,
@@ -311,8 +317,8 @@ export const useReportes = () => {
     // Calcular vencidos
     const ahora = new Date();
     stats.vencidos = reportes.filter(r => {
-      if (!r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
-      const fechaEstimada = new Date(r.fecha_estimada);
+      if (!r.fechaEstimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
+      const fechaEstimada = r.fechaEstimada.toDate ? r.fechaEstimada.toDate() : new Date(r.fechaEstimada);
       return fechaEstimada < ahora;
     }).length;
 
@@ -326,15 +332,15 @@ export const useReportes = () => {
 
   // Nueva función: Obtener reportes asignados a usuario
   const getReportesAsignados = (usuario) => {
-    return reportes.filter(r => r.asignado_a === usuario);
+    return reportes.filter(r => r.asignadoA === usuario);
   };
 
   // Nueva función: Obtener reportes vencidos
   const getReportesVencidos = () => {
     const ahora = new Date();
     return reportes.filter(r => {
-      if (!r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
-      const fechaEstimada = new Date(r.fecha_estimada);
+      if (!r.fechaEstimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
+      const fechaEstimada = r.fechaEstimada.toDate ? r.fechaEstimada.toDate() : new Date(r.fechaEstimada);
       return fechaEstimada < ahora;
     });
   };
@@ -350,7 +356,6 @@ export const useReportes = () => {
     actualizarEstado,
     
     // Funciones avanzadas
-    crearReporte,
     actualizarEstadoConHistorial,
     asignarReporte,
     cambiarPrioridad,
@@ -363,7 +368,6 @@ export const useReportes = () => {
     getReportesVencidos,
     
     // Utilidades
-    isUpdating: (id) => updating.has(id),
-    refetch: loadReportes
+    isUpdating: (id) => updating.has(id)
   };
 };

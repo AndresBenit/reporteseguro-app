@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { db } from '../../services/firebase';
-import { collection, addDoc, query, where, getDocs } from 'firebase/firestore';
+import { supabase, dbHelpers } from '../../services/supabase';
 
 const ExcelUploader = ({ onUploadComplete, onClose }) => {
   const [file, setFile] = useState(null);

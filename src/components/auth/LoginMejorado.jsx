@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../../services/firebase";
+import { authHelpers } from "../../services/supabase";
 
 const LoginMejorado = () => {
   const [form, setForm] = useState({ email: "", password: "" });

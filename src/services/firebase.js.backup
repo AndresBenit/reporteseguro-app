@@ -1,0 +1,151 @@
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
+import { getFirestore } from "firebase/firestore";
+import { getStorage } from "firebase/storage";
+import { getAnalytics } from "firebase/analytics";
+
+// 🔐 CONFIGURACIÓN SEGURA DE FIREBASE
+// ⚠️ IMPORTANTE: Todas las credenciales deben estar en variables de entorno
+
+// Validar que las variables de entorno existen
+const requiredEnvVars = [
+    'VITE_FIREBASE_API_KEY',
+    'VITE_FIREBASE_AUTH_DOMAIN',
+    'VITE_FIREBASE_PROJECT_ID',
+    'VITE_FIREBASE_STORAGE_BUCKET',
+    'VITE_FIREBASE_MESSAGING_SENDER_ID',
+    'VITE_FIREBASE_APP_ID'
+];
+
+// Verificar configuración requerida
+const missingVars = requiredEnvVars.filter(varName => !import.meta.env[varName]);
+
+if (missingVars.length > 0) {
+    const errorMsg = `❌ Variables de entorno faltantes: ${missingVars.join(', ')}
+    
+    🔧 Para solucionarlo:
+    1. Crea un archivo .env.local en la raíz del proyecto
+    2. Agrega las variables faltantes:
+    
+    ${missingVars.map(varName => `${varName}=tu_valor_aqui`).join('\n    ')}
+    
+    📚 Consulta el README.md para más información sobre configuración segura.
+    `;
+    
+    console.error(errorMsg);
+    throw new Error('Configuración Firebase incompleta. Revisa las variables de entorno.');
+}
+
+// Configuración Firebase usando variables de entorno
+const firebaseConfig = {
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID // Opcional
+};
+
+// Validación adicional de formato
+const validateConfig = (config) => {
+    const validations = [
+        {
+            field: 'apiKey',
+            test: (value) => value && value.startsWith('AIza'),
+            message: 'API Key debe comenzar con "AIza"'
+        },
+        {
+            field: 'authDomain',
+            test: (value) => value && value.includes('.firebaseapp.com'),
+            message: 'Auth Domain debe terminar en ".firebaseapp.com"'
+        },
+        {
+            field: 'projectId',
+            test: (value) => value && value.length > 0,
+            message: 'Project ID es requerido'
+        }
+    ];
+
+    const errors = validations
+        .filter(({ field, test }) => !test(config[field]))
+        .map(({ field, message }) => `${field}: ${message}`);
+
+    if (errors.length > 0) {
+        throw new Error(`❌ Configuración Firebase inválida:\n${errors.join('\n')}`);
+    }
+};
+
+// Validar configuración antes de inicializar
+validateConfig(firebaseConfig);
+
+// Inicializar Firebase de forma segura
+let app;
+try {
+    app = initializeApp(firebaseConfig);
+    console.log('✅ Firebase inicializado correctamente');
+} catch (error) {
+    console.error('❌ Error inicializando Firebase:', error);
+    throw new Error('No se pudo inicializar Firebase. Verifica tu configuración.');
+}
+
+// Inicializar servicios de Firebase
+export const auth = getAuth(app);
+export const db = getFirestore(app);
+export const storage = getStorage(app);
+
+// Analytics solo en producción y si está disponible
+export const analytics = (() => {
+    try {
+        if (import.meta.env.PROD && typeof window !== 'undefined') {
+            return getAnalytics(app);
+        }
+        return null;
+    } catch (error) {
+        console.warn('⚠️ Analytics no disponible:', error.message);
+        return null;
+    }
+})();
+
+// Configuración de seguridad adicional
+if (import.meta.env.DEV) {
+    // Solo en desarrollo: verificar que no estamos usando valores por defecto peligrosos
+    const dangerousDefaults = [
+        'demo-project',
+        'test-project',
+        'default-project',
+        'AIzaSyASF424zUhmoeAUJ2xVv7keG6RSxYpeD5M' // API key del código anterior
+    ];
+    
+    const hasDangerousDefaults = dangerousDefaults.some(dangerous => 
+        Object.values(firebaseConfig).some(value => 
+            value && value.toString().includes(dangerous)
+        )
+    );
+    
+    if (hasDangerousDefaults) {
+        console.warn('⚠️ ADVERTENCIA: Detectados valores por defecto en configuración Firebase. Asegúrate de usar credenciales de producción.');
+    }
+}
+
+// Logging seguro (solo en desarrollo)
+if (import.meta.env.DEV) {
+    console.log('🔧 Firebase Config Info:', {
+        projectId: firebaseConfig.projectId,
+        authDomain: firebaseConfig.authDomain,
+        hasApiKey: !!firebaseConfig.apiKey,
+        hasStorageBucket: !!firebaseConfig.storageBucket,
+        environment: import.meta.env.MODE
+    });
+}
+
+// Exportar la app para uso adicional
+export default app;
+
+// 🛡️ NOTAS DE SEGURIDAD:
+// 1. ✅ Todas las credenciales están en variables de entorno
+// 2. ✅ Validación de configuración implementada
+// 3. ✅ No se exponen credenciales en logs
+// 4. ✅ Detección de valores por defecto peligrosos
+// 5. ✅ Manejo de errores robusto
+// 6. ✅ Analytics solo en producción

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./services/firebase";
+import { supabase, authHelpers } from "./services/supabase";
 
 // Componentes principales
 import LoginMejorado from "./components/auth/LoginMejorado";
@@ -45,16 +44,27 @@ function App() {
   const { colaboradoresStats } = useColaboradores();
 
   useEffect(() => {
-    const unsub = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
+    const getInitialUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
       setLoading(false);
-    });
-    return () => unsub();
+    };
+    
+    getInitialUser();
+    
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+    
+    return () => subscription?.unsubscribe();
   }, []);
 
   const handleLogout = async () => {
     try {
-      await signOut(auth);
+      await authHelpers.signOut();
       navigate("/login");
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

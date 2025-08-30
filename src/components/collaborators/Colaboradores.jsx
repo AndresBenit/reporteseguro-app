@@ -1,18 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebase';
-import {
-  collection,
-  onSnapshot,
-  query,
-  orderBy,
-  addDoc,
-  updateDoc,
-  deleteDoc,
-  doc,
-  where,
-  getDocs,
-  serverTimestamp
-} from 'firebase/firestore';
+import { useColaboradores } from '../../hooks/useColaboradores';
 import ExcelUploader from './ExcelUploader';
 
 const Colaboradores = () => {

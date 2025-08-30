@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { addDoc, collection, serverTimestamp } from "firebase/firestore";
-import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
-import { db, storage } from "../../../services/firebase";
+import { supabase, dbHelpers, storageHelpers } from "../../../services/supabase";
 
 const areasDisponibles = [
   "Central de mezclas", "Central de cribado", "Laboratorio",

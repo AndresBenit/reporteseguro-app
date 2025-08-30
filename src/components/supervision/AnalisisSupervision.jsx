@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../../services/firebase';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { supabase } from '../../services/supabase';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from 'recharts';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';

@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { collection, onSnapshot, query, orderBy, where } from 'firebase/firestore';
-import { db } from '../../services/firebase';
+import { supabase } from '../../services/supabase';
 import { Icon } from '../common/Icons';
 import BannerMejoras from '../common/BannerMejoras';
 import { useReportes } from '../../hooks/useReportes';
