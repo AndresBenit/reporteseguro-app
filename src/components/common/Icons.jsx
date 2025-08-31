@@ -396,6 +396,14 @@ export const Icons = {
         strokeLinejoin="round"
       />
     </svg>
+  ),
+
+  Building2: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M6 22V4C6 3.44772 6.44772 3 7 3H12C12.5523 3 13 3.44772 13 4V7H17C17.5523 7 18 7.44772 18 8V22H6Z" stroke={color} strokeWidth="2"/>
+      <path d="M9 17V19M9 13V15M9 9V11M15 17V19M15 13V15M15 11V13" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+      <path d="M2 22H22" stroke={color} strokeWidth="2" strokeLinecap="round"/>
+    </svg>
   )
 };
 
