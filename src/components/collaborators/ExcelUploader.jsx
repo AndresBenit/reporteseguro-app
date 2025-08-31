@@ -62,43 +62,44 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        // Determinar el área basada en el nombre de la hoja
-        let area = 'Centro Industrial';
-        const sheetLower = sheetName.toLowerCase();
-        if (sheetLower.includes('hornos') || 
-            sheetLower.includes('solera') ||
-            sheetLower.includes('horno') ||
-            sheetLower.includes('hs')) {
-          area = 'Hornos Solera';
-        } else if (sheetLower.includes('centro') || 
-                   sheetLower.includes('industrial') ||
-                   sheetLower.includes('ci')) {
-          area = 'Centro Industrial';
-        }
+        setMensaje(`📋 Procesando hoja: ${sheetName}...`);
         
-        setMensaje(`📋 Procesando hoja: ${sheetName} (${area})...`);
-        
-        // Buscar las columnas de nombre y cédula
+        // Buscar secciones de áreas y sus columnas
+        const secciones = [];
         let nombreCol = -1;
         let cedulaCol = -1;
-        let headerRow = -1;
         
-        // Buscar la fila de encabezados (más flexible)
-        for (let i = 0; i < Math.min(10, jsonData.length); i++) {
+        // Buscar todas las secciones de áreas en la hoja
+        for (let i = 0; i < jsonData.length; i++) {
           const row = jsonData[i];
           if (Array.isArray(row)) {
+            const rowText = row.join(' ').toLowerCase();
+            
+            // Detectar inicio de sección por encabezados
+            if (rowText.includes('centro industrial')) {
+              secciones.push({ area: 'Centro Industrial', startRow: i });
+            } else if (rowText.includes('hornos solera')) {
+              secciones.push({ area: 'Hornos Solera', startRow: i });
+            }
+            
+            // Buscar columnas de nombre y cédula
             for (let j = 0; j < row.length; j++) {
               const cell = String(row[j] || '').toLowerCase().trim();
               if ((cell.includes('nombre') || cell.includes('empleado') || cell.includes('trabajador')) && nombreCol === -1) {
                 nombreCol = j;
-                headerRow = i;
               }
               if ((cell.includes('cedula') || cell.includes('cédula') || cell.includes('documento') || cell.includes('cc') || cell.includes('identificacion')) && cedulaCol === -1) {
                 cedulaCol = j;
-                headerRow = i;
               }
             }
           }
+        }
+        
+        // Definir los rangos de cada sección
+        for (let s = 0; s < secciones.length; s++) {
+          const seccion = secciones[s];
+          const nextSeccion = secciones[s + 1];
+          seccion.endRow = nextSeccion ? nextSeccion.startRow - 1 : jsonData.length - 1;
         }
         
         if (nombreCol === -1 || cedulaCol === -1) {
@@ -106,8 +107,17 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           continue;
         }
         
-        // Procesar datos desde la fila siguiente a los encabezados
-        for (let i = headerRow + 1; i < jsonData.length; i++) {
+        if (secciones.length === 0) {
+          console.warn(`No se encontraron secciones de área en la hoja: ${sheetName}`);
+          continue;
+        }
+        
+        // Procesar cada sección por separado
+        for (const seccion of secciones) {
+          setMensaje(`📋 Procesando ${seccion.area}...`);
+          
+          // Procesar datos en el rango de esta sección
+          for (let i = seccion.startRow + 3; i <= seccion.endRow; i++) {
           const row = jsonData[i];
           if (!Array.isArray(row) || row.length === 0) continue;
           
@@ -132,8 +142,8 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
               await dbHelpers.create('colaboradores', {
                 nombre: nombre,
                 cedula: cedula,
-                area: area,
-                departamento: area,
+                area: seccion.area,
+                departamento: seccion.area,
                 cargo: 'Operativo',
                 activo: true,
                 fechacreacion: new Date().toISOString(),
@@ -151,6 +161,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           } catch (error) {
             errores++;
             console.error(`Error con ${nombre}:`, error);
+          }
           }
         }
       }
