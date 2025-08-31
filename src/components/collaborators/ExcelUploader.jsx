@@ -121,13 +121,14 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           
           try {
             // Verificar si ya existe
-            const existing = await supabase
+            const { data: existing, error } = await supabase
               .from('colaboradores')
               .select('*')
               .eq('cedula', cedula)
-              .maybeSingle();
+              .single();
             
-            if (!existing.data) {
+            if (error && error.code === 'PGRST116') {
+              // No existe, crear nuevo
               await dbHelpers.create('colaboradores', {
                 nombre: nombre,
                 cedula: cedula,
