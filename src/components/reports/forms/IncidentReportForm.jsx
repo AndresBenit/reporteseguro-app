@@ -109,11 +109,11 @@ const IncidentReportForm = () => {
       setUploadingImage(true);
       
       const timestamp = Date.now();
-      const fileName = `reportes/incidentes/${timestamp}_${selectedImage.name.replace(/\s+/g, '_')}`;
+      const fileName = `incidentes/${timestamp}_${selectedImage.name.replace(/\s+/g, '_')}`;
       
       // Use Supabase storage instead of Firebase
-      const uploadResult = await storageHelpers.upload('reportes', fileName, selectedImage);
-      const publicUrl = storageHelpers.getPublicUrl('reportes', fileName);
+      const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
+      const publicUrl = storageHelpers.getPublicUrl('reportes-adjuntos', fileName);
       
       setUploadingImage(false);
       return publicUrl;
