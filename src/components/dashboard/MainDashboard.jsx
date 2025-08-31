@@ -3,7 +3,6 @@ import { Icon } from '../common/Icons';
 import StatsOverview from './StatsOverview';
 import QuickActions from './QuickActions';
 import RecentActivity from './RecentActivity';
-import ChartsSection from './ChartsSection';
 
 const MainDashboard = ({ user, reportes, colaboradoresStats }) => {
   return (
@@ -29,9 +28,6 @@ const MainDashboard = ({ user, reportes, colaboradoresStats }) => {
         reportes={reportes} 
         colaboradoresStats={colaboradoresStats} 
       />
-
-      {/* Gráficos y análisis visual */}
-      <ChartsSection reportes={reportes} />
 
       {/* Actividad reciente */}
       <RecentActivity reportes={reportes} />

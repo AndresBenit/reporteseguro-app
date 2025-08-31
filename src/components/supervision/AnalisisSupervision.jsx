@@ -3,7 +3,7 @@ import { supabase, dbHelpers } from '../../services/supabase';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from 'recharts';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
-import EnhancedGraficos from '../common/ui/EnhancedGraficos';
+import EnhancedGraficosCompleto from '../common/ui/EnhancedGraficosCompleto';
 
 const AnalisisSupervision = () => {
   const [recomendaciones, setRecomendaciones] = useState([]);
@@ -327,7 +327,7 @@ const AnalisisSupervision = () => {
               <h3 style={{ marginTop: '20px' }}>Cargando datos de reportes...</h3>
             </div>
           ) : (
-            <EnhancedGraficos reportes={reportes} />
+            <EnhancedGraficosCompleto reportes={reportes} />
           )}
         </div>
       )}
