@@ -151,6 +151,14 @@ const IncidentReportForm = () => {
         }
       }
 
+      console.log('🔄 Enviando datos:', {
+        ...form,
+        fotoUrl,
+        fecha: new Date().toISOString(),
+        estado: "pendiente",
+        tipoReporte: "incidencia"
+      });
+
       await dbHelpers.create("reportes", {
         ...form,
         fotoUrl,
@@ -158,6 +166,8 @@ const IncidentReportForm = () => {
         estado: "pendiente",
         tipoReporte: "incidencia"
       });
+      
+      console.log('✅ Reporte creado exitosamente');
       
       setMensaje("✅ ¡Reporte enviado exitosamente!");
       setForm({
@@ -176,9 +186,17 @@ const IncidentReportForm = () => {
       }, 2000);
       
     } catch (error) {
-      console.error("Error:", error);
-      setMensaje("❌ Error al enviar el reporte");
-      setTimeout(() => setMensaje(""), 3000);
+      console.error("❌ Error completo:", error);
+      console.error("❌ Error message:", error.message);
+      console.error("❌ Error details:", error.details);
+      
+      let mensajeError = "❌ Error al enviar el reporte";
+      if (error.message) {
+        mensajeError += `: ${error.message}`;
+      }
+      
+      setMensaje(mensajeError);
+      setTimeout(() => setMensaje(""), 5000);
     }
     setEnviando(false);
   };
