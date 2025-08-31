@@ -134,6 +134,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
                 cedula: cedula,
                 area: area,
                 departamento: area,
+                cargo: 'Operativo',
                 activo: true,
                 fechacreacion: new Date().toISOString(),
                 fechaactualizacion: new Date().toISOString(),
