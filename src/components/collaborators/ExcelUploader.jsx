@@ -134,12 +134,12 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
                 area: area,
                 departamento: area,
                 activo: true,
-                fechaCreacion: new Date().toISOString(),
-                fechaActualizacion: new Date().toISOString(),
-                tipoColaborador: 'Operativo',
-                fuenteDatos: 'Excel Upload',
-                hojaExcel: sheetName,
-                procesadoPor: 'Sistema',
+                fechacreacion: new Date().toISOString(),
+                fechaactualizacion: new Date().toISOString(),
+                tipocolaborador: 'Operativo',
+                fuentedatos: 'Excel Upload',
+                hojaexcel: sheetName,
+                procesadopor: 'Sistema',
                 version: '2.0'
               });
               totalMigrados++;
