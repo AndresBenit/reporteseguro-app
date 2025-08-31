@@ -40,7 +40,7 @@ export const useReportes = () => {
       console.log('🔄 Cargando reportes desde Supabase...');
       
       const data = await dbHelpers.getAll('reportes', {
-        orderBy: 'fecha_creacion',
+        orderBy: 'created_at',
         ascending: false
       });
       
@@ -268,7 +268,7 @@ export const useReportes = () => {
       
       const nuevoReporte = {
         ...datosReporte,
-        fecha_creacion: ahora,
+        created_at: ahora,
         fecha_ultima_actualizacion: ahora,
         creado_por: user?.id || 'anonimo',
         estado: datosReporte.estado || 'pendiente',
