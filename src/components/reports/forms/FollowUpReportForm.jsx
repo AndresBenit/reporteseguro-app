@@ -53,9 +53,8 @@ const FollowUpReportForm = ({ onBack }) => {
     try {
       await dbHelpers.create('reportes', { 
         ...form,
-        fecha: new Date().toISOString(),
         reportante: form.reportante || "Anónimo",
-        tipoReporte: "seguimiento",
+        tipo_reporte: "seguimiento",
         prioridad: "normal"
       });
       

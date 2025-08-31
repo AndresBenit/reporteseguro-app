@@ -43,9 +43,8 @@ const ObservationReportForm = ({ onBack }) => {
     try {
       await dbHelpers.create('reportes', { 
         ...form,
-        fecha: new Date().toISOString(),
         reportante: form.reportante || "Anónimo",
-        tipoReporte: "observacion",
+        tipo_reporte: "observacion",
         prioridad: "normal"
       });
       

@@ -20,7 +20,7 @@ const IncidentReportForm = () => {
     severidad: "media",
     area: "",
     reportante: "",
-    fotoUrl: ""
+    foto_url: ""
   });
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -153,18 +153,16 @@ const IncidentReportForm = () => {
 
       console.log('🔄 Enviando datos:', {
         ...form,
-        fotoUrl,
-        fecha: new Date().toISOString(),
+        foto_url: fotoUrl,
         estado: "pendiente",
-        tipoReporte: "incidencia"
+        tipo_reporte: "incidencia"
       });
 
       await dbHelpers.create("reportes", {
         ...form,
-        fotoUrl,
-        fecha: new Date().toISOString(),
+        foto_url: fotoUrl,
         estado: "pendiente",
-        tipoReporte: "incidencia"
+        tipo_reporte: "incidencia"
       });
       
       console.log('✅ Reporte creado exitosamente');
@@ -176,7 +174,7 @@ const IncidentReportForm = () => {
         severidad: "media", 
         area: "",
         reportante: "",
-        fotoUrl: ""
+        foto_url: ""
       });
       setSelectedImage(null);
       setImagePreview(null);
