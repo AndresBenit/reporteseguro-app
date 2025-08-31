@@ -122,8 +122,23 @@ const PersonnelReportForm = ({ onBack }) => {
               >
                 <option value="">Selecciona un área...</option>
                 <option value="Central de mezclas">Central de mezclas</option>
-                <option value="Hornos solera">Hornos solera</option>
+                <option value="Central de cribado">Central de cribado</option>
+                <option value="Laboratorio">Laboratorio</option>
+                <option value="Caseta de procesamiento de muestras">Caseta de procesamiento de muestras</option>
+                <option value="Cárcamo">Cárcamo</option>
+                <option value="Almacenamiento de combustible">Almacenamiento de combustible</option>
+                <option value="Taller de mantenimiento">Taller de mantenimiento</option>
+                <option value="Patio de almacenamiento 7">Patio de almacenamiento 7</option>
+                <option value="Patio de almacenamiento de la pluma">Patio de almacenamiento de la pluma</option>
                 <option value="Centro industrial 2">Centro industrial 2</option>
+                <option value="Hornos solera">Hornos solera</option>
+                <option value="Almacén centro industrial">Almacén centro industrial</option>
+                <option value="Ambiental">Ambiental</option>
+                <option value="Oficinas administrativas">Oficinas administrativas</option>
+                <option value="Comedor">Comedor</option>
+                <option value="Estacionamiento">Estacionamiento</option>
+                <option value="Acceso principal">Acceso principal</option>
+                <option value="Área de carga y descarga">Área de carga y descarga</option>
               </select>
             </div>
 
