@@ -43,10 +43,17 @@ const PersonnelReportForm = ({ onBack }) => {
     setEnviando(true);
     try {
       await dbHelpers.create('reportes', { 
-        ...form,
+        tipo: form.tipo,
+        subtipo: form.subtipo,
+        descripcion: form.descripcion,
+        severidad: form.severidad,
+        area: form.area,
         reportante: form.reportante || "Anónimo",
+        estado: form.estado,
         tipo_reporte: "personal",
-        prioridad: "normal"
+        prioridad: "normal",
+        colaboradorinvolucrado: form.colaboradorInvolucrado,
+        accionrecomendada: form.accionRecomendada
       });
       
       setMensaje("✅ ¡Reporte de personal enviado exitosamente!");

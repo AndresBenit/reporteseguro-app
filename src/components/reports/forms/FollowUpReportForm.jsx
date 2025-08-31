@@ -52,10 +52,18 @@ const FollowUpReportForm = ({ onBack }) => {
     setEnviando(true);
     try {
       await dbHelpers.create('reportes', { 
-        ...form,
+        tipo: form.tipo,
+        descripcion: form.descripcion,
+        area: form.area,
         reportante: form.reportante || "Anónimo",
+        estado: form.estado,
         tipo_reporte: "seguimiento",
-        prioridad: "normal"
+        prioridad: "normal",
+        reporteoriginalid: form.reporteOriginalId,
+        estadoimplementacion: form.estadoImplementacion,
+        eficacia: form.eficacia,
+        requiereaccionadicional: form.requiereAccionAdicional,
+        proximarevision: form.proximaRevision
       });
       
       setMensaje("✅ ¡Reporte de seguimiento enviado exitosamente!");
