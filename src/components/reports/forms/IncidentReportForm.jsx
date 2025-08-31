@@ -151,10 +151,10 @@ const IncidentReportForm = () => {
         }
       }
 
-      await addDoc(collection(db, "reportes"), {
+      await dbHelpers.create("reportes", {
         ...form,
         fotoUrl,
-        fecha: serverTimestamp(),
+        fecha: new Date().toISOString(),
         estado: "pendiente",
         tipoReporte: "incidencia"
       });
