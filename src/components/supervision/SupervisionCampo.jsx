@@ -261,17 +261,13 @@ const SupervisionCampo = () => {
       // Guardar recomendación
       const recomendacionData = {
         tipo: "Nueva Recomendación",
-        subtipo: "Supervisión de Campo",
         descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nRecomendación: ${form.recomendacion}`,
         severidad: "media",
         area: form.colaboradorArea,
         reportante: form.supervisorReporta.trim(),
         foto_url: fotoUrl,
         estado: "pendiente",
-        tipo_reporte: "recomendacion",
-        prioridad: "normal",
-        colaboradorInvolucrado: form.colaboradorNombre,
-        accionRecomendada: form.recomendacion.trim()
+        tipo_reporte: "recomendacion"
       };
 
       await dbHelpers.create('reportes', recomendacionData);
