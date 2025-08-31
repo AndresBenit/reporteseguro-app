@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabase';
+import { supabase, dbHelpers } from '../../services/supabase';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line, Legend, AreaChart, Area } from 'recharts';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
@@ -16,25 +16,26 @@ const AnalisisSupervision = () => {
   const { reportes, loading: reportesLoading } = useReportes();
 
   useEffect(() => {
-    // Cargar recomendaciones
-    const recomendacionesRef = collection(db, 'recomendaciones_campo');
-    const unsubRecomendaciones = onSnapshot(recomendacionesRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setRecomendaciones(data);
-    });
+    const loadData = async () => {
+      try {
+        // Cargar recomendaciones
+        const recomendacionesData = await dbHelpers.getAll('recomendaciones_campo');
+        setRecomendaciones(recomendacionesData || []);
 
-    // Cargar colaboradores
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const unsubColaboradores = onSnapshot(colaboradoresRef, (snapshot) => {
-      const data = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-      setColaboradores(data);
-      setLoading(false);
-    });
-
-    return () => {
-      unsubRecomendaciones();
-      unsubColaboradores();
+        // Cargar colaboradores
+        const colaboradoresData = await dbHelpers.getAll('colaboradores');
+        setColaboradores(colaboradoresData || []);
+        
+        setLoading(false);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setRecomendaciones([]);
+        setColaboradores([]);
+        setLoading(false);
+      }
     };
+
+    loadData();
   }, []);
 
   // Filtrar recomendaciones por tiempo
