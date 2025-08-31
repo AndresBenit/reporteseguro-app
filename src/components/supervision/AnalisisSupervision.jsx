@@ -18,13 +18,12 @@ const AnalisisSupervision = () => {
   useEffect(() => {
     const loadData = async () => {
       try {
-        // Cargar recomendaciones
-        const recomendacionesData = await dbHelpers.getAll('recomendaciones_campo');
-        setRecomendaciones(recomendacionesData || []);
-
-        // Cargar colaboradores
+        // Cargar colaboradores (recomendaciones_campo no existe aún)
         const colaboradoresData = await dbHelpers.getAll('colaboradores');
         setColaboradores(colaboradoresData || []);
+        
+        // Por ahora usar datos vacíos para recomendaciones hasta crear la tabla
+        setRecomendaciones([]);
         
         setLoading(false);
       } catch (error) {
