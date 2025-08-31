@@ -260,23 +260,18 @@ const SupervisionCampo = () => {
 
       // Guardar recomendación
       const recomendacionData = {
-        fecha: new Date().toISOString(),
-        colaborador: {
-          id: form.colaboradorId,
-          nombre: form.colaboradorNombre,
-          area: form.colaboradorArea,
-        },
-        supervisorReporta: form.supervisorReporta.trim(),
-        lugarLabor: form.lugarLabor.trim(),
-        hallazgo: form.hallazgo.trim(),
-        recomendacion: form.recomendacion.trim(),
-        fotoFirmada: fotoUrl,
         tipo: "Nueva Recomendación",
-        tipoReporte: "recomendacion",
-        descripcion: form.hallazgo.trim(),
-        reportante: form.supervisorReporta.trim(),
+        subtipo: "Supervisión de Campo",
+        descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nRecomendación: ${form.recomendacion}`,
+        severidad: "media",
         area: form.colaboradorArea,
+        reportante: form.supervisorReporta.trim(),
+        foto_url: fotoUrl,
         estado: "pendiente",
+        tipo_reporte: "recomendacion",
+        prioridad: "normal",
+        colaboradorInvolucrado: form.colaboradorNombre,
+        accionRecomendada: form.recomendacion.trim()
       };
 
       await dbHelpers.create('reportes', recomendacionData);
