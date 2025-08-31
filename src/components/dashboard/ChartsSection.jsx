@@ -61,6 +61,14 @@ const ChartsSection = ({ reportes = [] }) => {
       return acc;
     }, {});
 
+    // Debug: mostrar tipos encontrados
+    console.log('📊 Tipos de reportes encontrados:', tiposData);
+    console.log('📊 Reportes por tipo_reporte:', reportes.map(r => ({ 
+      id: r.id, 
+      tipo_reporte: r.tipo_reporte, 
+      tipo: r.tipo 
+    })));
+
     const tipoReporteData = Object.entries(tiposData).map(([tipo, cantidad]) => ({
       tipo: tipo.charAt(0).toUpperCase() + tipo.slice(1),
       cantidad,
@@ -110,7 +118,8 @@ const ChartsSection = ({ reportes = [] }) => {
       'observacion': '#f59e0b', 
       'personal': '#3b82f6',
       'seguimiento': '#10b981',
-      'abordaje': '#8b5cf6'
+      'abordaje': '#8b5cf6',
+      'recomendacion': '#06b6d4'
     };
     return colors[tipo.toLowerCase()] || '#6b7280';
   }
