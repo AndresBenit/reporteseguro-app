@@ -103,22 +103,17 @@ const AbordajeCampo = () => {
     try {
       // Guardar abordaje
       const abordajeData = {
-        fecha: new Date().toISOString(),
-        colaborador: {
-          id: form.colaboradorId,
-          nombre: form.colaboradorNombre,
-          area: form.colaboradorArea
-        },
-        supervisorReporta: form.supervisorReporta.trim(),
-        lugarLabor: form.lugarLabor.trim(),
-        hallazgo: form.hallazgo.trim(),
-        abordaje: form.abordaje.trim(),
-        tipo: 'Nuevo Abordaje en Campo',
-        tipoReporte: 'abordaje',
-        descripcion: form.hallazgo.trim(),
-        reportante: form.supervisorReporta.trim(),
+        tipo: "Abordaje de Campo",
+        subtipo: "Abordaje de Seguridad",
+        descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nAbordaje: ${form.abordaje}`,
+        severidad: "media",
         area: form.colaboradorArea,
-        estado: 'pendiente'
+        reportante: form.supervisorReporta.trim(),
+        estado: "pendiente",
+        tipo_reporte: "abordaje",
+        prioridad: "normal",
+        colaboradorinvolucrado: form.colaboradorNombre,
+        accionrecomendada: form.abordaje.trim()
       };
 
       await dbHelpers.create('reportes', abordajeData);
