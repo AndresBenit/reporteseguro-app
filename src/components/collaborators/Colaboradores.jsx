@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useColaboradores } from '../../hooks/useColaboradores';
+import { supabase, dbHelpers } from '../../services/supabase';
 import ExcelUploader from './ExcelUploader';
 
 const Colaboradores = () => {
@@ -25,36 +25,43 @@ const Colaboradores = () => {
     loadColaboradores();
   }, []);
 
-  const loadColaboradores = () => {
-    const colaboradoresRef = collection(db, 'colaboradores');
-    const q = query(colaboradoresRef, orderBy('nombre', 'asc'));
-    
-    const unsub = onSnapshot(
-      q,
-      (snapshot) => {
-        try {
-          const data = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data()
-          }));
-          setColaboradores(data);
-          calculateStats(data);
-          setLoading(false);
-          setError(null);
-        } catch (err) {
-          console.error('Error procesando colaboradores:', err);
-          setError('Error al procesar los datos de colaboradores');
-          setLoading(false);
-        }
-      },
-      (err) => {
-        console.error('Error obteniendo colaboradores:', err);
-        setError('Error conectando con la base de datos');
-        setLoading(false);
-      }
-    );
-    
-    return () => unsub();
+  const loadColaboradores = async () => {
+    try {
+      const data = await dbHelpers.getAll('colaboradores', { 
+        orderBy: 'nombre', 
+        ascending: true 
+      });
+      setColaboradores(data);
+      calculateStats(data);
+      setLoading(false);
+      setError(null);
+      
+      // Set up real-time subscription
+      const subscription = dbHelpers.subscribe('colaboradores', (payload) => {
+        console.log('Colaboradores subscription event:', payload);
+        // Reload data when changes occur
+        loadColaboradoresData();
+      });
+      
+      return () => subscription.unsubscribe();
+    } catch (err) {
+      console.error('Error obteniendo colaboradores:', err);
+      setError('Error conectando con la base de datos');
+      setLoading(false);
+    }
+  };
+  
+  const loadColaboradoresData = async () => {
+    try {
+      const data = await dbHelpers.getAll('colaboradores', { 
+        orderBy: 'nombre', 
+        ascending: true 
+      });
+      setColaboradores(data);
+      calculateStats(data);
+    } catch (err) {
+      console.error('Error recargando colaboradores:', err);
+    }
   };
 
   const calculateStats = (data) => {
@@ -80,11 +87,13 @@ const Colaboradores = () => {
     
     try {
       // Verificar si ya existe
-      const colaboradoresRef = collection(db, 'colaboradores');
-      const q = query(colaboradoresRef, where("cedula", "==", newColaborador.cedula.trim()));
-      const querySnapshot = await getDocs(q);
+      const existing = await supabase
+        .from('colaboradores')
+        .select('*')
+        .eq('cedula', newColaborador.cedula.trim())
+        .maybeSingle();
       
-      if (!querySnapshot.empty) {
+      if (existing.data) {
         setMensaje('❌ Ya existe un colaborador con esta cédula');
         setTimeout(() => setMensaje(''), 3000);
         setAddingColaborador(false);
@@ -92,14 +101,14 @@ const Colaboradores = () => {
       }
 
       // Agregar nuevo colaborador
-      await addDoc(colaboradoresRef, {
+      await dbHelpers.create('colaboradores', {
         nombre: newColaborador.nombre.trim(),
         cedula: newColaborador.cedula.trim(),
         area: newColaborador.area,
         departamento: newColaborador.area,
         activo: true,
-        fechaCreacion: serverTimestamp(),
-        fechaActualizacion: serverTimestamp(),
+        fechaCreacion: new Date().toISOString(),
+        fechaActualizacion: new Date().toISOString(),
         tipoColaborador: 'Operativo',
         fuenteDatos: 'Manual'
       });
@@ -119,10 +128,9 @@ const Colaboradores = () => {
 
   const handleToggleActivo = async (colaboradorId, nuevoEstado) => {
     try {
-      const colaboradorRef = doc(db, 'colaboradores', colaboradorId);
-      await updateDoc(colaboradorRef, {
+      await dbHelpers.update('colaboradores', colaboradorId, {
         activo: nuevoEstado,
-        fechaActualizacion: serverTimestamp()
+        fechaActualizacion: new Date().toISOString()
       });
       
       setMensaje(`✅ Colaborador ${nuevoEstado ? 'activado' : 'desactivado'} exitosamente`);
@@ -157,7 +165,7 @@ const Colaboradores = () => {
         }}>
           <div style={{ fontSize: "3rem", marginBottom: "20px" }} className="pulse">👥</div>
           <h2 style={{ color: "#374151", marginBottom: "10px" }}>Cargando Colaboradores</h2>
-          <p style={{ color: "#6b7280" }}>Conectando con Firebase...</p>
+          <p style={{ color: "#6b7280" }}>Conectando con Supabase...</p>
         </div>
       </div>
     );

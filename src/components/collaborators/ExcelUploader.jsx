@@ -57,8 +57,6 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
       let yaExisten = 0;
       let errores = 0;
       
-      const colaboradoresRef = collection(db, 'colaboradores');
-
       // Procesar cada hoja del Excel
       for (const sheetName of workbook.SheetNames) {
         const worksheet = workbook.Sheets[sheetName];
@@ -123,18 +121,21 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           
           try {
             // Verificar si ya existe
-            const q = query(colaboradoresRef, where("cedula", "==", cedula));
-            const querySnapshot = await getDocs(q);
+            const existing = await supabase
+              .from('colaboradores')
+              .select('*')
+              .eq('cedula', cedula)
+              .maybeSingle();
             
-            if (querySnapshot.empty) {
-              await addDoc(colaboradoresRef, {
+            if (!existing.data) {
+              await dbHelpers.create('colaboradores', {
                 nombre: nombre,
                 cedula: cedula,
                 area: area,
                 departamento: area,
                 activo: true,
-                fechaCreacion: new Date(),
-                fechaActualizacion: new Date(),
+                fechaCreacion: new Date().toISOString(),
+                fechaActualizacion: new Date().toISOString(),
                 tipoColaborador: 'Operativo',
                 fuenteDatos: 'Excel Upload',
                 hojaExcel: sheetName,

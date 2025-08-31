@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { db } from "../../services/firebase";
-import {
-  collection,
-  onSnapshot,
-  deleteDoc,
-  updateDoc,
-  doc,
-} from "firebase/firestore";
+import { supabase, dbHelpers } from "../../services/supabase";
 import { Icon } from "../common/Icons";
 import ReporteForm from "../reports/ReporteForm";
 import EnhancedGraficos from "../common/EnhancedGraficos";
@@ -26,33 +19,50 @@ const Dashboard = ({ user, onLogout }) => {
   const [showExcelUploader, setShowExcelUploader] = useState(false);
 
   useEffect(() => {
-    const ref = collection(db, "reportes");
-    
-    const unsub = onSnapshot(
-      ref, 
-      (snap) => {
-        try {
-          const data = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-          setReportes(data);
-          setLoading(false);
-          setError(null);
-        } catch (err) {
-          console.error("Error procesando datos:", err);
-          setError("Error al procesar los datos");
-          setLoading(false);
-        }
-      },
-      (err) => {
+    const loadReportes = async () => {
+      try {
+        const data = await dbHelpers.getAll('reportes');
+        setReportes(data);
+        setLoading(false);
+        setError(null);
+        
+        // Set up real-time subscription
+        const subscription = dbHelpers.subscribe('reportes', (payload) => {
+          console.log('Reportes subscription event:', payload);
+          // Reload data when changes occur
+          loadReportesData();
+        });
+        
+        return subscription;
+      } catch (err) {
         console.error("Error obteniendo reportes:", err);
         setError("Error conectando con la base de datos");
         setLoading(false);
       }
-    );
+    };
+    
+    const loadReportesData = async () => {
+      try {
+        const data = await dbHelpers.getAll('reportes');
+        setReportes(data);
+      } catch (err) {
+        console.error('Error recargando reportes:', err);
+      }
+    };
+    
+    let subscription;
+    loadReportes().then(sub => {
+      subscription = sub;
+    });
     
     // Cargar estadísticas básicas (rápido y simple)
     loadColaboradoresStats();
     
-    return () => unsub();
+    return () => {
+      if (subscription) {
+        subscription.unsubscribe();
+      }
+    };
   }, []);
 
   // CARGA SIMPLE Y DIRECTA DESDE FIREBASE
@@ -169,7 +179,7 @@ const Dashboard = ({ user, onLogout }) => {
             Cargando Dashboard
           </h2>
           <p style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-            Conectando con Firebase...
+            Conectando con Supabase...
           </p>
           
           {/* Barra de progreso rápida */}
