@@ -182,13 +182,18 @@ export const dbHelpers = {
     
     // Crear un nuevo registro
     create: async (table, data) => {
+        console.log('📥 dbHelpers.create called with:', { table, data });
+        
         const { data: result, error } = await supabase
             .from(table)
-            .insert([data])
-            .select()
-            .single();
+            .insert(data);
         
-        if (error) throw error;
+        if (error) {
+            console.error('❌ Supabase insert error:', error);
+            throw error;
+        }
+        
+        console.log('✅ Insert successful:', result);
         return result;
     },
     
