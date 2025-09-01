@@ -16,6 +16,8 @@ import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
 import ComponenteMigracion from "./components/admin/ComponenteMigracion";
+import TestForm from "./components/debug/TestForm";
+import ErrorBoundary from "./components/debug/ErrorBoundary";
 
 // Hooks y servicios
 import { useReportes } from "./hooks/useReportes";
@@ -168,9 +170,38 @@ function App() {
                   </Route>
                   
                   {/* Formularios Específicos */}
-                  <Route path="/reportes/incident-form" element={<IncidentReportForm />} />
-                  <Route path="/formularios/recomendacion" element={<SupervisionCampo />} />
-                  <Route path="/formularios/abordaje" element={<AbordajeCampo />} />
+                  <Route path="/reportes/incident-form" element={
+                    <ErrorBoundary>
+                      <IncidentReportForm />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/formularios/recomendacion" element={
+                    <ErrorBoundary>
+                      <SupervisionCampo />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/formularios/abordaje" element={
+                    <ErrorBoundary>
+                      <AbordajeCampo />
+                    </ErrorBoundary>
+                  } />
+                  
+                  {/* Formularios originales para depuración */}
+                  <Route path="/reportes/incident-form-original" element={
+                    <ErrorBoundary>
+                      <IncidentReportForm />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/formularios/recomendacion-original" element={
+                    <ErrorBoundary>
+                      <SupervisionCampo />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/formularios/abordaje-original" element={
+                    <ErrorBoundary>
+                      <AbordajeCampo />
+                    </ErrorBoundary>
+                  } />
                   
                   {/* Módulo de Supervisión */}
                   <Route path="/supervision" element={<SupervisionMain />} />
