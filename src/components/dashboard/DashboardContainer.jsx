@@ -104,10 +104,12 @@ const Dashboard = ({ user, onLogout }) => {
   };
 
   const getStatsCards = () => {
-    const total = reportes.length;
-    const pendientes = reportes.filter(r => r.estado === "pendiente").length;
-    const criticos = reportes.filter(r => r.severidad === "critica").length;
-    const resueltos = reportes.filter(r => r.estado === "resuelto").length;
+    // Validar que reportes sea un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    const total = reportesValidos.length;
+    const pendientes = reportesValidos.filter(r => r && r.estado === "pendiente").length;
+    const criticos = reportesValidos.filter(r => r && r.severidad === "critica").length;
+    const resueltos = reportesValidos.filter(r => r && r.estado === "resuelto").length;
     
     // Calcular porcentajes
     const porcentajePendientes = total > 0 ? Math.round((pendientes / total) * 100) : 0;
@@ -255,9 +257,10 @@ const Dashboard = ({ user, onLogout }) => {
     );
   }
 
-  // Dashboard principal
-  const pendientes = reportes.filter(r => r.estado === "pendiente").length;
-  const criticos = reportes.filter(r => r.severidad === "critica").length;
+  // Dashboard principal - Validar arrays
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  const pendientes = reportesValidos.filter(r => r && r.estado === "pendiente").length;
+  const criticos = reportesValidos.filter(r => r && r.severidad === "critica").length;
 
   return (
     <div className="container fade-in">
@@ -483,7 +486,7 @@ const Dashboard = ({ user, onLogout }) => {
                     Estado Operacional
                   </h3>
                   <p style={{ color: "#1e3a8a", fontSize: "0.9rem", lineHeight: "1.4" }}>
-                    <strong>{pendientes}</strong> reportes pendientes de <strong>{reportes.length}</strong> totales
+                    <strong>{pendientes}</strong> reportes pendientes de <strong>{reportesValidos.length}</strong> totales
                   </p>
                   <div style={{ 
                     marginTop: "8px", 
@@ -494,7 +497,7 @@ const Dashboard = ({ user, onLogout }) => {
                   }}>
                     <span>📊 Eficiencia operativa</span>
                     <span style={{ fontWeight: "600" }}>
-                      {reportes.length > 0 ? Math.round(((reportes.length - pendientes) / reportes.length) * 100) : 0}%
+                      {reportesValidos.length > 0 ? Math.round(((reportesValidos.length - pendientes) / reportesValidos.length) * 100) : 0}%
                     </span>
                   </div>
                 </div>
@@ -605,7 +608,7 @@ const Dashboard = ({ user, onLogout }) => {
                     border: "1px solid #e2e8f0"
                   }}>
                     <div style={{ fontWeight: "600", color: "#374151" }}>
-                      {reportes.filter(r => r.estado === "proceso").length}
+                      {reportesValidos.filter(r => r && r.estado === "proceso").length}
                     </div>
                     <div style={{ color: "#6b7280", fontSize: "0.75rem" }}>En Proceso</div>
                   </div>
@@ -617,7 +620,7 @@ const Dashboard = ({ user, onLogout }) => {
                     border: "1px solid #e2e8f0"
                   }}>
                     <div style={{ fontWeight: "600", color: "#374151" }}>
-                      {new Set(reportes.map(r => r.area)).size}
+                      {new Set(reportesValidos.map(r => r && r.area).filter(Boolean)).size}
                     </div>
                     <div style={{ color: "#6b7280", fontSize: "0.75rem" }}>Áreas Activas</div>
                   </div>
