@@ -9,7 +9,7 @@ import { Icon } from '../common/Icons';
 const ChartsSection = ({ reportes = [] }) => {
   // Procesamiento de datos para gráficos
   const chartsData = useMemo(() => {
-    if (!reportes.length) return null;
+    if (!reportes || !Array.isArray(reportes) || reportes.length === 0) return null;
 
     // 1. Reportes por área
     const reportesPorArea = reportes.reduce((acc, reporte) => {
@@ -147,7 +147,7 @@ const ChartsSection = ({ reportes = [] }) => {
     return days;
   }
 
-  if (!chartsData || reportes.length === 0) {
+  if (!chartsData || !reportes || reportes.length === 0) {
     return (
       <div className="charts-section">
         <div className="charts-header">

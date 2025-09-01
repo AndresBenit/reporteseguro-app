@@ -22,6 +22,9 @@ import {
 import { Icon } from '../Icons';
 
 const EnhancedGraficosCompleto = ({ reportes = [] }) => {
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  
   // Estados para filtros
   const [filtroFecha, setFiltroFecha] = useState('30dias');
   const [filtroTipo, setFiltroTipo] = useState('todos');
@@ -336,7 +339,7 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
       fecha.setDate(fecha.getDate() - i);
       const fechaStr = fecha.toISOString().split('T')[0];
       
-      const reportesDelDia = reportes.filter(r => {
+      const reportesDelDia = reportesValidos.filter(r => {
         const fechaReporte = new Date(r.created_at);
         return fechaReporte.toISOString().split('T')[0] === fechaStr;
       }).length;
@@ -375,7 +378,7 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
     }));
   }
 
-  if (!reportes.length) {
+  if (!reportesValidos.length) {
     return (
       <div className="enhanced-graficos">
         <div className="no-data-container">

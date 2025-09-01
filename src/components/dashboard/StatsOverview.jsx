@@ -7,19 +7,22 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   // Actualizar timestamp cuando cambien los reportes
   useEffect(() => {
     setLastUpdate(new Date());
-  }, [reportes.length, reportes]);
+  }, [reportes?.length, reportes]);
+  
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
   // Debug: verificar los datos que llegan (solo cuando hay cambios)
-  if (reportes.length > 0) {
-    console.log('📊 StatsOverview actualizado - Total reportes:', reportes.length);
+  if (reportesValidos.length > 0) {
+    console.log('📊 StatsOverview actualizado - Total reportes:', reportesValidos.length);
   }
   
   // Calcular estadísticas básicas - CORREGIDO para estados reales
-  const totalReportes = reportes.length;
-  const reportesCriticos = reportes.filter(r => r.severidad === 'critica' || r.severidad === 'crítica').length;
-  const reportesResueltos = reportes.filter(r => r.estado === 'resuelto' || r.estado === 'cerrado').length;
-  const reportesPendientes = reportes.filter(r => r.estado === 'pendiente').length;
-  const reportesEnProceso = reportes.filter(r => 
+  const totalReportes = reportesValidos.length;
+  const reportesCriticos = reportesValidos.filter(r => r.severidad === 'critica' || r.severidad === 'crítica').length;
+  const reportesResueltos = reportesValidos.filter(r => r.estado === 'resuelto' || r.estado === 'cerrado').length;
+  const reportesPendientes = reportesValidos.filter(r => r.estado === 'pendiente').length;
+  const reportesEnProceso = reportesValidos.filter(r => 
     r.estado === 'proceso' || 
     r.estado === 'en_proceso' || 
     r.estado === 'asignado' ||

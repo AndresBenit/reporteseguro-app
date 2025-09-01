@@ -404,6 +404,36 @@ export const Icons = {
       <path d="M9 17V19M9 13V15M9 9V11M15 17V19M15 13V15M15 11V13" stroke={color} strokeWidth="2" strokeLinecap="round"/>
       <path d="M2 22H22" stroke={color} strokeWidth="2" strokeLinecap="round"/>
     </svg>
+  ),
+
+  // Iconos faltantes que se usan en la aplicación
+  PieChart: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M21.21 15.89A10 10 0 1 1 8 2.83" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 12A10 10 0 0 0 12 2V12L22 12Z" fill={color} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+
+  Info: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <circle cx="12" cy="12" r="10" stroke={color} strokeWidth="2" />
+      <path d="M12 16V12" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M12 8H12.01" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+
+  MousePointer: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M3 3L10.07 19.97L12.58 12.58L19.97 10.07L3 3Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 13L21 21" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  ),
+
+  BookOpen: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M2 3H8C9.06087 3 10.0783 3.42143 10.8284 4.17157C11.5786 4.92172 12 5.93913 12 7V21C12 20.2044 11.6839 19.4413 11.1213 18.8787C10.5587 18.3161 9.79565 18 9 18H2V3Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M22 3H16C14.9391 3 13.9217 3.42143 13.1716 4.17157C12.4214 4.92172 12 5.93913 12 7V21C12 20.2044 12.3161 19.4413 12.8787 18.8787C13.4413 18.3161 14.2044 18 15 18H22V3Z" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 };
 
@@ -417,7 +447,7 @@ export const useIcon = (name, props = {}) => {
 export const Icon = ({ name, ...props }) => {
   const IconComponent = Icons[name];
   if (!IconComponent) {
-    console.warn(`⚠️ Icon "${name}" not found. Available icons:`, Object.keys(Icons).join(', '));
+    console.warn(`⚠️ Icono "${name}" no encontrado. Iconos disponibles:`, Object.keys(Icons).join(', '));
     return null;
   }
   return <IconComponent {...props} />;

@@ -37,11 +37,14 @@ const EnhancedGraficos = ({ reportes = [] }) => {
 
   // 📊 PROCESAR DATOS CON LÓGICA MEJORADA
   const chartData = useMemo(() => {
-    console.log('📊 Procesando datos para gráficas:', reportes.length, 'reportes');
-    console.log('📋 Datos de ejemplo:', reportes.slice(0, 2)); // DEBUG
+    // Validar que reportes sea un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    
+    console.log('📊 Procesando datos para gráficas:', reportesValidos.length, 'reportes');
+    console.log('📋 Datos de ejemplo:', reportesValidos.slice(0, 2)); // DEBUG
     
     // Si no hay reportes, retornar datos vacíos
-    if (!reportes.length) {
+    if (!reportesValidos.length) {
       console.log('⚠️ No hay reportes disponibles');
       return {
         monthly: [],
@@ -106,22 +109,22 @@ const EnhancedGraficos = ({ reportes = [] }) => {
     const severityData = [
       { 
         name: 'Crítica', 
-        value: reportes.filter(r => (r.severidad || '').toLowerCase() === 'critica').length, 
+        value: reportesValidos.filter(r => (r.severidad || '').toLowerCase() === 'critica').length, 
         color: colores.danger 
       },
       { 
         name: 'Alta', 
-        value: reportes.filter(r => (r.severidad || '').toLowerCase() === 'alta').length, 
+        value: reportesValidos.filter(r => (r.severidad || '').toLowerCase() === 'alta').length, 
         color: colores.warning 
       },
       { 
         name: 'Media', 
-        value: reportes.filter(r => (r.severidad || '').toLowerCase() === 'media').length, 
+        value: reportesValidos.filter(r => (r.severidad || '').toLowerCase() === 'media').length, 
         color: colores.info 
       },
       { 
         name: 'Baja', 
-        value: reportes.filter(r => (r.severidad || '').toLowerCase() === 'baja').length, 
+        value: reportesValidos.filter(r => (r.severidad || '').toLowerCase() === 'baja').length, 
         color: colores.success 
       }
     ].filter(item => item.value > 0);
@@ -175,17 +178,17 @@ const EnhancedGraficos = ({ reportes = [] }) => {
     const statusData = [
       { 
         name: 'Pendientes', 
-        value: reportes.filter(r => (r.estado || '').toLowerCase() === 'pendiente').length, 
+        value: reportesValidos.filter(r => (r.estado || '').toLowerCase() === 'pendiente').length, 
         color: colores.info 
       },
       { 
         name: 'En Proceso', 
-        value: reportes.filter(r => ['proceso', 'en_proceso', 'asignado'].includes((r.estado || '').toLowerCase())).length, 
+        value: reportesValidos.filter(r => ['proceso', 'en_proceso', 'asignado'].includes((r.estado || '').toLowerCase())).length, 
         color: colores.warning 
       },
       { 
         name: 'Resueltos', 
-        value: reportes.filter(r => ['resuelto', 'cerrado'].includes((r.estado || '').toLowerCase())).length, 
+        value: reportesValidos.filter(r => ['resuelto', 'cerrado'].includes((r.estado || '').toLowerCase())).length, 
         color: colores.success 
       }
     ].filter(item => item.value > 0);
@@ -246,7 +249,7 @@ const EnhancedGraficos = ({ reportes = [] }) => {
   );
 
   // Si no hay reportes, mostrar mensaje
-  if (!reportes.length) {
+  if (!reportesValidos.length) {
     return <NoDataMessage message="No hay reportes registrados aún" />;
   }
 
@@ -611,12 +614,12 @@ const EnhancedGraficos = ({ reportes = [] }) => {
           fontSize: '0.875rem'
         }}>
           <div>
-            <strong style={{ color: '#1f2937' }}>Total de reportes:</strong> {reportes.length}
+            <strong style={{ color: '#1f2937' }}>Total de reportes:</strong> {reportesValidos.length}
           </div>
           <div>
             <strong style={{ color: '#1f2937' }}>Tasa de resolución:</strong> {' '}
-            {reportes.length > 0 ? 
-              Math.round((reportes.filter(r => ['resuelto', 'cerrado'].includes((r.estado || '').toLowerCase())).length / reportes.length) * 100) 
+            {reportesValidos.length > 0 ? 
+              Math.round((reportesValidos.filter(r => ['resuelto', 'cerrado'].includes((r.estado || '').toLowerCase())).length / reportesValidos.length) * 100) 
               : 0}%
           </div>
           <div>
@@ -625,7 +628,7 @@ const EnhancedGraficos = ({ reportes = [] }) => {
           </div>
           <div>
             <strong style={{ color: '#1f2937' }}>Reportes críticos:</strong> {' '}
-            {reportes.filter(r => (r.severidad || '').toLowerCase() === 'critica').length}
+            {reportesValidos.filter(r => (r.severidad || '').toLowerCase() === 'critica').length}
           </div>
         </div>
       </div>
