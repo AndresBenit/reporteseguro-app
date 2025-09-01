@@ -1,7 +1,7 @@
 import React from 'react';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
-import EnhancedGraficosCompleto from '../common/ui/EnhancedGraficosCompleto';
+import EnterpriseGraficos from '../common/ui/EnterpriseGraficos';
 
 const AnalisisSupervision = () => {
   // Hook para reportes de seguridad
@@ -60,7 +60,7 @@ const AnalisisSupervision = () => {
           <h3 style={{ marginTop: '20px' }}>Cargando datos de reportes...</h3>
         </div>
       ) : (
-        <EnhancedGraficosCompleto reportes={reportes} />
+        <EnterpriseGraficos reportes={reportes} />
       )}
 
     </div>
