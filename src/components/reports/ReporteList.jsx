@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { reporteUtils, REPORTE_ESTADOS } from "../../constants/reporteStates";
 
 const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
   const [filtroEstado, setFiltroEstado] = useState("todos");
@@ -11,7 +12,9 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
   // Filtrar y ordenar reportes
   const reportesFiltrados = reportes
     .filter(reporte => {
-      const cumpleFiltroEstado = filtroEstado === "todos" || reporte.estado === filtroEstado;
+      // Normalizar estado para comparación
+      const estadoNormalizado = reporteUtils.normalizeEstado(reporte.estado);
+      const cumpleFiltroEstado = filtroEstado === "todos" || estadoNormalizado === filtroEstado;
       const cumpleFiltroSeveridad = filtroSeveridad === "todos" || reporte.severidad === filtroSeveridad;
       const cumpleBusqueda = busqueda === "" || 
         reporte.descripcion?.toLowerCase().includes(busqueda.toLowerCase()) ||
@@ -34,9 +37,15 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
           valorB = ordenSeveridad[b.severidad] || 0;
           break;
         case "estado":
-          const ordenEstado = { "pendiente": 1, "proceso": 2, "resuelto": 3 };
-          valorA = ordenEstado[a.estado] || 0;
-          valorB = ordenEstado[b.estado] || 0;
+          const ordenEstado = { 
+            [REPORTE_ESTADOS.PENDIENTE]: 1, 
+            [REPORTE_ESTADOS.EN_PROCESO]: 2, 
+            [REPORTE_ESTADOS.PROCESO]: 2, 
+            [REPORTE_ESTADOS.RESUELTO]: 3,
+            [REPORTE_ESTADOS.CERRADO]: 4
+          };
+          valorA = ordenEstado[reporteUtils.normalizeEstado(a.estado)] || 0;
+          valorB = ordenEstado[reporteUtils.normalizeEstado(b.estado)] || 0;
           break;
         default:
           valorA = a[ordenPor] || "";
@@ -63,22 +72,11 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
   };
 
   const getSeverityIcon = (severidad) => {
-    const icons = {
-      baja: "🟢",
-      media: "🟡", 
-      alta: "🟠",
-      critica: "🔴"
-    };
-    return icons[severidad] || "⚪";
+    return reporteUtils.getSeveridadIcon(severidad);
   };
 
   const getStatusIcon = (estado) => {
-    const icons = {
-      pendiente: "⏳",
-      proceso: "🔄",
-      resuelto: "✅"
-    };
-    return icons[estado] || "❓";
+    return reporteUtils.getEstadoIcon(estado);
   };
 
   const handleEstadoChange = (id, nuevoEstado) => {
@@ -180,9 +178,9 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
             className="form-select"
           >
             <option value="todos">Todos</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="proceso">En Proceso</option>
-            <option value="resuelto">Resuelto</option>
+            <option value={REPORTE_ESTADOS.PENDIENTE}>Pendiente</option>
+            <option value={REPORTE_ESTADOS.EN_PROCESO}>En Proceso</option>
+            <option value={REPORTE_ESTADOS.RESUELTO}>Resuelto</option>
           </select>
         </div>
 
@@ -331,7 +329,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
                 </td>
                 <td style={{ minWidth: "120px" }}>
                   <select
-                    value={reporte.estado}
+                    value={reporteUtils.normalizeEstado(reporte.estado)}
                     onChange={(e) => handleEstadoChange(reporte.id, e.target.value)}
                     style={{
                       padding: "6px 10px",
@@ -344,9 +342,9 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
                       width: "100%"
                     }}
                   >
-                    <option value="pendiente">⏳ Pendiente</option>
-                    <option value="proceso">🔄 En Proceso</option>
-                    <option value="resuelto">✅ Resuelto</option>
+                    <option value={REPORTE_ESTADOS.PENDIENTE}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.PENDIENTE)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.PENDIENTE)}</option>
+                    <option value={REPORTE_ESTADOS.EN_PROCESO}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.EN_PROCESO)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.EN_PROCESO)}</option>
+                    <option value={REPORTE_ESTADOS.RESUELTO}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.RESUELTO)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.RESUELTO)}</option>
                   </select>
                 </td>
                 <td style={{ minWidth: "80px" }}>
@@ -483,7 +481,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
               flexWrap: "wrap"
             }}>
               <select
-                value={reporte.estado}
+                value={reporteUtils.normalizeEstado(reporte.estado)}
                 onChange={(e) => handleEstadoChange(reporte.id, e.target.value)}
                 style={{
                   flex: 1,
@@ -496,9 +494,9 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
                   fontWeight: "600"
                 }}
               >
-                <option value="pendiente">⏳ Pendiente</option>
-                <option value="proceso">🔄 En Proceso</option>
-                <option value="resuelto">✅ Resuelto</option>
+                <option value={REPORTE_ESTADOS.PENDIENTE}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.PENDIENTE)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.PENDIENTE)}</option>
+                <option value={REPORTE_ESTADOS.EN_PROCESO}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.EN_PROCESO)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.EN_PROCESO)}</option>
+                <option value={REPORTE_ESTADOS.RESUELTO}>{reporteUtils.getEstadoIcon(REPORTE_ESTADOS.RESUELTO)} {reporteUtils.getEstadoDisplay(REPORTE_ESTADOS.RESUELTO)}</option>
               </select>
 
               {reporte.fotoUrl && (

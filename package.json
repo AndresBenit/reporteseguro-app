@@ -38,11 +38,13 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^8.41.0",
     "@vitejs/plugin-react": "^4.7.0",
     "eslint": "^8.57.0",
-    "eslint-plugin-react": "^7.33.2",
-    "eslint-plugin-react-hooks": "^4.6.0",
+    "eslint-plugin-react": "^7.37.5",
+    "eslint-plugin-react-hooks": "^4.6.2",
+    "eslint-plugin-react-refresh": "^0.4.20",
     "eslint-plugin-security": "^1.7.1",
     "prettier": "^3.0.0",
     "vite": "^5.0.0"
@@ -100,29 +102,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "eslintConfig": {
-    "extends": [
-      "react-app",
-      "react-app/jest"
-    ],
-    "plugins": [
-      "security"
-    ],
-    "rules": {
-      "security/detect-object-injection": "error",
-      "security/detect-non-literal-regexp": "error",
-      "security/detect-unsafe-regex": "error",
-      "security/detect-buffer-noassert": "error",
-      "security/detect-child-process": "error",
-      "security/detect-disable-mustache-escape": "error",
-      "security/detect-eval-with-expression": "error",
-      "security/detect-no-csrf-before-method-override": "error",
-      "security/detect-non-literal-fs-filename": "error",
-      "security/detect-non-literal-require": "error",
-      "security/detect-possible-timing-attacks": "error",
-      "security/detect-pseudoRandomBytes": "error"
-    }
   },
   "prettier": {
     "semi": true,

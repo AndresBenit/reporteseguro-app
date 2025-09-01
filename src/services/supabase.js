@@ -227,7 +227,7 @@ export const dbHelpers = {
     
     // Suscribirse a cambios en tiempo real
     subscribe: (table, callback, filters = {}) => {
-        let subscription = supabase
+        const subscription = supabase
             .channel(`public:${table}`)
             .on('postgres_changes', 
                 { 

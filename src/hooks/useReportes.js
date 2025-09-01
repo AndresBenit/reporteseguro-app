@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { supabase, dbHelpers } from "../services/supabase";
+import { reporteUtils, REPORTE_ESTADOS } from "../constants/reporteStates";
 
 export const useReportes = () => {
   const [reportes, setReportes] = useState([]);
@@ -81,17 +82,20 @@ export const useReportes = () => {
 
   const actualizarEstado = async (id, estado) => {
     try {
-      console.log(`🔄 Actualizando reporte ${id} al estado: ${estado}`);
+      // Normalizar el estado antes de enviarlo
+      const estadoNormalizado = reporteUtils.normalizeEstado(estado);
+      console.log(`🔄 Actualizando reporte ${id} al estado: ${estado} (normalizado: ${estadoNormalizado})`);
+      
       setUpdating(prev => new Set([...prev, id]));
       
       const updateData = { 
-        estado,
+        estado: estadoNormalizado,
         fecha_ultima_actualizacion: new Date().toISOString()
       };
       
       await dbHelpers.update('reportes', id, updateData);
       
-      console.log(`✅ Estado actualizado exitosamente`);
+      console.log(`✅ Estado actualizado exitosamente a ${estadoNormalizado}`);
       
     } catch (err) {
       console.error("❌ Error actualizando estado:", err);
@@ -272,6 +276,7 @@ export const useReportes = () => {
         fecha_ultima_actualizacion: ahora,
         creado_por: user?.id || 'anonimo',
         estado: datosReporte.estado || 'pendiente',
+        tipo_reporte: datosReporte.tipo_reporte || datosReporte.tipo || 'Condición Insegura',
         historial_estados: {
           [Date.now().toString()]: {
             estado: datosReporte.estado || 'pendiente',
@@ -298,9 +303,9 @@ export const useReportes = () => {
     
     const stats = {
       total: reportesValidos.length,
-      pendientes: reportesValidos.filter(r => r && r.estado === 'pendiente').length,
-      enProceso: reportesValidos.filter(r => r && ['asignado', 'en_proceso'].includes(r.estado)).length,
-      resueltos: reportesValidos.filter(r => r && ['resuelto', 'cerrado'].includes(r.estado)).length,
+      pendientes: reportesValidos.filter(r => r && reporteUtils.normalizeEstado(r.estado) === REPORTE_ESTADOS.PENDIENTE).length,
+      enProceso: reportesValidos.filter(r => r && [REPORTE_ESTADOS.ASIGNADO, REPORTE_ESTADOS.EN_PROCESO, REPORTE_ESTADOS.PROCESO].includes(reporteUtils.normalizeEstado(r.estado))).length,
+      resueltos: reportesValidos.filter(r => r && [REPORTE_ESTADOS.RESUELTO, REPORTE_ESTADOS.CERRADO].includes(reporteUtils.normalizeEstado(r.estado))).length,
       vencidos: 0,
       sinAsignar: reportesValidos.filter(r => r && !r.asignado_a).length,
       porSeveridad: {
