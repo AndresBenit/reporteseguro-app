@@ -10,7 +10,8 @@
       "Bash(npm run dev:*)",
       "Bash(npm run lint:*)",
       "Bash(node:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(grep:*)"
     ],
     "deny": [],
     "ask": []

@@ -45,6 +45,30 @@ function App() {
   } = useReportes();
   const { colaboradoresStats } = useColaboradores();
 
+  // Debug: Log del estado de los datos principales
+  useEffect(() => {
+    console.log('🔍 [APP DEBUG] Estado de datos actualizado:');
+    console.log('   📊 Reportes:', {
+      count: reportes?.length || 0,
+      type: Array.isArray(reportes) ? 'Array' : typeof reportes,
+      loading: reportesLoading,
+      error: reportesError
+    });
+    console.log('   👥 Colaboradores Stats:', {
+      data: colaboradoresStats,
+      type: typeof colaboradoresStats,
+      keys: Object.keys(colaboradoresStats || {})
+    });
+    console.log('   👤 Usuario:', {
+      authenticated: !!user,
+      email: user?.email,
+      displayName: user?.displayName
+    });
+    if (getEstadisticas) {
+      console.log('   📈 Estadísticas calculadas:', getEstadisticas());
+    }
+  }, [reportes, colaboradoresStats, user, reportesLoading, reportesError]);
+
   useEffect(() => {
     const getInitialUser = async () => {
       const { data: { user } } = await supabase.auth.getUser();
