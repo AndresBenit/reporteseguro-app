@@ -40,10 +40,13 @@ const AbordajeCampo = () => {
       setColaboradoresFiltrados([]);
       setShowSugerencias(false);
     } else {
-      const filtrados = colaboradores
+      // Validar que colaboradores sea un array válido antes de filtrar
+      const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+      const filtrados = colaboradoresValidos
         .filter(col => 
-          col.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          col.cedula.includes(searchTerm)
+          col && col.nombre && col.cedula &&
+          (col.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          col.cedula.includes(searchTerm))
         )
         .slice(0, 8); // Mostrar máximo 8 sugerencias
       setColaboradoresFiltrados(filtrados);
