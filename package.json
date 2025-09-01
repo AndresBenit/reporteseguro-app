@@ -52,7 +52,7 @@
   "scripts": {
     "dev": "npx vite",
     "build": "vite build",
-    "build:vercel": "npm install @rollup/rollup-linux-x64-gnu --optional --force || true && vite build",
+    "build:vercel": "npm install @rollup/rollup-linux-x64-gnu --optional --force || true && npx vite build",
     "build:secure": "npm run security:audit && npm run lint && npm run build",
     "preview": "npx vite preview",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
