@@ -74,7 +74,7 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
     // Filtro por fecha
     if (filtroFecha !== 'todos') {
       const ahora = new Date();
-      let fechaLimite = new Date();
+      const fechaLimite = new Date();
 
       switch (filtroFecha) {
         case '7dias':

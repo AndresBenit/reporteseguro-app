@@ -149,7 +149,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
     if (filtroFecha !== 'todos') {
       const ahora = new Date();
-      let fechaLimite = new Date();
+      const fechaLimite = new Date();
 
       switch (filtroFecha) {
         case '7dias': fechaLimite.setDate(ahora.getDate() - 7); break;
