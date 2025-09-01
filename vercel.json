@@ -1,1 +1,13 @@
-{"rewrites": [{"source": "/(.*)", "destination": "/index.html"}]}
+{
+  "version": 2,
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm ci --ignore-scripts",
+  "framework": "vite",
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
+    }
+  ]
+}
