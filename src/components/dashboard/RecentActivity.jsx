@@ -2,8 +2,12 @@ import React from 'react';
 import { Icon } from '../common/Icons';
 
 const RecentActivity = ({ reportes = [] }) => {
+  // ✅ VALIDACIÓN: Asegurar que reportes es un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  
   // Ordenar por fecha más reciente y tomar los primeros 5
-  const recentReports = reportes
+  const recentReports = reportesValidos
+    .filter(r => r && r.fecha) // ✅ Filtrar reportes válidos con fecha
     .sort((a, b) => {
       const dateA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha);
       const dateB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha);

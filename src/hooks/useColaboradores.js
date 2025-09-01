@@ -199,31 +199,35 @@ export const useColaboradores = () => {
   };
 
   const buscarColaboradores = (termino) => {
-    if (!termino) return colaboradores;
+    const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+    if (!termino) return colaboradoresValidos;
     
     const terminoLower = termino.toLowerCase();
-    return colaboradores.filter(colaborador =>
-      colaborador.nombre?.toLowerCase().includes(terminoLower) ||
-      colaborador.email?.toLowerCase().includes(terminoLower) ||
-      colaborador.area?.toLowerCase().includes(terminoLower) ||
-      colaborador.cargo?.toLowerCase().includes(terminoLower) ||
-      colaborador.cedula?.toString().includes(termino)
+    return colaboradoresValidos.filter(colaborador =>
+      colaborador?.nombre?.toLowerCase().includes(terminoLower) ||
+      colaborador?.email?.toLowerCase().includes(terminoLower) ||
+      colaborador?.area?.toLowerCase().includes(terminoLower) ||
+      colaborador?.cargo?.toLowerCase().includes(terminoLower) ||
+      colaborador?.cedula?.toString().includes(termino)
     );
   };
 
   const getColaboradoresPorArea = (area) => {
-    return colaboradores.filter(c => 
-      c.area?.toLowerCase().includes(area.toLowerCase())
+    const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+    return colaboradoresValidos.filter(c => 
+      c && c.area?.toLowerCase().includes(area.toLowerCase())
     );
   };
 
   const getColaboradoresActivos = () => {
-    return colaboradores.filter(c => c.activo !== false);
+    const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+    return colaboradoresValidos.filter(c => c && c.activo !== false);
   };
 
   const getColaboradoresPorCargo = (cargo) => {
-    return colaboradores.filter(c => 
-      c.cargo?.toLowerCase().includes(cargo.toLowerCase())
+    const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+    return colaboradoresValidos.filter(c => 
+      c && c.cargo?.toLowerCase().includes(cargo.toLowerCase())
     );
   };
 
@@ -269,16 +273,17 @@ export const useColaboradores = () => {
   // Función para exportar colaboradores
   const exportarColaboradores = () => {
     try {
-      const datosExportar = colaboradores.map(colaborador => ({
-        Nombre: colaborador.nombre,
-        Email: colaborador.email,
-        Cedula: colaborador.cedula,
-        Area: colaborador.area,
-        Cargo: colaborador.cargo,
-        Telefono: colaborador.telefono,
-        Estado: colaborador.activo ? 'Activo' : 'Inactivo',
-        'Fecha Registro': colaborador.fecha_registro ? new Date(colaborador.fecha_registro).toLocaleDateString() : '',
-        'Última Actualización': colaborador.fecha_actualizacion ? new Date(colaborador.fecha_actualizacion).toLocaleDateString() : ''
+      const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+      const datosExportar = colaboradoresValidos.map(colaborador => ({
+        Nombre: colaborador?.nombre || '',
+        Email: colaborador?.email || '',
+        Cedula: colaborador?.cedula || '',
+        Area: colaborador?.area || '',
+        Cargo: colaborador?.cargo || '',
+        Telefono: colaborador?.telefono || '',
+        Estado: colaborador?.activo ? 'Activo' : 'Inactivo',
+        'Fecha Registro': colaborador?.fecha_registro ? new Date(colaborador.fecha_registro).toLocaleDateString() : '',
+        'Última Actualización': colaborador?.fecha_actualizacion ? new Date(colaborador.fecha_actualizacion).toLocaleDateString() : ''
       }));
 
       return datosExportar;

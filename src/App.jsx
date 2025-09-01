@@ -162,7 +162,7 @@ function App() {
                         user={user} 
                         reportes={reportes}
                         colaboradoresStats={colaboradoresStats}
-                        estadisticasReportes={getEstadisticas()}
+                        estadisticasReportes={getEstadisticas}
                       />
                     }
                   />

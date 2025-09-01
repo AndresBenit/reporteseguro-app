@@ -293,25 +293,28 @@ export const useReportes = () => {
 
   // Nueva función: Obtener estadísticas de reportes
   const getEstadisticas = () => {
+    // ✅ VALIDACIÓN: Asegurar que reportes es un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    
     const stats = {
-      total: reportes.length,
-      pendientes: reportes.filter(r => r.estado === 'pendiente').length,
-      enProceso: reportes.filter(r => ['asignado', 'en_proceso'].includes(r.estado)).length,
-      resueltos: reportes.filter(r => ['resuelto', 'cerrado'].includes(r.estado)).length,
+      total: reportesValidos.length,
+      pendientes: reportesValidos.filter(r => r && r.estado === 'pendiente').length,
+      enProceso: reportesValidos.filter(r => r && ['asignado', 'en_proceso'].includes(r.estado)).length,
+      resueltos: reportesValidos.filter(r => r && ['resuelto', 'cerrado'].includes(r.estado)).length,
       vencidos: 0,
-      sinAsignar: reportes.filter(r => !r.asignado_a).length,
+      sinAsignar: reportesValidos.filter(r => r && !r.asignado_a).length,
       porSeveridad: {
-        baja: reportes.filter(r => r.severidad === 'baja').length,
-        media: reportes.filter(r => r.severidad === 'media').length,
-        alta: reportes.filter(r => r.severidad === 'alta').length,
-        critica: reportes.filter(r => r.severidad === 'critica').length
+        baja: reportesValidos.filter(r => r && r.severidad === 'baja').length,
+        media: reportesValidos.filter(r => r && r.severidad === 'media').length,
+        alta: reportesValidos.filter(r => r && r.severidad === 'alta').length,
+        critica: reportesValidos.filter(r => r && r.severidad === 'critica').length
       }
     };
 
-    // Calcular vencidos
+    // Calcular vencidos - con validación adicional
     const ahora = new Date();
-    stats.vencidos = reportes.filter(r => {
-      if (!r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
+    stats.vencidos = reportesValidos.filter(r => {
+      if (!r || !r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
       const fechaEstimada = new Date(r.fecha_estimada);
       return fechaEstimada < ahora;
     }).length;
@@ -321,19 +324,22 @@ export const useReportes = () => {
 
   // Nueva función: Obtener reportes por estado
   const getReportesPorEstado = (estado) => {
-    return reportes.filter(r => r.estado === estado);
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    return reportesValidos.filter(r => r && r.estado === estado);
   };
 
   // Nueva función: Obtener reportes asignados a usuario
   const getReportesAsignados = (usuario) => {
-    return reportes.filter(r => r.asignado_a === usuario);
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    return reportesValidos.filter(r => r && r.asignado_a === usuario);
   };
 
   // Nueva función: Obtener reportes vencidos
   const getReportesVencidos = () => {
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
     const ahora = new Date();
-    return reportes.filter(r => {
-      if (!r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
+    return reportesValidos.filter(r => {
+      if (!r || !r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
       const fechaEstimada = new Date(r.fecha_estimada);
       return fechaEstimada < ahora;
     });
