@@ -26,7 +26,32 @@ function runCommand(command, args = [], options = {}) {
 
 async function main() {
   try {
-    // Paso 1: Instalar Rollup Linux (puede fallar, no pasa nada)
+    // Paso 1: Limpiar binarios de plataforma incorrecta
+    console.log("🧹 Cleaning platform-specific binaries...");
+    try {
+      await runCommand("rm", ["-rf", "node_modules/@esbuild"]);
+      await runCommand("rm", ["-rf", "node_modules/.bin"]);
+      console.log("✅ Platform binaries cleaned");
+    } catch (error) {
+      console.log("⚠️  Cleanup failed, continuing...");
+    }
+    
+    // Paso 2: Reinstalar dependencias para plataforma correcta
+    console.log("📦 Reinstalling for correct platform...");
+    try {
+      await runCommand("npm", ["rebuild", "esbuild"]);
+      console.log("✅ esbuild rebuilt for Linux");
+    } catch (error) {
+      console.log("⚠️  Rebuild failed, trying fresh install...");
+      try {
+        await runCommand("npm", ["install", "@esbuild/linux-x64", "--force"]);
+        console.log("✅ Linux esbuild installed");
+      } catch (error2) {
+        console.log("⚠️  Linux esbuild install failed, continuing...");
+      }
+    }
+    
+    // Paso 3: Instalar Rollup Linux (puede fallar, no pasa nada)
     console.log("📦 Installing Rollup Linux binary...");
     try {
       await runCommand("npm", ["install", "@rollup/rollup-linux-x64-gnu", "--optional", "--force"]);
