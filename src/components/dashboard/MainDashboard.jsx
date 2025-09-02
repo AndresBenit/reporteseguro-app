@@ -3,7 +3,6 @@ import { Icon } from '../common/Icons';
 import StatsOverview from './StatsOverview';
 import QuickActions from './QuickActions';
 import ActividadReciente from './RecentActivity';
-import DataDebugger from '../debug/DataDebugger';
 
 const MainDashboard = ({ user, reportes, colaboradoresStats }) => {
   return (
@@ -33,12 +32,6 @@ const MainDashboard = ({ user, reportes, colaboradoresStats }) => {
       {/* Actividad reciente */}
       <ActividadReciente reportes={reportes} />
 
-      {/* Debugger de datos (solo en desarrollo) */}
-      <DataDebugger 
-        reportes={reportes} 
-        colaboradoresStats={colaboradoresStats}
-        user={user}
-      />
 
       <style jsx>{`
         .dashboard-container {

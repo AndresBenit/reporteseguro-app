@@ -5,17 +5,6 @@ const ActividadReciente = ({ reportes = [] }) => {
   // ✅ VALIDACIÓN: Asegurar que reportes es un array válido
   const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
-  // 🔍 DEBUG: Verificar los datos que llegan
-  console.log('🔄 ActividadReciente - Reportes recibidos:', {
-    total: reportesValidos.length,
-    primerosReportes: reportesValidos.slice(0, 2).map(r => ({
-      id: r.id,
-      fecha: r.fecha,
-      created_at: r.created_at,
-      tipo: r.tipo,
-      estado: r.estado
-    }))
-  });
   
   // Ordenar por fecha más reciente y tomar los primeros 5
   const recentReports = reportesValidos
