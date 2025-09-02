@@ -5,12 +5,30 @@ const ActividadReciente = ({ reportes = [] }) => {
   // ✅ VALIDACIÓN: Asegurar que reportes es un array válido
   const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
+  // 🔍 DEBUG: Verificar los datos que llegan
+  console.log('🔄 ActividadReciente - Reportes recibidos:', {
+    total: reportesValidos.length,
+    primerosReportes: reportesValidos.slice(0, 2).map(r => ({
+      id: r.id,
+      fecha: r.fecha,
+      created_at: r.created_at,
+      tipo: r.tipo,
+      estado: r.estado
+    }))
+  });
+  
   // Ordenar por fecha más reciente y tomar los primeros 5
   const recentReports = reportesValidos
-    .filter(r => r && r.fecha) // ✅ Filtrar reportes válidos con fecha
+    .filter(r => r && (r.fecha || r.created_at)) // ✅ Filtrar reportes válidos con fecha o created_at
     .sort((a, b) => {
-      const dateA = a.fecha?.toDate ? a.fecha.toDate() : new Date(a.fecha);
-      const dateB = b.fecha?.toDate ? b.fecha.toDate() : new Date(b.fecha);
+      // Intentar múltiples campos de fecha
+      const getFecha = (reporte) => {
+        const fecha = reporte.fecha || reporte.created_at;
+        return fecha?.toDate ? fecha.toDate() : new Date(fecha);
+      };
+      
+      const dateA = getFecha(a);
+      const dateB = getFecha(b);
       return dateB - dateA;
     })
     .slice(0, 5);
@@ -34,11 +52,12 @@ const ActividadReciente = ({ reportes = [] }) => {
     return colors[status] || "#6b7280";
   };
 
-  const formatTimeAgo = (date) => {
-    if (!date) return 'Fecha no disponible';
+  const formatTimeAgo = (reporte) => {
+    const fecha = reporte.fecha || reporte.created_at;
+    if (!fecha) return 'Fecha no disponible';
     
     const now = new Date();
-    const reportDate = date.toDate ? date.toDate() : new Date(date);
+    const reportDate = fecha?.toDate ? fecha.toDate() : new Date(fecha);
     const diffInMs = now - reportDate;
     const diffInMinutes = Math.floor(diffInMs / (1000 * 60));
     const diffInHours = Math.floor(diffInMs / (1000 * 60 * 60));
@@ -111,7 +130,7 @@ const ActividadReciente = ({ reportes = [] }) => {
               <div className="activity-header">
                 <span className="activity-type">{reporte.tipo}</span>
                 <span className="activity-time">
-                  {formatTimeAgo(reporte.fecha)}
+                  {formatTimeAgo(reporte)}
                 </span>
               </div>
               

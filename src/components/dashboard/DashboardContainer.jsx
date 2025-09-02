@@ -7,6 +7,7 @@ import ReporteList from "../reports/ReporteList";
 import Colaboradores from "../collaborators/Colaboradores";
 import ExcelUploader from "../collaborators/ExcelUploader";
 import SupervisionMain from "../supervision/SupervisionMain";
+import ActividadReciente from "./RecentActivity";
 import { migrateColaboradores, getEstadisticasColaboradores } from '../../utils/scripts/migrateColaboradores';
 import { useReportes } from "../../hooks/useReportes";
 
@@ -602,6 +603,9 @@ const Dashboard = ({ user, onLogout }) => {
               </div>
             </div>
           </div>
+
+          {/* Actividad Reciente */}
+          <ActividadReciente reportes={reportes} />
         </>
       )}
 
