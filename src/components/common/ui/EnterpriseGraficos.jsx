@@ -115,7 +115,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
   const vistasEmpresariales = [
     { 
       id: 'executive', 
-      label: 'Executive Dashboard', 
+      label: 'Panel Ejecutivo', 
       icon: 'TrendingUp',
       description: 'Vista ejecutiva con KPIs clave',
       color: enterpriseColors.primary.base
@@ -501,7 +501,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                       {item.payload.tendencia && (
                         <span className={`context-item trend-${item.payload.tendencia}`}>
                           <Icon name={item.payload.tendencia === 'up' ? 'TrendingUp' : 'TrendingDown'} size={12} />
-                          {item.payload.tendencia === 'up' ? 'Trending up' : 'Trending down'}
+                          {item.payload.tendencia === 'up' ? 'Tendencia al alza' : 'Tendencia a la baja'}
                         </span>
                       )}
                       {item.payload.fechaCompleta && (
@@ -564,7 +564,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     }
     
     if (data.tendencia === 'down' && data.criticos > 0) {
-      return "Critical incidents decreasing - good progress";
+      return "Incidentes críticos disminuyendo - buen progreso";
     }
     
     return null;
@@ -624,10 +624,10 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
         <div className="control-header">
           <div className="control-title">
             <Icon name="Settings" size={24} color={enterpriseColors.primary.base} />
-            <h3>Business Intelligence Controls</h3>
+            <h3>Controles de Inteligencia Empresarial</h3>
           </div>
           <div className="control-subtitle">
-            Configure your analytics view and apply intelligent filters
+            Configure su vista de análisis y aplique filtros inteligentes
           </div>
         </div>
 
@@ -635,7 +635,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           <div className="filter-group">
             <label className="filter-label">
               <Icon name="Calendar" size={16} />
-              Time Period
+              Período de Tiempo
             </label>
             <select 
               value={filtroFecha} 
@@ -651,7 +651,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           <div className="filter-group">
             <label className="filter-label">
               <Icon name="FileText" size={16} />
-              Report Type
+              Tipo de Reporte
             </label>
             <select 
               value={filtroTipo} 
@@ -674,7 +674,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
               onChange={(e) => setFiltroArea(e.target.value)}
               className="filter-select"
             >
-              <option value="todas">All Areas</option>
+              <option value="todas">Todas las Áreas</option>
               {areasUnicas.map(area => (
                 <option key={area} value={area}>{area}</option>
               ))}
@@ -682,7 +682,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           </div>
         </div>
 
-        {/* KPIs Executive Dashboard */}
+        {/* KPIs Panel Ejecutivo */}
         <div className="kpi-dashboard">
           {Object.entries(datosEmpresariales.kpisExecutivos).map(([key, kpi]) => (
             <div key={key} className="kpi-card">
@@ -724,7 +724,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
         ))}
       </div>
 
-      {/* Vista Executive Dashboard */}
+      {/* Vista Panel Ejecutivo */}
       {vistaActiva === 'executive' && (
         <div className="enterprise-grid">
           {/* Distribución de Tipos - Donut Chart Empresarial */}
@@ -732,11 +732,11 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
             <div className="card-header">
               <div className="card-title">
                 <Icon name="PieChart" size={24} color={enterpriseColors.primary.base} />
-                <h3>Report Type Distribution</h3>
+                <h3>Distribución por Tipo de Reporte</h3>
               </div>
               <div className="card-insights">
                 <span className="insight-badge">
-                  {datosEmpresariales.distribuciones.tipos.length} Categories
+                  {datosEmpresariales.distribuciones.tipos.length} Categorías
                 </span>
               </div>
             </div>
@@ -802,7 +802,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
             <div className="card-header">
               <div className="card-title">
                 <Icon name="TrendingUp" size={24} color={enterpriseColors.success.base} />
-                <h3>Temporal Trends Analysis</h3>
+                <h3>Análisis de Tendencias Temporales</h3>
               </div>
               <div className="card-insights">
                 <span className="insight-badge success">
@@ -849,7 +849,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                   strokeWidth={3}
                   fillOpacity={1} 
                   fill="url(#totalGradient)"
-                  name="Total Reports"
+                  name="Total de Reportes"
                 />
                 <Area 
                   type="monotone" 
@@ -858,7 +858,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                   strokeWidth={2}
                   fillOpacity={1} 
                   fill="url(#criticosGradient)"
-                  name="Critical Reports"
+                  name="Reportes Críticos"
                 />
                 <Line 
                   type="monotone" 
@@ -866,7 +866,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                   stroke={enterpriseColors.warning.base}
                   strokeWidth={2}
                   dot={{ fill: enterpriseColors.warning.base, r: 4 }}
-                  name="Incidents"
+                  name="Incidentes"
                 />
               </ComposedChart>
             </ResponsiveContainer>
@@ -946,11 +946,11 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
             <div className="card-header">
               <div className="card-title">
                 <Icon name="BarChart3" size={24} color={enterpriseColors.info.base} />
-                <h3>Area Performance Dashboard</h3>
+                <h3>Panel de Rendimiento por Área</h3>
               </div>
               <div className="card-insights">
                 <span className="insight-badge">
-                  {datosEmpresariales.insights.areas.length} Active Areas
+                  {datosEmpresariales.insights.areas.length} Áreas Activas
                 </span>
               </div>
             </div>
@@ -987,13 +987,13 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                 <Bar 
                   dataKey="eficiencia" 
                   fill="url(#efficiencyGradient)"
-                  name="Efficiency %"
+                  name="% Eficiencia"
                   radius={[0, 6, 6, 0]}
                 />
                 <Bar 
                   dataKey="criticidad" 
                   fill="url(#criticalityGradient)"
-                  name="Criticality %"
+                  name="% Criticidad"
                   radius={[0, 6, 6, 0]}
                 />
               </BarChart>
@@ -1029,11 +1029,11 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                     </div>
                     <div className="heatmap-stat">
                       <span className="stat-value">{area.criticidad}%</span>
-                      <span className="stat-label">Critical</span>
+                      <span className="stat-label">Crítico</span>
                     </div>
                     <div className="heatmap-stat">
                       <span className="stat-value">{area.eficiencia}%</span>
-                      <span className="stat-label">Resolved</span>
+                      <span className="stat-label">Resueltos</span>
                     </div>
                   </div>
                   <div className="heatmap-indicator" style={{ backgroundColor: getCriticalityColor(area.criticidad) }}></div>
@@ -1083,7 +1083,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
             <div className="card-header">
               <div className="card-title">
                 <Icon name="Users" size={24} color={enterpriseColors.warning.base} />
-                <h3>Workforce Safety Analytics</h3>
+                <h3>Análisis de Seguridad Laboral</h3>
               </div>
             </div>
             <div className="workforce-analytics">
@@ -1104,8 +1104,8 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                 </div>
                 <div className="metric-content">
                   <div className="metric-value">{getSafetyScore()}%</div>
-                  <div className="metric-label">Safety Score</div>
-                  <div className="metric-trend">+12% improvement</div>
+                  <div className="metric-label">Puntaje de Seguridad</div>
+                  <div className="metric-trend">+12% mejora</div>
                 </div>
               </div>
               
