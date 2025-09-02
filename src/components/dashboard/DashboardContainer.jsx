@@ -17,7 +17,8 @@ const Dashboard = ({ user, onLogout }) => {
     loading, 
     error, 
     actualizarEstado, 
-    eliminarReporte 
+    eliminarReporte,
+    refresh
   } = useReportes();
   
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -227,6 +228,32 @@ const Dashboard = ({ user, onLogout }) => {
           <div className="header-actions">
             {/* Botones de Colaboradores */}
             <div className="header-buttons">
+              {/* Botón de refresh manual */}
+              <button
+                onClick={() => refresh()}
+                className="btn"
+                style={{
+                  padding: "10px 16px",
+                  background: "var(--color-primary)",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "var(--radius-md)",
+                  fontWeight: "600",
+                  fontSize: "0.875rem",
+                  cursor: "pointer",
+                  display: "flex",
+                  alignItems: "center",
+                  gap: "8px",
+                  transition: "var(--transition-base)",
+                  whiteSpace: "nowrap",
+                  marginRight: "12px"
+                }}
+                disabled={loading}
+                title="Actualizar datos manualmente"
+              >
+                <Icon name="RefreshCw" size={16} />
+                {loading ? 'Actualizando...' : 'Actualizar'}
+              </button>
               <button
                 onClick={() => setShowExcelUploader(true)}
                 className="btn"

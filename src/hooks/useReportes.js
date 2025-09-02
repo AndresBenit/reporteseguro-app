@@ -11,9 +11,7 @@ export const useReportes = () => {
   useEffect(() => {
     loadReportes();
     
-    // ✅ Suscripción en tiempo real + Auto-refresh como backup
-    let realtimeWorking = false;
-    
+    // ✅ Suscripción en tiempo real SOLAMENTE (sin backup automático)
     const subscription = supabase
       .channel('public:reportes')
       .on('postgres_changes', { 
@@ -22,7 +20,6 @@ export const useReportes = () => {
         table: 'reportes' 
       }, (payload) => {
         console.log('🔄 Real-time update:', payload);
-        realtimeWorking = true; // Marcar que tiempo real funciona
         
         switch (payload.eventType) {
           case 'INSERT':
@@ -45,19 +42,9 @@ export const useReportes = () => {
         }
       })
       .subscribe();
-    
-    // ✅ Backup: Auto-refresh si tiempo real no funciona
-    const backupInterval = setInterval(() => {
-      if (!realtimeWorking && !updating.size) {
-        console.log('🔄 Backup refresh (tiempo real no detectado)');
-        loadReportes();
-      }
-      realtimeWorking = false; // Reset flag
-    }, 15000); // Cada 15 segundos
 
     return () => {
       subscription?.unsubscribe();
-      clearInterval(backupInterval);
     };
   }, []);
 
@@ -382,6 +369,7 @@ export const useReportes = () => {
     
     // Utilidades
     isUpdating: (id) => updating.has(id),
-    refetch: loadReportes
+    refetch: loadReportes,
+    refresh: loadReportes // Alias para refrescar manualmente
   };
 };

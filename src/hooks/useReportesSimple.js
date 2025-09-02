@@ -129,16 +129,16 @@ export const useReportesSimple = () => {
     loadReportes();
   }, []);
 
-  // ✅ Opcional: Auto-refrescar cada 30 segundos como backup
-  useEffect(() => {
-    const interval = setInterval(() => {
-      if (!updating.size) { // Solo refrescar si no hay operaciones en curso
-        loadReportes();
-      }
-    }, 30000);
-    
-    return () => clearInterval(interval);
-  }, [updating]);
+  // ✅ Auto-refresh DESACTIVADO para evitar actualizaciones constantes
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     if (!updating.size) {
+  //       loadReportes();
+  //     }
+  //   }, 30000);
+  //   
+  //   return () => clearInterval(interval);
+  // }, [updating]);
 
   return {
     reportes,
