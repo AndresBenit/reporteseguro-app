@@ -11,27 +11,53 @@ export const useReportes = () => {
   useEffect(() => {
     loadReportes();
     
-    // Suscripción en tiempo real
-    const subscription = dbHelpers.subscribe('reportes', (payload) => {
-      console.log('🔄 Real-time update:', payload);
-      
-      switch (payload.eventType) {
-        case 'INSERT':
-          setReportes(prev => [payload.new, ...prev]);
-          break;
-        case 'UPDATE':
-          setReportes(prev => prev.map(r => r.id === payload.new.id ? payload.new : r));
-          break;
-        case 'DELETE':
-          setReportes(prev => prev.filter(r => r.id !== payload.old.id));
-          break;
-        default:
-          break;
+    // ✅ Suscripción en tiempo real + Auto-refresh como backup
+    let realtimeWorking = false;
+    
+    const subscription = supabase
+      .channel('public:reportes')
+      .on('postgres_changes', { 
+        event: '*', 
+        schema: 'public', 
+        table: 'reportes' 
+      }, (payload) => {
+        console.log('🔄 Real-time update:', payload);
+        realtimeWorking = true; // Marcar que tiempo real funciona
+        
+        switch (payload.eventType) {
+          case 'INSERT':
+            setReportes(prev => [payload.new, ...prev]);
+            console.log('✅ Reporte agregado en tiempo real');
+            break;
+          case 'UPDATE':
+            setReportes(prev => prev.map(r => 
+              r.id === payload.new.id ? { ...r, ...payload.new } : r
+            ));
+            console.log('✅ Reporte actualizado en tiempo real');
+            break;
+          case 'DELETE':
+            setReportes(prev => prev.filter(r => r.id !== payload.old.id));
+            console.log('✅ Reporte eliminado en tiempo real');
+            break;
+          default:
+            console.log('🔄 Evento no manejado:', payload.eventType);
+            break;
+        }
+      })
+      .subscribe();
+    
+    // ✅ Backup: Auto-refresh si tiempo real no funciona
+    const backupInterval = setInterval(() => {
+      if (!realtimeWorking && !updating.size) {
+        console.log('🔄 Backup refresh (tiempo real no detectado)');
+        loadReportes();
       }
-    });
+      realtimeWorking = false; // Reset flag
+    }, 15000); // Cada 15 segundos
 
     return () => {
       subscription?.unsubscribe();
+      clearInterval(backupInterval);
     };
   }, []);
 
@@ -93,7 +119,12 @@ export const useReportes = () => {
         estado: estadoNormalizado
       };
       
-      await dbHelpers.update('reportes', id, updateData);
+      const updatedReporte = await dbHelpers.update('reportes', id, updateData);
+      
+      // ✅ Actualización inmediata local (fallback si realtime falla)
+      setReportes(prev => prev.map(r => 
+        r.id === id ? { ...r, ...updatedReporte } : r
+      ));
       
       console.log(`✅ Estado actualizado exitosamente a ${estadoNormalizado}`);
       
