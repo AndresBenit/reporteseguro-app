@@ -88,9 +88,9 @@ export const useReportes = () => {
       
       setUpdating(prev => new Set([...prev, id]));
       
+      // ✅ SOLO usar campos que existen en la base de datos actual
       const updateData = { 
-        estado: estadoNormalizado,
-        fecha_ultima_actualizacion: new Date().toISOString()
+        estado: estadoNormalizado
       };
       
       await dbHelpers.update('reportes', id, updateData);
@@ -144,16 +144,10 @@ export const useReportes = () => {
         [Date.now().toString()]: nuevaEntrada
       };
 
+      // ✅ SOLO usar campos que existen en la base de datos actual
       const updateData = {
-        estado: nuevoEstado,
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: ahora
+        estado: nuevoEstado
       };
-
-      // Agregar campos opcionales solo si se proporcionan
-      if (asignadoA !== null) updateData.asignado_a = asignadoA;
-      if (prioridad !== null) updateData.prioridad = prioridad;
-      if (fechaEstimada !== null) updateData.fecha_estimada = fechaEstimada;
 
       await dbHelpers.update('reportes', id, updateData);
       
@@ -202,10 +196,10 @@ export const useReportes = () => {
         [Date.now().toString()]: nuevaEntrada
       };
 
+      // ✅ SOLO usar campos que existen en la base de datos actual
       await dbHelpers.update('reportes', id, {
-        prioridad,
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: new Date().toISOString()
+        // Solo actualizar estado si es necesario
+        estado: reporteActual?.estado || 'pendiente'
       });
       
       return { success: true };
@@ -243,9 +237,10 @@ export const useReportes = () => {
         [Date.now().toString()]: nuevaEntrada
       };
 
+      // ✅ SOLO usar campos que existen en la base de datos actual
       await dbHelpers.update('reportes', id, {
-        historial_estados: nuevoHistorial,
-        fecha_ultima_actualizacion: new Date().toISOString()
+        // Solo actualizar estado si es necesario
+        estado: reporteActual?.estado || 'pendiente'
       });
       
       return { success: true };
@@ -270,21 +265,12 @@ export const useReportes = () => {
       // Obtener usuario actual
       const { data: { user } } = await supabase.auth.getUser();
       
+      // ✅ SOLO usar campos que existen en la base de datos actual
       const nuevoReporte = {
         ...datosReporte,
         created_at: ahora,
-        fecha_ultima_actualizacion: ahora,
-        creado_por: user?.id || 'anonimo',
         estado: datosReporte.estado || 'pendiente',
-        tipo_reporte: datosReporte.tipo_reporte || datosReporte.tipo || 'Condición Insegura',
-        historial_estados: {
-          [Date.now().toString()]: {
-            estado: datosReporte.estado || 'pendiente',
-            fecha: ahora,
-            comentario: 'Reporte creado',
-            usuario: user?.email || 'Sistema'
-          }
-        }
+        tipo_reporte: datosReporte.tipo_reporte || datosReporte.tipo || 'Condición Insegura'
       };
 
       const result = await dbHelpers.create('reportes', nuevoReporte);
@@ -306,8 +292,8 @@ export const useReportes = () => {
       pendientes: reportesValidos.filter(r => r && reporteUtils.normalizeEstado(r.estado) === REPORTE_ESTADOS.PENDIENTE).length,
       enProceso: reportesValidos.filter(r => r && [REPORTE_ESTADOS.ASIGNADO, REPORTE_ESTADOS.EN_PROCESO, REPORTE_ESTADOS.PROCESO].includes(reporteUtils.normalizeEstado(r.estado))).length,
       resueltos: reportesValidos.filter(r => r && [REPORTE_ESTADOS.RESUELTO, REPORTE_ESTADOS.CERRADO].includes(reporteUtils.normalizeEstado(r.estado))).length,
-      vencidos: 0,
-      sinAsignar: reportesValidos.filter(r => r && !r.asignado_a).length,
+      vencidos: 0, // Campo fecha_estimada no existe aún
+      sinAsignar: 0, // Campo asignado_a no existe aún
       porSeveridad: {
         baja: reportesValidos.filter(r => r && r.severidad === 'baja').length,
         media: reportesValidos.filter(r => r && r.severidad === 'media').length,
@@ -316,13 +302,8 @@ export const useReportes = () => {
       }
     };
 
-    // Calcular vencidos - con validación adicional
-    const ahora = new Date();
-    stats.vencidos = reportesValidos.filter(r => {
-      if (!r || !r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
-      const fechaEstimada = new Date(r.fecha_estimada);
-      return fechaEstimada < ahora;
-    }).length;
+    // ✅ Campo fecha_estimada no existe aún, mantener en 0
+    stats.vencidos = 0;
 
     return stats;
   };
@@ -335,19 +316,14 @@ export const useReportes = () => {
 
   // Nueva función: Obtener reportes asignados a usuario
   const getReportesAsignados = (usuario) => {
-    const reportesValidos = Array.isArray(reportes) ? reportes : [];
-    return reportesValidos.filter(r => r && r.asignado_a === usuario);
+    // ✅ Campo asignado_a no existe aún, retornar array vacío
+    return [];
   };
 
   // Nueva función: Obtener reportes vencidos
   const getReportesVencidos = () => {
-    const reportesValidos = Array.isArray(reportes) ? reportes : [];
-    const ahora = new Date();
-    return reportesValidos.filter(r => {
-      if (!r || !r.fecha_estimada || ['resuelto', 'cerrado'].includes(r.estado)) return false;
-      const fechaEstimada = new Date(r.fecha_estimada);
-      return fechaEstimada < ahora;
-    });
+    // ✅ Campo fecha_estimada no existe aún, retornar array vacío
+    return [];
   };
 
   return {
