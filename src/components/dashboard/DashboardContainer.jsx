@@ -2,67 +2,32 @@ import React, { useEffect, useState } from "react";
 import { supabase, dbHelpers } from "../../services/supabase";
 import { Icon } from "../common/Icons";
 import ReporteForm from "../reports/ReporteForm";
-import EnhancedGraficos from "../common/EnhancedGraficos";
+import EnhancedGraficos from "../common/ui/EnhancedGraficos";
 import ReporteList from "../reports/ReporteList";
 import Colaboradores from "../collaborators/Colaboradores";
 import ExcelUploader from "../collaborators/ExcelUploader";
 import SupervisionMain from "../supervision/SupervisionMain";
 import { migrateColaboradores, getEstadisticasColaboradores } from '../../utils/scripts/migrateColaboradores';
+import { useReportes } from "../../hooks/useReportes";
 
 const Dashboard = ({ user, onLogout }) => {
-  const [reportes, setReportes] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // ✅ Usar hook actualizado para gestión automática de reportes  
+  const { 
+    reportes, 
+    loading, 
+    error, 
+    actualizarEstado, 
+    eliminarReporte 
+  } = useReportes();
+  
   const [activeSection, setActiveSection] = useState('dashboard');
   const [colaboradoresStats, setColaboradoresStats] = useState(null);
   const [migrating, setMigrating] = useState(false);
   const [showExcelUploader, setShowExcelUploader] = useState(false);
 
   useEffect(() => {
-    const loadReportes = async () => {
-      try {
-        const data = await dbHelpers.getAll('reportes');
-        setReportes(data);
-        setLoading(false);
-        setError(null);
-        
-        // Set up real-time subscription
-        const subscription = dbHelpers.subscribe('reportes', (payload) => {
-          console.log('Reportes subscription event:', payload);
-          // Reload data when changes occur
-          loadReportesData();
-        });
-        
-        return subscription;
-      } catch (err) {
-        console.error("Error obteniendo reportes:", err);
-        setError("Error conectando con la base de datos");
-        setLoading(false);
-      }
-    };
-    
-    const loadReportesData = async () => {
-      try {
-        const data = await dbHelpers.getAll('reportes');
-        setReportes(data);
-      } catch (err) {
-        console.error('Error recargando reportes:', err);
-      }
-    };
-    
-    let subscription;
-    loadReportes().then(sub => {
-      subscription = sub;
-    });
-    
-    // Cargar estadísticas básicas (rápido y simple)
+    // Cargar estadísticas de colaboradores
     loadColaboradoresStats();
-    
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
   }, []);
 
   // CARGA SIMPLE Y DIRECTA DESDE FIREBASE
@@ -83,25 +48,7 @@ const Dashboard = ({ user, onLogout }) => {
     alert(`✅ Migración completada:\n• ${resultado.migrados} nuevos colaboradores\n• ${resultado.yaExisten} ya existían\n• Total: ${resultado.total}`);
   };
 
-  const eliminarReporte = async (id) => {
-    if (window.confirm("¿Seguro que deseas eliminar este reporte?")) {
-      try {
-        await dbHelpers.delete('reportes', id);
-      } catch (err) {
-        console.error("Error eliminando reporte:", err);
-        alert("Error al eliminar el reporte");
-      }
-    }
-  };
-
-  const actualizarEstado = async (id, estado) => {
-    try {
-      await dbHelpers.update('reportes', id, { estado });
-    } catch (err) {
-      console.error("Error actualizando estado:", err);
-      alert("Error al actualizar el estado");
-    }
-  };
+  // ✅ Las funciones eliminarReporte y actualizarEstado ahora vienen del hook useReportes
 
   const getStatsCards = () => {
     // Validar que reportes sea un array válido
