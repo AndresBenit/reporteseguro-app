@@ -350,11 +350,11 @@ const Dashboard = ({ user, onLogout }) => {
       <div className="nav-tabs">
         <div className="nav-tabs-flex" style={{ display: "flex", gap: "4px" }}>
           {[
-            { id: 'dashboard', label: 'Dashboard', icon: 'Dashboard' },
+            { id: 'dashboard', label: 'Tablero', icon: 'Dashboard' },
             { id: 'colaboradores', label: 'Colaboradores', icon: 'Users' },
             { id: 'reportes', label: 'Reportes', icon: 'Reports' },
             { id: 'supervision', label: 'Supervisión', icon: 'Supervisor' },
-            { id: 'analytics', label: 'Analytics', icon: 'Analytics' }
+            { id: 'analytics', label: 'Análisis', icon: 'Analytics' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -631,7 +631,7 @@ const Dashboard = ({ user, onLogout }) => {
         <div className="card">
           <h2>
             <Icon name="Analytics" size={20} />
-            Analytics y Tendencias
+            Análisis y Tendencias
           </h2>
           <GraficosEspañol reportes={reportes} />
         </div>

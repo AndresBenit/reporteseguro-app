@@ -52,7 +52,7 @@ const ChartsSection = ({ reportes = [] }) => {
     }));
 
     // 4. Tendencia temporal (últimos 7 días)
-    const tendenciaData = getLast7DaysData(reportes);
+    const tendenciaData = obtenerDatosUltimos7Dias(reportes);
 
     // 5. Tipos de reportes
     const tiposData = reportes.reduce((acc, reporte) => {
@@ -124,7 +124,7 @@ const ChartsSection = ({ reportes = [] }) => {
     return colors[tipo.toLowerCase()] || '#6b7280';
   }
 
-  function getLast7DaysData(reportes) {
+  function obtenerDatosUltimos7Dias(reportes) {
     const today = new Date();
     const days = [];
     

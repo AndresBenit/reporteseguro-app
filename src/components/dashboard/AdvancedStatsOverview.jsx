@@ -184,7 +184,7 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
       <div className="stats-header">
         <h2 className="main-title">
           <Icon name="BarChart3" size={24} />
-          Dashboard Analítico Avanzado
+          Tablero Analítico Avanzado
         </h2>
         <p className="stats-subtitle">
           Análisis profundo de datos de seguridad • Actualizado en tiempo real

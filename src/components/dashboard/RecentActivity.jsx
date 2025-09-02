@@ -1,7 +1,7 @@
 import React from 'react';
 import { Icon } from '../common/Icons';
 
-const RecentActivity = ({ reportes = [] }) => {
+const ActividadReciente = ({ reportes = [] }) => {
   // ✅ VALIDACIÓN: Asegurar que reportes es un array válido
   const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
@@ -303,4 +303,4 @@ const RecentActivity = ({ reportes = [] }) => {
   );
 };
 
-export default RecentActivity;
+export default ActividadReciente;
