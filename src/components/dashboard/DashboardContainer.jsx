@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { supabase, dbHelpers } from "../../services/supabase";
 import { Icon } from "../common/Icons";
 import ReporteForm from "../reports/ReporteForm";
-import EnhancedGraficos from "../common/ui/EnhancedGraficos";
+import GraficosEspañol from "../common/ui/GraficosEspañol";
 import ReporteList from "../reports/ReporteList";
 import Colaboradores from "../collaborators/Colaboradores";
 import ExcelUploader from "../collaborators/ExcelUploader";
@@ -606,7 +606,7 @@ const Dashboard = ({ user, onLogout }) => {
             <Icon name="Analytics" size={20} />
             Analytics y Tendencias
           </h2>
-          <EnhancedGraficos reportes={reportes} />
+          <GraficosEspañol reportes={reportes} />
         </div>
       )}
 
