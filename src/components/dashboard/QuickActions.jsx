@@ -32,6 +32,15 @@ const QuickActions = () => {
       color: '#059669',
       bgColor: '#ecfdf5',
       action: () => navigate('/formularios/abordaje')
+    },
+    {
+      id: 'control-epp',
+      title: 'Control de EPP',
+      subtitle: 'Registrar entrega de elementos',
+      icon: 'Shield',
+      color: '#7c3aed',
+      bgColor: '#f3e8ff',
+      action: () => navigate('/formularios/control-epp')
     }
   ];
 
@@ -86,9 +95,9 @@ const QuickActions = () => {
 
         .actions-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 20px;
-          max-width: 900px;
+          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+          gap: 16px;
+          max-width: 1200px;
           margin: 0 auto;
         }
 

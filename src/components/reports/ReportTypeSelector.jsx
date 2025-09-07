@@ -224,9 +224,11 @@ const ReportTypeSelector = () => {
 
         .types-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-          gap: 24px;
+          grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+          gap: 20px;
           margin-bottom: 40px;
+          max-width: 1200px;
+          margin: 0 auto 40px auto;
         }
 
         .type-card {
