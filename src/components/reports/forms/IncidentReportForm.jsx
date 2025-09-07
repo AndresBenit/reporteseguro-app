@@ -124,7 +124,7 @@ const IncidentReportForm = () => {
       
       // Use Supabase storage instead of Firebase
       const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
-      const publicUrl = storageHelpers.getPublicUrl('reportes-adjuntos', fileName);
+      const publicUrl = storageHelpers.getPublicUrl('reportes-adjuntos', uploadResult.path);
       
       setUploadingImage(false);
       return publicUrl;
