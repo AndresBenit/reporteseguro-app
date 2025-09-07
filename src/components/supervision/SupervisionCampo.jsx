@@ -318,7 +318,11 @@ const SupervisionCampo = () => {
         tipo_reporte: "recomendacion",
         prioridad: "normal",
         colaboradorinvolucrado: form.colaboradorNombre,
-        accionrecomendada: form.recomendacion.trim()
+        accionrecomendada: form.recomendacion.trim(),
+        // Campos de firma digital
+        firma_url: form.firma_url,
+        firmado_por: form.firmado_por,
+        fecha_firma: form.fecha_firma
       };
 
       await dbHelpers.create('reportes', recomendacionData);

@@ -159,7 +159,11 @@ const AbordajeCampo = () => {
         tipo_reporte: "abordaje",
         prioridad: "normal",
         colaboradorinvolucrado: form.colaboradorNombre,
-        accionrecomendada: form.abordaje.trim()
+        accionrecomendada: form.abordaje.trim(),
+        // Campos de firma digital
+        firma_url: form.firma_url,
+        firmado_por: form.firmado_por,
+        fecha_firma: form.fecha_firma
       };
 
       await dbHelpers.create('reportes', abordajeData);
