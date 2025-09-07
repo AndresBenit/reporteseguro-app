@@ -319,7 +319,7 @@ const Dashboard = ({ user, onLogout }) => {
                 ) : (
                   <>
                     <Icon name="Refresh" size={16} />
-                    <span className="btn-text">Migrar 72</span>
+                    <span className="btn-text">Migrar Colaboradores</span>
                   </>
                 )}
               </button>

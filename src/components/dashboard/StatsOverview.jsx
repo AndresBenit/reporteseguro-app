@@ -31,8 +31,8 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   
   // Colaboradores - PROTECCIÓN CONTRA NULL
   const colaboradoresData = colaboradoresStats || {};
-  const totalColaboradores = colaboradoresData.total || 72;
-  const colaboradoresActivos = colaboradoresData.activos || totalColaboradores;
+  const totalColaboradores = colaboradoresData.total || 0;
+  const colaboradoresActivos = colaboradoresData.activos || 0;
 
   // Calcular porcentaje de crecimiento (simulado para demo)
   const crecimientoMensual = totalReportes > 0 ? '+12%' : '0%';
