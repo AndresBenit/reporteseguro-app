@@ -268,7 +268,7 @@ const ControlEPP = () => {
 
       // Guardar registro de EPP
       const eppData = {
-        tipo: "Control de EPP",
+        tipo: "epp",
         subtipo: "Entrega de EPP",
         descripcion: `Entrega de ${form.cantidad} ${form.elemento_epp} a ${form.nombre}`,
         severidad: "baja", // Las entregas de EPP son informativas
