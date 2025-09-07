@@ -77,6 +77,9 @@ export const useReportes = () => {
         
         await dbHelpers.delete('reportes', id);
         
+        // Actualizar estado local inmediatamente
+        setReportes(prev => prev.filter(reporte => reporte.id !== id));
+        
         console.log(`✅ Reporte ${id} eliminado exitosamente`);
         alert("Reporte eliminado exitosamente");
         
