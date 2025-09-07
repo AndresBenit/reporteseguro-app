@@ -14,7 +14,8 @@ const ReportesHistorial = () => {
   const [paginaActual, setPaginaActual] = useState({
     incidencia: 1,
     recomendacion: 1,
-    abordaje: 1
+    abordaje: 1,
+    epp: 1
   });
   const [selectedReporte, setSelectedReporte] = useState(null);
   const [showModal, setShowModal] = useState(false);
@@ -87,6 +88,20 @@ const ReportesHistorial = () => {
         tipo.includes('campo') ||
         tipoReporte.includes('abordaj')
       );
+    }),
+    
+    epp: reportes.filter(r => {
+      const tipo = String(r.tipo || '').toLowerCase();
+      const tipoReporte = String(r.tipoReporte || '').toLowerCase();
+      
+      return (
+        r.tipo === 'Control de EPP' ||
+        r.tipoReporte === 'epp' ||
+        tipo.includes('epp') ||
+        tipo.includes('elemento') ||
+        tipo.includes('proteccion') ||
+        tipoReporte.includes('epp')
+      );
     })
   };
   
@@ -94,7 +109,8 @@ const ReportesHistorial = () => {
   const reportesSinCategoria = reportes.filter(r => {
     return !reportesPorTipo.incidencia.includes(r) && 
            !reportesPorTipo.recomendacion.includes(r) && 
-           !reportesPorTipo.abordaje.includes(r);
+           !reportesPorTipo.abordaje.includes(r) &&
+           !reportesPorTipo.epp.includes(r);
   });
   
   // DEBUG: Mostrar cuántos reportes van a cada categoría
@@ -102,6 +118,7 @@ const ReportesHistorial = () => {
   console.log(`Incidencias: ${reportesPorTipo.incidencia.length}`);
   console.log(`Recomendaciones: ${reportesPorTipo.recomendacion.length}`);
   console.log(`Abordajes: ${reportesPorTipo.abordaje.length}`);
+  console.log(`EPP: ${reportesPorTipo.epp.length}`);
   console.log(`Sin categoría: ${reportesSinCategoria.length}`);
   console.log('✅ PROBLEMA SOLUCIONADO - Formularios ahora guardan en "reportes"');
   
@@ -537,6 +554,18 @@ const ReportesHistorial = () => {
           border: '1px solid #e5e7eb',
           textAlign: 'center'
         }}>
+          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#7c3aed' }}>
+            {reportesPorTipo.epp?.length || 0}
+          </div>
+          <div style={{ color: '#374151', fontWeight: '600' }}>Control EPP</div>
+        </div>
+        <div style={{
+          background: 'white',
+          padding: '20px',
+          borderRadius: '12px',
+          border: '1px solid #e5e7eb',
+          textAlign: 'center'
+        }}>
           <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b7280' }}>
             {reportes.length}
           </div>
@@ -560,6 +589,11 @@ const ReportesHistorial = () => {
           tipo="abordaje" 
           titulo="👥 Abordajes en Campo" 
           color="#059669" 
+        />
+        <TablaReportes 
+          tipo="epp" 
+          titulo="🛡️ Control de EPP" 
+          color="#7c3aed" 
         />
         
         {/* Sección para reportes sin categoría si los hay */}
@@ -711,6 +745,28 @@ const ReportesHistorial = () => {
               <div>
                 <strong>Área:</strong> {selectedReporte.area || selectedReporte.lugarLabor || 'N/A'}
               </div>
+              
+              {/* Campos específicos de EPP */}
+              {(selectedReporte.tipoReporte === 'epp' || selectedReporte.tipo?.toLowerCase().includes('epp')) && (
+                <>
+                  {selectedReporte.elemento_epp && (
+                    <div>
+                      <strong>Elemento de Protección Personal:</strong> {selectedReporte.elemento_epp}
+                    </div>
+                  )}
+                  {selectedReporte.cantidad && (
+                    <div>
+                      <strong>Cantidad:</strong> {selectedReporte.cantidad}
+                    </div>
+                  )}
+                  {selectedReporte.nombre && (
+                    <div>
+                      <strong>Nombre del Colaborador:</strong> {selectedReporte.nombre}
+                    </div>
+                  )}
+                </>
+              )}
+              
               {selectedReporte.supervisorReporta && (
                 <div>
                   <strong>Supervisor que Reporta:</strong> {selectedReporte.supervisorReporta}

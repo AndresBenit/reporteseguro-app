@@ -17,6 +17,9 @@ const ReportTypeSelector = () => {
       case 'abordaje':
         navigate('/formularios/abordaje');
         break;
+      case 'epp':
+        navigate('/formularios/control-epp');
+        break;
       default:
         break;
     }
@@ -52,6 +55,16 @@ const ReportTypeSelector = () => {
       bgColor: '#ecfdf5',
       priority: 'SEGUIMIENTO',
       examples: ['Conversación directa', 'Abordaje correctivo']
+    },
+    {
+      id: 'epp',
+      title: 'Control de EPP',
+      description: 'Registrar entrega de Elementos de Protección Personal',
+      icon: 'Shield',
+      color: '#7c3aed',
+      bgColor: '#f3e8ff',
+      priority: 'CONTROL',
+      examples: ['Entrega de casco', 'Entrega de guantes']
     }
   ];
 

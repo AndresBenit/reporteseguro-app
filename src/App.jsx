@@ -12,6 +12,7 @@ import ColaboradoresMain from "./components/collaborators/ColaboradoresMain";
 import SupervisionMain from "./components/supervision/SupervisionMain";
 import SupervisionCampo from "./components/supervision/SupervisionCampo";
 import AbordajeCampo from "./components/supervision/AbordajeCampo";
+import ControlEPP from "./components/supervision/ControlEPP";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -207,6 +208,11 @@ function App() {
                   <Route path="/formularios/abordaje" element={
                     <ErrorBoundary>
                       <AbordajeCampo />
+                    </ErrorBoundary>
+                  } />
+                  <Route path="/formularios/control-epp" element={
+                    <ErrorBoundary>
+                      <ControlEPP />
                     </ErrorBoundary>
                   } />
                   
