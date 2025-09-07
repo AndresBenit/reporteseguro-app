@@ -372,16 +372,8 @@ const ReportesHistorial = () => {
                         👁️
                       </button>
                       
-                      {/* DEBUG - mostrar datos */}
-                      {console.log('🔍 DEBUG reporte:', {
-                        id: reporte.id, 
-                        foto_url: reporte.foto_url, 
-                        firma_url: reporte.firma_url,
-                        tipo: reporte.tipo
-                      })}
-                      
                       {/* Botón para ver foto de recomendación */}
-                      {(reporte.foto_url) && (
+                      {(reporte.foto_url && reporte.foto_url.trim() !== '') && (
                         <button
                           onClick={() => verImagen(reporte.foto_url)}
                           style={{
@@ -401,7 +393,7 @@ const ReportesHistorial = () => {
                       )}
                       
                       {/* Botón para ver firma digital */}
-                      {reporte.firma_url && (
+                      {(reporte.firma_url && reporte.firma_url.trim() !== '') && (
                         <button
                           onClick={() => verImagen(reporte.firma_url)}
                           style={{
@@ -419,24 +411,6 @@ const ReportesHistorial = () => {
                           ✍️
                         </button>
                       )}
-                      
-                      {/* DEBUG - botones temporales siempre visibles */}
-                      <button
-                        onClick={() => alert(`Foto: ${reporte.foto_url || 'NULL'}\nFirma: ${reporte.firma_url || 'NULL'}`)}
-                        style={{
-                          padding: '4px 8px',
-                          background: '#f59e0b',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: '600'
-                        }}
-                        title="DEBUG - Ver datos"
-                      >
-                        🐛
-                      </button>
                       
                       {/* Botón para eliminar */}
                       <button
@@ -831,7 +805,7 @@ const ReportesHistorial = () => {
                   </span>
                 </div>
               )}
-              {selectedReporte.foto_url && (
+              {(selectedReporte.foto_url && selectedReporte.foto_url.trim() !== '') && (
                 <div>
                   <strong>Evidencia Fotográfica:</strong>
                   <button
@@ -851,7 +825,7 @@ const ReportesHistorial = () => {
                   </button>
                 </div>
               )}
-              {selectedReporte.firma_url && (
+              {(selectedReporte.firma_url && selectedReporte.firma_url.trim() !== '') && (
                 <div>
                   <strong>Firma Digital:</strong>
                   <button
