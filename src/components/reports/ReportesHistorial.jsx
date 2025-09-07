@@ -194,6 +194,13 @@ const ReportesHistorial = () => {
   };
 
   const verImagen = (imagenUrl) => {
+    console.log('🖼️ Abriendo imagen:', imagenUrl);
+    
+    if (!imagenUrl || imagenUrl.trim() === '') {
+      alert('❌ URL de imagen vacía o inválida');
+      return;
+    }
+    
     setSelectedImage(imagenUrl);
     setShowImageModal(true);
   };
@@ -887,6 +894,11 @@ const ReportesHistorial = () => {
                 maxHeight: '100%',
                 borderRadius: '8px'
               }}
+              onError={(e) => {
+                console.error('❌ Error cargando imagen:', selectedImage);
+                e.target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZjNmNGY2Ii8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzM3NDE1MSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkVycm9yIGNhcmdhbmRvIGltYWdlbjwvdGV4dD48L3N2Zz4=';
+              }}
+              onLoad={() => console.log('✅ Imagen cargada correctamente:', selectedImage)}
             />
             <button
               onClick={() => setShowImageModal(false)}
