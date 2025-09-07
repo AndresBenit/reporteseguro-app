@@ -134,7 +134,26 @@ const ReportesHistorial = () => {
 
   const formatearFecha = (fecha) => {
     if (!fecha) return 'N/A';
-    return fecha.toLocaleDateString('es-ES', {
+    
+    // Intentar diferentes formatos de fecha
+    let fechaObj;
+    if (fecha instanceof Date) {
+      fechaObj = fecha;
+    } else if (typeof fecha === 'string') {
+      fechaObj = new Date(fecha);
+    } else if (fecha.seconds) {
+      // Timestamp de Supabase/Firebase
+      fechaObj = new Date(fecha.seconds * 1000);
+    } else {
+      return 'N/A';
+    }
+    
+    // Verificar que la fecha es válida
+    if (isNaN(fechaObj.getTime())) {
+      return 'N/A';
+    }
+    
+    return fechaObj.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -276,7 +295,7 @@ const ReportesHistorial = () => {
               {datos.map((reporte) => (
                 <tr key={reporte.id}>
                   <td style={{ fontSize: '0.8rem' }}>
-                    {formatearFecha(reporte.fecha)}
+                    {formatearFecha(reporte.fecha || reporte.created_at)}
                   </td>
                   <td>
                     <div style={{
@@ -354,9 +373,9 @@ const ReportesHistorial = () => {
                       </button>
                       
                       {/* Botón para ver foto de recomendación */}
-                      {(reporte.fotoUrl || reporte.fotoFirmada) && (
+                      {(reporte.foto_url) && (
                         <button
-                          onClick={() => verImagen(reporte.fotoUrl || reporte.fotoFirmada)}
+                          onClick={() => verImagen(reporte.foto_url)}
                           style={{
                             padding: '4px 8px',
                             background: '#10b981',
@@ -370,6 +389,26 @@ const ReportesHistorial = () => {
                           title="Ver evidencia"
                         >
                           📸
+                        </button>
+                      )}
+                      
+                      {/* Botón para ver firma digital */}
+                      {reporte.firma_url && (
+                        <button
+                          onClick={() => verImagen(reporte.firma_url)}
+                          style={{
+                            padding: '4px 8px',
+                            background: '#8b5cf6',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '0.75rem',
+                            fontWeight: '600'
+                          }}
+                          title="Ver firma digital"
+                        >
+                          ✍️
                         </button>
                       )}
                       
@@ -552,7 +591,7 @@ const ReportesHistorial = () => {
                   {reportesSinCategoria.map((reporte) => (
                     <tr key={reporte.id} style={{ borderBottom: '1px solid #fed7aa' }}>
                       <td style={{ padding: '12px', fontSize: '0.8rem' }}>
-                        {formatearFecha(reporte.fecha)}
+                        {formatearFecha(reporte.fecha || reporte.created_at)}
                       </td>
                       <td style={{ padding: '12px', fontWeight: '600' }}>
                         "{reporte.tipo || reporte.tipoReporte || 'Sin tipo'}"
@@ -644,7 +683,7 @@ const ReportesHistorial = () => {
             
             <div style={{ display: 'grid', gap: '16px' }}>
               <div>
-                <strong>Fecha:</strong> {formatearFecha(selectedReporte.fecha)}
+                <strong>Fecha:</strong> {formatearFecha(selectedReporte.fecha || selectedReporte.created_at)}
               </div>
               <div>
                 <strong>Tipo:</strong> {selectedReporte.tipo || selectedReporte.tipoReporte}
@@ -714,14 +753,63 @@ const ReportesHistorial = () => {
               </div>
               {selectedReporte.abordaje && (
                 <div>
-                  <strong>Abordaje:</strong> {selectedReporte.abordaje}
+                  <strong>Abordaje Realizado:</strong> {selectedReporte.abordaje}
                 </div>
               )}
-              {(selectedReporte.fotoUrl || selectedReporte.fotoFirmada) && (
+              {selectedReporte.accionrecomendada && selectedReporte.abordaje !== selectedReporte.accionrecomendada && (
                 <div>
-                  <strong>Evidencia:</strong>
+                  <strong>Acción Recomendada:</strong> {selectedReporte.accionrecomendada}
+                </div>
+              )}
+              {selectedReporte.lugarLabor && (
+                <div>
+                  <strong>Lugar de Labor:</strong> {selectedReporte.lugarLabor}
+                </div>
+              )}
+              {selectedReporte.colaboradorinvolucrado && (
+                <div>
+                  <strong>Colaborador Involucrado:</strong> {selectedReporte.colaboradorinvolucrado}
+                </div>
+              )}
+              {selectedReporte.prioridad && (
+                <div>
+                  <strong>Prioridad:</strong> 
+                  <span style={{
+                    marginLeft: '8px',
+                    padding: '2px 6px',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    textTransform: 'capitalize',
+                    background: selectedReporte.prioridad === 'alta' ? '#fef2f2' : selectedReporte.prioridad === 'media' ? '#fffbeb' : '#f0fdf4',
+                    color: selectedReporte.prioridad === 'alta' ? '#dc2626' : selectedReporte.prioridad === 'media' ? '#d97706' : '#059669'
+                  }}>
+                    {selectedReporte.prioridad}
+                  </span>
+                </div>
+              )}
+              {selectedReporte.tipo_reporte && (
+                <div>
+                  <strong>Categoría:</strong> 
+                  <span style={{
+                    marginLeft: '8px',
+                    padding: '2px 6px',
+                    borderRadius: '8px',
+                    fontSize: '0.75rem',
+                    fontWeight: '600',
+                    textTransform: 'capitalize',
+                    background: '#f3f4f6',
+                    color: '#374151'
+                  }}>
+                    {selectedReporte.tipo_reporte}
+                  </span>
+                </div>
+              )}
+              {selectedReporte.foto_url && (
+                <div>
+                  <strong>Evidencia Fotográfica:</strong>
                   <button
-                    onClick={() => verImagen(selectedReporte.fotoUrl || selectedReporte.fotoFirmada)}
+                    onClick={() => verImagen(selectedReporte.foto_url)}
                     style={{
                       marginLeft: '8px',
                       padding: '4px 8px',
@@ -733,8 +821,37 @@ const ReportesHistorial = () => {
                       fontSize: '0.8rem'
                     }}
                   >
-                    📸 Ver {selectedReporte.fotoFirmada ? 'documento firmado' : 'imagen'}
+                    📸 Ver evidencia fotográfica
                   </button>
+                </div>
+              )}
+              {selectedReporte.firma_url && (
+                <div>
+                  <strong>Firma Digital:</strong>
+                  <button
+                    onClick={() => verImagen(selectedReporte.firma_url)}
+                    style={{
+                      marginLeft: '8px',
+                      padding: '4px 8px',
+                      background: '#8b5cf6',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '4px',
+                      cursor: 'pointer',
+                      fontSize: '0.8rem'
+                    }}
+                  >
+                    ✍️ Ver firma digital
+                  </button>
+                  <div style={{ 
+                    marginTop: '8px', 
+                    fontSize: '0.85rem', 
+                    color: '#6b7280',
+                    marginLeft: '8px'
+                  }}>
+                    Firmado por: {selectedReporte.firmado_por || 'Usuario'} 
+                    {selectedReporte.fecha_firma && ` el ${new Date(selectedReporte.fecha_firma).toLocaleDateString('es-ES')}`}
+                  </div>
                 </div>
               )}
             </div>

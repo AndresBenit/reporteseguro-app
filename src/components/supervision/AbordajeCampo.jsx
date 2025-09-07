@@ -153,7 +153,7 @@ const AbordajeCampo = () => {
         subtipo: "Abordaje de Seguridad",
         descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nAbordaje: ${form.abordaje}`,
         severidad: "media",
-        area: form.colaboradorArea,
+        area: form.area,
         reportante: form.supervisorReporta.trim(),
         estado: "pendiente",
         tipo_reporte: "abordaje",

@@ -311,7 +311,7 @@ const SupervisionCampo = () => {
         subtipo: "Supervisión de Campo",
         descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nRecomendación: ${form.recomendacion}`,
         severidad: "media",
-        area: form.colaboradorArea,
+        area: form.area,
         reportante: form.supervisorReporta.trim(),
         foto_url: fotoUrl,
         estado: "pendiente",
