@@ -385,21 +385,28 @@ const SupervisionCampo = () => {
           display: "flex",
           alignItems: "center",
           gap: "8px",
-          padding: window.innerWidth <= 768 ? "10px 16px" : "12px 20px",
-          background: "#f3f4f6",
-          border: "1px solid #d1d5db",
-          borderRadius: "8px",
+          padding: "12px 20px",
+          background: "#f8fafc",
+          border: "2px solid #e2e8f0",
+          borderRadius: "12px",
           cursor: "pointer",
           fontSize: "0.9rem",
           fontWeight: "600",
-          color: "#374151",
-          marginBottom: "20px",
+          color: "#475569",
+          marginBottom: "24px",
           transition: "all 0.2s ease",
-          width: window.innerWidth <= 480 ? "100%" : "auto",
-          justifyContent: window.innerWidth <= 480 ? "center" : "flex-start"
+          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
         }}
-        onMouseEnter={(e) => (e.target.style.background = "#e5e7eb")}
-        onMouseLeave={(e) => (e.target.style.background = "#f3f4f6")}
+        onMouseEnter={(e) => {
+          e.target.style.background = "#e2e8f0";
+          e.target.style.transform = "translateY(-1px)";
+          e.target.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.background = "#f8fafc";
+          e.target.style.transform = "translateY(0)";
+          e.target.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.05)";
+        }}
       >
         ← Volver
       </button>
