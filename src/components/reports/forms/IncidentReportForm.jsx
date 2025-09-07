@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, dbHelpers, storageHelpers } from "../../../services/supabase";
+import SignaturePad from "../../common/SignaturePad";
 
 const areasDisponibles = [
   "Central de mezclas", "Central de cribado", "Laboratorio",
@@ -20,13 +21,17 @@ const IncidentReportForm = () => {
     severidad: "media",
     area: "",
     reportante: "",
-    foto_url: ""
+    foto_url: "",
+    firma_url: "",
+    firmado_por: "",
+    fecha_firma: ""
   });
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState("");
   const [selectedImage, setSelectedImage] = useState(null);
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
+  const [signatureData, setSignatureData] = useState(null);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -129,11 +134,39 @@ const IncidentReportForm = () => {
     setImagePreview(null);
   };
 
+  // Manejar cambios en la firma
+  const handleSignatureChange = (signature) => {
+    setSignatureData(signature);
+    if (signature && signature.url) {
+      setForm(prev => ({
+        ...prev,
+        firma_url: signature.url,
+        fecha_firma: signature.timestamp,
+        firmado_por: "Usuario actual" // En producción, usar el usuario autenticado
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        firma_url: "",
+        fecha_firma: "",
+        firmado_por: ""
+      }));
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
+    // Validación de campos obligatorios incluyendo firma
     if (!form.descripcion.trim() || !form.area) {
       setMensaje("❌ Por favor completa todos los campos obligatorios");
+      setTimeout(() => setMensaje(""), 3000);
+      return;
+    }
+
+    // Validación obligatoria de firma
+    if (!signatureData || !form.firma_url) {
+      setMensaje("❌ La firma digital es obligatoria para enviar el reporte");
       setTimeout(() => setMensaje(""), 3000);
       return;
     }
@@ -174,10 +207,14 @@ const IncidentReportForm = () => {
         severidad: "media", 
         area: "",
         reportante: "",
-        foto_url: ""
+        foto_url: "",
+        firma_url: "",
+        firmado_por: "",
+        fecha_firma: ""
       });
       setSelectedImage(null);
       setImagePreview(null);
+      setSignatureData(null);
       
       setTimeout(() => {
         navigate('/reportes/nuevo');
@@ -549,6 +586,18 @@ const IncidentReportForm = () => {
             )}
           </div>
         </div>
+
+        {/* Firma Digital - OBLIGATORIA */}
+        <SignaturePad
+          onSignatureChange={handleSignatureChange}
+          required={true}
+          label="Firma Digital del Reportante"
+          onError={(error) => {
+            console.error('Error en firma:', error);
+            setMensaje("❌ Error al procesar la firma. Intente nuevamente.");
+            setTimeout(() => setMensaje(""), 3000);
+          }}
+        />
 
         {/* Botón Enviar */}
         <button
