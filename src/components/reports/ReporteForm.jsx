@@ -163,14 +163,14 @@ const ReporteForm = () => {
       const progressInterval = simulateProgress();
       
       // Subir imagen
-      const uploadResult = await storageHelpers.upload('images', fileName, selectedImage);
+      const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
       
       // Finalizar progreso
       clearInterval(progressInterval);
       setUploadProgress(100);
       
       // Obtener URL pública
-      const downloadURL = storageHelpers.getPublicUrl('images', uploadResult.path);
+      const downloadURL = storageHelpers.getPublicUrl('reportes-adjuntos', uploadResult.path);
       
       // Pequeña pausa para mostrar el 100%
       await new Promise(resolve => setTimeout(resolve, 500));
