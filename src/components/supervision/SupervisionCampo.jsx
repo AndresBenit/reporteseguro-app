@@ -222,10 +222,13 @@ const SupervisionCampo = () => {
       const timestamp = Date.now();
       // Fix: Verificar que selectedImage.name existe y es string
       const imageName = selectedImage.name || `image_${timestamp}.jpg`;
-      const fileName = `supervision/${timestamp}_${imageName.replace(
-        /\s+/g,
-        "_"
-      )}`;
+      // Sanitizar nombre de archivo - remover espacios, acentos y caracteres especiales
+      const sanitizedName = imageName
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // Remover caracteres especiales
+        .replace(/_{2,}/g, '_'); // Reemplazar múltiples _ consecutivos por uno solo
+      const fileName = `supervision/${timestamp}_${sanitizedName}`;
 
       // Simular progreso
       const simulateProgress = () => {

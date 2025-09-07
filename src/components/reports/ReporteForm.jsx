@@ -143,7 +143,13 @@ const ReporteForm = () => {
       
       // Crear referencia única para la imagen
       const timestamp = Date.now();
-      const fileName = `reportes/${timestamp}_${selectedImage.name.replace(/\s+/g, '_')}`;
+      // Sanitizar nombre de archivo - remover espacios, acentos y caracteres especiales
+      const sanitizedName = selectedImage.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // Remover caracteres especiales
+        .replace(/_{2,}/g, '_'); // Reemplazar múltiples _ consecutivos por uno solo
+      const fileName = `reportes/${timestamp}_${sanitizedName}`;
       
       // Simular progreso
       const simulateProgress = () => {

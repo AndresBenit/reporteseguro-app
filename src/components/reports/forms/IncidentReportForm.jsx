@@ -114,7 +114,13 @@ const IncidentReportForm = () => {
       setUploadingImage(true);
       
       const timestamp = Date.now();
-      const fileName = `incidentes/${timestamp}_${selectedImage.name.replace(/\s+/g, '_')}`;
+      // Sanitizar nombre de archivo - remover espacios, acentos y caracteres especiales
+      const sanitizedName = selectedImage.name
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '') // Remover acentos
+        .replace(/[^a-zA-Z0-9._-]/g, '_') // Remover caracteres especiales
+        .replace(/_{2,}/g, '_'); // Reemplazar múltiples _ consecutivos por uno solo
+      const fileName = `incidentes/${timestamp}_${sanitizedName}`;
       
       // Use Supabase storage instead of Firebase
       const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
