@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, dbHelpers } from '../../services/supabase';
+import SignaturePad from '../common/SignaturePad';
 
 const AbordajeCampo = () => {
   const [form, setForm] = useState({
@@ -9,12 +10,16 @@ const AbordajeCampo = () => {
     supervisorReporta: '',
     lugarLabor: '',
     hallazgo: '',
-    abordaje: ''
+    abordaje: '',
+    firma_url: '',
+    firmado_por: '',
+    fecha_firma: ''
   });
   
   const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [signatureData, setSignatureData] = useState(null);
   
   // Estados para autocompletado
   const [searchTerm, setSearchTerm] = useState('');
@@ -59,6 +64,26 @@ const AbordajeCampo = () => {
     setForm({ ...form, [name]: value });
   };
 
+  // Manejar cambios en la firma
+  const handleSignatureChange = (signature) => {
+    setSignatureData(signature);
+    if (signature && signature.url) {
+      setForm(prev => ({
+        ...prev,
+        firma_url: signature.url,
+        fecha_firma: signature.timestamp,
+        firmado_por: "Usuario actual"
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        firma_url: "",
+        fecha_firma: "",
+        firmado_por: ""
+      }));
+    }
+  };
+
   // Manejar búsqueda de colaborador
   const handleSearchChange = (e) => {
     const value = e.target.value;
@@ -98,6 +123,13 @@ const AbordajeCampo = () => {
     
     if (!form.colaboradorId || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
       setMensaje('❌ Por favor completa todos los campos obligatorios');
+      setTimeout(() => setMensaje(''), 3000);
+      return;
+    }
+
+    // Validación obligatoria de firma
+    if (!signatureData || !form.firma_url) {
+      setMensaje('❌ La firma digital es obligatoria para enviar el reporte');
       setTimeout(() => setMensaje(''), 3000);
       return;
     }
@@ -408,6 +440,18 @@ const AbordajeCampo = () => {
               style={{ minHeight: '100px' }}
             />
           </div>
+
+          {/* Firma Digital - OBLIGATORIA */}
+          <SignaturePad
+            onSignatureChange={handleSignatureChange}
+            required={true}
+            label="Firma Digital del Supervisor"
+            onError={(error) => {
+              console.error('Error en firma:', error);
+              setMensaje('❌ Error al procesar la firma. Intente nuevamente.');
+              setTimeout(() => setMensaje(''), 3000);
+            }}
+          />
 
           {/* Botón Submit */}
           <button

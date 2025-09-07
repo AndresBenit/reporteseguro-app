@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { dbHelpers, storageHelpers, supabase } from "../../services/supabase";
+import SignaturePad from "../common/SignaturePad";
 
 const SupervisionCampo = () => {
   const [form, setForm] = useState({
@@ -10,6 +11,9 @@ const SupervisionCampo = () => {
     lugarLabor: "",
     hallazgo: "",
     recomendacion: "",
+    firma_url: "",
+    firmado_por: "",
+    fecha_firma: ""
   });
 
   const [colaboradores, setColaboradores] = useState([]);
@@ -19,6 +23,7 @@ const SupervisionCampo = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [signatureData, setSignatureData] = useState(null);
 
   // Estados para autocompletado
   const [searchTerm, setSearchTerm] = useState("");
@@ -78,6 +83,26 @@ const SupervisionCampo = () => {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setForm({ ...form, [name]: value });
+  };
+
+  // Manejar cambios en la firma
+  const handleSignatureChange = (signature) => {
+    setSignatureData(signature);
+    if (signature && signature.url) {
+      setForm(prev => ({
+        ...prev,
+        firma_url: signature.url,
+        fecha_firma: signature.timestamp,
+        firmado_por: "Usuario actual" // En producción, usar el usuario autenticado
+      }));
+    } else {
+      setForm(prev => ({
+        ...prev,
+        firma_url: "",
+        fecha_firma: "",
+        firmado_por: ""
+      }));
+    }
   };
 
   // Manejar búsqueda de colaborador
@@ -243,6 +268,13 @@ const SupervisionCampo = () => {
       !form.recomendacion.trim()
     ) {
       setMensaje("❌ Por favor completa todos los campos obligatorios");
+      setTimeout(() => setMensaje(""), 3000);
+      return;
+    }
+
+    // Validación obligatoria de firma
+    if (!signatureData || !form.firma_url) {
+      setMensaje("❌ La firma digital es obligatoria para enviar el reporte");
       setTimeout(() => setMensaje(""), 3000);
       return;
     }
@@ -812,6 +844,18 @@ const SupervisionCampo = () => {
               )}
             </div>
           </div>
+
+          {/* Firma Digital - OBLIGATORIA */}
+          <SignaturePad
+            onSignatureChange={handleSignatureChange}
+            required={true}
+            label="Firma Digital del Supervisor"
+            onError={(error) => {
+              console.error('Error en firma:', error);
+              setMensaje("❌ Error al procesar la firma. Intente nuevamente.");
+              setTimeout(() => setMensaje(""), 3000);
+            }}
+          />
 
           {/* Botón Submit */}
           <button
