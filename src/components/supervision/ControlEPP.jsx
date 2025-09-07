@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dbHelpers, storageHelpers } from '../../services/supabase';
 import SignaturePad from '../common/SignaturePad';
@@ -26,6 +26,12 @@ const ControlEPP = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [signatureData, setSignatureData] = useState(null);
+
+  // Estados para autocompletado de colaboradores
+  const [colaboradores, setColaboradores] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSugerencias, setShowSugerencias] = useState(false);
+  const [colaboradoresFiltrados, setColaboradoresFiltrados] = useState([]);
 
   // Lista de elementos EPP
   const elementosEPP = [
@@ -57,6 +63,67 @@ const ControlEPP = () => {
     "Acceso principal",
     "Área de carga y descarga"
   ];
+
+  // Cargar colaboradores
+  useEffect(() => {
+    const fetchColaboradores = async () => {
+      try {
+        const data = await dbHelpers.getAll('colaboradores', {
+          orderBy: 'nombre',
+          ascending: true
+        });
+        setColaboradores(data);
+      } catch (error) {
+        console.error('Error fetching colaboradores:', error);
+      }
+    };
+
+    fetchColaboradores();
+  }, []);
+
+  // Filtrar colaboradores cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (searchTerm.length >= 2) {
+      const filtrados = colaboradores.filter((colaborador) =>
+        colaborador.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        colaborador.area.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      setColaboradoresFiltrados(filtrados);
+      setShowSugerencias(filtrados.length > 0);
+    } else {
+      setColaboradoresFiltrados([]);
+      setShowSugerencias(false);
+    }
+  }, [searchTerm, colaboradores]);
+
+  // Manejar búsqueda de colaborador
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+
+    // Si borra el texto, limpiar selección
+    if (value === "") {
+      setForm({
+        ...form,
+        nombre: ""
+      });
+    }
+  };
+
+  // Seleccionar colaborador de sugerencias
+  const seleccionarColaborador = (colaborador) => {
+    setForm({
+      ...form,
+      nombre: colaborador.nombre
+    });
+    setSearchTerm(colaborador.nombre);
+    setShowSugerencias(false);
+  };
+
+  // Cerrar sugerencias al hacer click fuera
+  const handleBlurColaborador = () => {
+    setTimeout(() => setShowSugerencias(false), 200);
+  };
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -331,7 +398,7 @@ const ControlEPP = () => {
           />
         </div>
 
-        {/* Nombre del colaborador */}
+        {/* Colaborador con Autocompletado */}
         <div style={{ marginBottom: "24px" }}>
           <label style={{ 
             display: "block", 
@@ -340,26 +407,91 @@ const ControlEPP = () => {
             marginBottom: "8px",
             fontSize: "14px"
           }}>
-            Nombre del Colaborador *
+            👤 Colaborador *
           </label>
-          <input
-            type="text"
-            name="nombre"
-            value={form.nombre}
-            onChange={handleChange}
-            placeholder="Ingrese el nombre completo del colaborador"
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "16px",
-              transition: "border-color 0.2s ease",
-            }}
-            onFocus={(e) => e.target.style.borderColor = "#3b82f6"}
-            onBlur={(e) => e.target.style.borderColor = "#e5e7eb"}
-          />
+          <div style={{ position: "relative" }}>
+            <input
+              type="text"
+              placeholder="Escribe el nombre del colaborador..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              onFocus={() =>
+                searchTerm &&
+                setShowSugerencias(colaboradoresFiltrados.length > 0)
+              }
+              onBlur={handleBlurColaborador}
+              required
+              style={{
+                width: "100%",
+                padding: "12px",
+                border: form.nombre ? "2px solid #10b981" : "2px solid #e5e7eb",
+                borderRadius: "8px",
+                fontSize: "16px",
+                backgroundColor: form.nombre ? "#f0fdf4" : "white",
+                transition: "all 0.2s ease",
+              }}
+            />
+
+            {/* Indicador de selección */}
+            {form.nombre && (
+              <div style={{
+                position: "absolute",
+                right: "12px",
+                top: "50%",
+                transform: "translateY(-50%)",
+                color: "#10b981",
+                fontSize: "18px",
+              }}>
+                ✓
+              </div>
+            )}
+
+            {/* Sugerencias */}
+            {showSugerencias && colaboradoresFiltrados.length > 0 && (
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                left: 0,
+                right: 0,
+                backgroundColor: "white",
+                border: "2px solid #e5e7eb",
+                borderTop: "none",
+                borderRadius: "0 0 8px 8px",
+                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
+                maxHeight: "200px",
+                overflowY: "auto",
+                zIndex: 1000,
+              }}>
+                {colaboradoresFiltrados.map((colaborador) => (
+                  <div
+                    key={colaborador.id}
+                    onClick={() => seleccionarColaborador(colaborador)}
+                    style={{
+                      padding: "12px 16px",
+                      cursor: "pointer",
+                      borderBottom: "1px solid #f3f4f6",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      transition: "background-color 0.2s ease",
+                    }}
+                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f9fafb"}
+                    onMouseLeave={(e) => e.target.style.backgroundColor = "white"}
+                  >
+                    <div>
+                      <div style={{ fontWeight: "600", color: "#374151" }}>
+                        {colaborador.nombre}
+                      </div>
+                      <div style={{ fontSize: "12px", color: "#6b7280" }}>
+                        {colaborador.area}
+                      </div>
+                    </div>
+                    <div style={{ color: "#10b981" }}>+</div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Elemento de Protección Personal */}
