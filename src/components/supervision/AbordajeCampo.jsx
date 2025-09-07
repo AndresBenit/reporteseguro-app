@@ -2,11 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { supabase, dbHelpers } from '../../services/supabase';
 import SignaturePad from '../common/SignaturePad';
 
+const areasDisponibles = [
+  "Central de mezclas", "Central de cribado", "Laboratorio",
+  "Caseta de procesamiento de muestras", "Cárcamo", 
+  "Almacenamiento de combustible", "Taller de mantenimiento",
+  "Patio de almacenamiento 7", "Patio de almacenamiento de la pluma",
+  "Centro industrial 2", "Hornos solera", "Almacén centro industrial",
+  "Ambiental", "Oficinas administrativas", "Comedor", 
+  "Estacionamiento", "Acceso principal", "Área de carga y descarga"
+];
+
 const AbordajeCampo = () => {
   const [form, setForm] = useState({
     colaboradorId: '',
     colaboradorNombre: '',
     colaboradorArea: '',
+    area: '',
     supervisorReporta: '',
     lugarLabor: '',
     hallazgo: '',
@@ -121,7 +132,7 @@ const AbordajeCampo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!form.colaboradorId || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
+    if (!form.colaboradorId || !form.area || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
       setMensaje('❌ Por favor completa todos los campos obligatorios');
       setTimeout(() => setMensaje(''), 3000);
       return;
@@ -391,6 +402,24 @@ const AbordajeCampo = () => {
               required
               style={{ width: '100%' }}
             />
+          </div>
+
+          {/* Área de Trabajo */}
+          <div className="form-group">
+            <label className="form-label">🏭 Área de Trabajo *</label>
+            <select
+              name="area"
+              value={form.area}
+              onChange={handleChange}
+              className="form-input"
+              required
+              style={{ width: '100%' }}
+            >
+              <option value="">Selecciona un área</option>
+              {areasDisponibles.map(area => (
+                <option key={area} value={area}>{area}</option>
+              ))}
+            </select>
           </div>
 
           {/* Lugar de Labor */}
