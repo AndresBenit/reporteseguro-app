@@ -180,7 +180,7 @@ const MainLayoutMejorado = ({ user, onLogout, children, reportes = [] }) => {
                 onClick={() => setMobileMenuOpen(false)}
                 aria-label="Cerrar menú"
               >
-                <Icon name="X" size={20} />
+                <Icon name="ArrowLeft" size={20} />
               </button>
             </div>
             

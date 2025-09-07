@@ -100,7 +100,7 @@ const MainLayout = ({ user, onLogout, children, reportes = [] }) => {
             className="mobile-menu-button"
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
           >
-            <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} />
+            <Icon name={mobileMenuOpen ? "ArrowLeft" : "Menu"} size={24} />
           </button>
         </div>
       </header>
@@ -112,7 +112,7 @@ const MainLayout = ({ user, onLogout, children, reportes = [] }) => {
             <div className="mobile-nav-header">
               <h3>Navegación</h3>
               <button onClick={() => setMobileMenuOpen(false)}>
-                <Icon name="X" size={20} />
+                <Icon name="ArrowLeft" size={20} />
               </button>
             </div>
             
