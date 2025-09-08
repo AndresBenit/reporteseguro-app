@@ -342,29 +342,17 @@ const Graficos = ({ reportes }) => {
 
         <div className="date-range-actions">
           <button 
-            className="date-btn"
-            onClick={() => establecerRangoRapido(7)}
-          >
-            7 días
-          </button>
-          <button 
-            className="date-btn"
-            onClick={() => establecerRangoRapido(30)}
-          >
-            30 días
-          </button>
-          <button 
             className="date-btn primary"
             onClick={aplicarRangoPersonalizado}
             disabled={!fechaDesde || !fechaHasta}
           >
-            Aplicar Rango
+            📊 Aplicar Filtro
           </button>
           <button 
             className="date-btn"
             onClick={limpiarFiltros}
           >
-            Limpiar
+            🗑️ Limpiar
           </button>
         </div>
       </div>

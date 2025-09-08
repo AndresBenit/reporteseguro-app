@@ -26,7 +26,8 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
   const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
   // Estados para filtros
-  const [filtroFecha, setFiltroFecha] = useState('30dias');
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroArea, setFiltroArea] = useState('todas');
   const [vistaActiva, setVistaActiva] = useState('resumen');
@@ -47,15 +48,15 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
     teal: '#0d9488'
   };
 
-  // Opciones de filtrado
-  const opcionesFecha = [
-    { value: '7dias', label: 'Últimos 7 días' },
-    { value: '30dias', label: 'Últimos 30 días' },
-    { value: '90dias', label: 'Últimos 3 meses' },
-    { value: '6meses', label: 'Últimos 6 meses' },
-    { value: '1año', label: 'Último año' },
-    { value: 'todos', label: 'Todo el período' }
-  ];
+  // Funciones de manejo de fechas
+  const aplicarFiltroFechas = () => {
+    // La lógica de filtrado se aplicará automáticamente en useMemo
+  };
+
+  const limpiarFiltroFechas = () => {
+    setFechaDesde('');
+    setFechaHasta('');
+  };
 
   const opcionesTipo = [
     { value: 'todos', label: 'Todos los tipos' },
@@ -71,32 +72,26 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
   const reportesFiltrados = useMemo(() => {
     let filtrados = [...reportes];
 
-    // Filtro por fecha
-    if (filtroFecha !== 'todos') {
-      const ahora = new Date();
-      const fechaLimite = new Date();
-
-      switch (filtroFecha) {
-        case '7dias':
-          fechaLimite.setDate(ahora.getDate() - 7);
-          break;
-        case '30dias':
-          fechaLimite.setDate(ahora.getDate() - 30);
-          break;
-        case '90dias':
-          fechaLimite.setDate(ahora.getDate() - 90);
-          break;
-        case '6meses':
-          fechaLimite.setMonth(ahora.getMonth() - 6);
-          break;
-        case '1año':
-          fechaLimite.setFullYear(ahora.getFullYear() - 1);
-          break;
-      }
-
+    // Filtro por fecha personalizada
+    if (fechaDesde || fechaHasta) {
       filtrados = filtrados.filter(reporte => {
-        const fechaReporte = new Date(reporte.created_at);
-        return fechaReporte >= fechaLimite;
+        const fechaReporte = new Date(reporte.fecha || reporte.created_at);
+        
+        if (fechaDesde && fechaHasta) {
+          const desde = new Date(fechaDesde);
+          const hasta = new Date(fechaHasta);
+          hasta.setHours(23, 59, 59, 999); // Incluir todo el día final
+          return fechaReporte >= desde && fechaReporte <= hasta;
+        } else if (fechaDesde) {
+          const desde = new Date(fechaDesde);
+          return fechaReporte >= desde;
+        } else if (fechaHasta) {
+          const hasta = new Date(fechaHasta);
+          hasta.setHours(23, 59, 59, 999);
+          return fechaReporte <= hasta;
+        }
+        
+        return true;
       });
     }
 
@@ -111,7 +106,7 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
     }
 
     return filtrados;
-  }, [reportes, filtroFecha, filtroTipo, filtroArea]);
+  }, [reportes, fechaDesde, fechaHasta, filtroTipo, filtroArea]);
 
   // Obtener áreas únicas para filtro
   const areasUnicas = useMemo(() => {
@@ -182,8 +177,8 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
       fill: getColorByStatus(estado)
     }));
 
-    // 4. Tendencia temporal (últimos días según filtro)
-    const tendenciaTemporal = getTendenciaTemporal(reportesFiltrados, filtroFecha);
+    // 4. Tendencia temporal 
+    const tendenciaTemporal = getTendenciaTemporal(reportesFiltrados, fechaDesde, fechaHasta);
 
     // 5. Reportes por área
     const areasData = reportesFiltrados.reduce((acc, reporte) => {
@@ -278,7 +273,7 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
       reportantesFrecuencia,
       kpis
     };
-  }, [reportesFiltrados, filtroFecha]);
+  }, [reportesFiltrados, fechaDesde, fechaHasta]);
 
   // Funciones auxiliares para colores
   function getColorByType(tipo) {
@@ -320,27 +315,28 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
     }
   }
 
-  function getTendenciaTemporal(reportes, filtroFecha) {
-    const datos = [];
+  function getTendenciaTemporal(reportes, fechaDesde, fechaHasta) {
+    if (!reportes.length) return [];
+
+    // Si no hay filtros de fecha, mostrar últimos 30 días
     const ahora = new Date();
-    let dias = 30;
-
-    switch (filtroFecha) {
-      case '7dias': dias = 7; break;
-      case '30dias': dias = 30; break;
-      case '90dias': dias = 90; break;
-      case '6meses': dias = 180; break;
-      case '1año': dias = 365; break;
-      default: dias = 30;
-    }
-
-    for (let i = dias - 1; i >= 0; i--) {
-      const fecha = new Date(ahora);
-      fecha.setDate(fecha.getDate() - i);
+    const fechaInicio = fechaDesde ? new Date(fechaDesde) : new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const fechaFin = fechaHasta ? new Date(fechaHasta) : ahora;
+    
+    // Asegurar que fechaFin incluya todo el día
+    fechaFin.setHours(23, 59, 59, 999);
+    
+    const datos = [];
+    const diffTiempo = fechaFin.getTime() - fechaInicio.getTime();
+    const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
+    
+    for (let i = 0; i <= diffDias; i++) {
+      const fecha = new Date(fechaInicio);
+      fecha.setDate(fechaInicio.getDate() + i);
       const fechaStr = fecha.toISOString().split('T')[0];
       
-      const reportesDelDia = reportesValidos.filter(r => {
-        const fechaReporte = new Date(r.created_at);
+      const reportesDelDia = reportes.filter(r => {
+        const fechaReporte = new Date(r.created_at || r.fecha);
         return fechaReporte.toISOString().split('T')[0] === fechaStr;
       }).length;
 
@@ -417,12 +413,23 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
       <div className="filtros-panel">
         <div className="filtros-row">
           <div className="filtro-group">
-            <label>📅 Período</label>
-            <select value={filtroFecha} onChange={(e) => setFiltroFecha(e.target.value)}>
-              {opcionesFecha.map(opcion => (
-                <option key={opcion.value} value={opcion.value}>{opcion.label}</option>
-              ))}
-            </select>
+            <label>📅 Fecha de Inicio</label>
+            <input 
+              type="date" 
+              value={fechaDesde} 
+              onChange={(e) => setFechaDesde(e.target.value)}
+              className="date-input"
+            />
+          </div>
+
+          <div className="filtro-group">
+            <label>📅 Fecha Final</label>
+            <input 
+              type="date" 
+              value={fechaHasta} 
+              onChange={(e) => setFechaHasta(e.target.value)}
+              className="date-input"
+            />
           </div>
 
           <div className="filtro-group">
@@ -443,6 +450,12 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
               ))}
             </select>
           </div>
+        </div>
+
+        <div className="filtros-acciones">
+          <button onClick={limpiarFiltroFechas} className="btn-limpiar">
+            🗑️ Limpiar Fechas
+          </button>
         </div>
 
         <div className="stats-summary">
@@ -590,7 +603,16 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
           <div className="grafico-card grafico-wide">
             <div className="grafico-header">
               <h3><Icon name="TrendingUp" size={20} />Tendencia Temporal</h3>
-              <span className="count">Últimos {filtroFecha}</span>
+              <span className="count">
+                {fechaDesde && fechaHasta 
+                  ? `${fechaDesde} - ${fechaHasta}` 
+                  : fechaDesde 
+                    ? `Desde ${fechaDesde}` 
+                    : fechaHasta 
+                      ? `Hasta ${fechaHasta}` 
+                      : 'Últimos 30 días'
+                }
+              </span>
             </div>
             <ResponsiveContainer width="100%" height={400}>
               <AreaChart data={datosGraficos.tendenciaTemporal}>
@@ -765,7 +787,8 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
           font-size: 0.9rem;
         }
 
-        .filtro-group select {
+        .filtro-group select,
+        .filtro-group .date-input {
           width: 100%;
           padding: 10px 12px;
           border: 2px solid #e5e7eb;
@@ -775,10 +798,36 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
           transition: border-color 0.3s ease;
         }
 
-        .filtro-group select:focus {
+        .filtro-group select:focus,
+        .filtro-group .date-input:focus {
           outline: none;
           border-color: ${colores.primary};
           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .filtros-acciones {
+          display: flex;
+          gap: 12px;
+          justify-content: flex-end;
+          margin-top: 16px;
+        }
+
+        .btn-limpiar {
+          padding: 8px 16px;
+          border: 2px solid #e5e7eb;
+          border-radius: 8px;
+          background: white;
+          color: #6b7280;
+          font-size: 0.85rem;
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .btn-limpiar:hover {
+          border-color: ${colores.primary};
+          color: ${colores.primary};
+          transform: translateY(-1px);
         }
 
         .stats-summary {

@@ -103,12 +103,10 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
   const opcionesTipo = [
     { value: 'todos', label: 'Todos los tipos', color: enterpriseColors.neutral[600] },
-    { value: 'incidencia', label: 'Incidencias', color: enterpriseColors.danger.base },
-    { value: 'observacion', label: 'Observaciones', color: enterpriseColors.warning.base },
-    { value: 'personal', label: 'Personal', color: enterpriseColors.primary.base },
-    { value: 'seguimiento', label: 'Seguimientos', color: enterpriseColors.success.base },
-    { value: 'abordaje', label: 'Abordajes', color: enterpriseColors.purple.base },
-    { value: 'recomendacion', label: 'Recomendaciones', color: enterpriseColors.info.base }
+    { value: 'incidencia', label: 'Reportar Incidencia', color: enterpriseColors.danger.base },
+    { value: 'recomendacion', label: 'Nueva Recomendación', color: enterpriseColors.info.base },
+    { value: 'abordaje', label: 'Abordaje en Campo', color: enterpriseColors.purple.base },
+    { value: 'epp', label: 'Control EPP', color: '#f97316' }
   ];
 
   // Vistas empresariales
@@ -256,11 +254,9 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
   function getEnterpriseColorByType(tipo) {
     const colorMap = {
       'incidencia': enterpriseColors.danger.base,
-      'observacion': enterpriseColors.warning.base,
-      'personal': enterpriseColors.primary.base,
-      'seguimiento': enterpriseColors.success.base,
+      'recomendacion': enterpriseColors.info.base,
       'abordaje': enterpriseColors.purple.base,
-      'recomendacion': enterpriseColors.info.base
+      'epp': '#f97316'
     };
     return colorMap[tipo.toLowerCase()] || enterpriseColors.neutral[500];
   }
@@ -279,12 +275,10 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
   function formatTipoLabel(tipo) {
     const labels = {
-      'incidencia': 'Incidencias',
-      'observacion': 'Observaciones',
-      'personal': 'Personal',
-      'seguimiento': 'Seguimientos',
-      'abordaje': 'Abordajes',
-      'recomendacion': 'Recomendaciones'
+      'incidencia': 'Reportar Incidencia',
+      'recomendacion': 'Nueva Recomendación',
+      'abordaje': 'Abordaje en Campo',
+      'epp': 'Control EPP'
     };
     return labels[tipo.toLowerCase()] || tipo.charAt(0).toUpperCase() + tipo.slice(1);
   }
