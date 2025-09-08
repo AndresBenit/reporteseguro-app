@@ -26,7 +26,14 @@ import { Icon } from '../Icons';
 
 const EnterpriseGraficos = ({ reportes = [] }) => {
   // Estados para filtros
-  const [filtroFecha, setFiltroFecha] = useState('30dias');
+  const [fechaInicio, setFechaInicio] = useState(() => {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - 30);
+    return fecha.toISOString().split('T')[0];
+  });
+  const [fechaFin, setFechaFin] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroArea, setFiltroArea] = useState('todas');
   const [vistaActiva, setVistaActiva] = useState('executive');
@@ -91,15 +98,13 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     }
   };
 
-  // Opciones de filtrado mejoradas
-  const opcionesFecha = [
-    { value: '7dias', label: 'Últimos 7 días', icon: 'Calendar' },
-    { value: '30dias', label: 'Últimos 30 días', icon: 'Calendar' },
-    { value: '90dias', label: 'Últimos 3 meses', icon: 'Calendar' },
-    { value: '6meses', label: 'Últimos 6 meses', icon: 'Calendar' },
-    { value: '1año', label: 'Último año', icon: 'Calendar' },
-    { value: 'todos', label: 'Todo el período', icon: 'Calendar' }
-  ];
+  // Función para limpiar filtros de fecha
+  const limpiarFiltroFechas = () => {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - 30);
+    setFechaInicio(fecha.toISOString().split('T')[0]);
+    setFechaFin(new Date().toISOString().split('T')[0]);
+  };
 
   const opcionesTipo = [
     { value: 'todos', label: 'Todos los tipos', color: enterpriseColors.neutral[600] },
@@ -145,21 +150,26 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
   const reportesFiltrados = useMemo(() => {
     let filtrados = [...reportes];
 
-    if (filtroFecha !== 'todos') {
-      const ahora = new Date();
-      const fechaLimite = new Date();
-
-      switch (filtroFecha) {
-        case '7dias': fechaLimite.setDate(ahora.getDate() - 7); break;
-        case '30dias': fechaLimite.setDate(ahora.getDate() - 30); break;
-        case '90dias': fechaLimite.setDate(ahora.getDate() - 90); break;
-        case '6meses': fechaLimite.setMonth(ahora.getMonth() - 6); break;
-        case '1año': fechaLimite.setFullYear(ahora.getFullYear() - 1); break;
-      }
-
+    // Filtro por rango de fechas
+    if (fechaInicio || fechaFin) {
       filtrados = filtrados.filter(reporte => {
         const fechaReporte = new Date(reporte.created_at);
-        return fechaReporte >= fechaLimite;
+        
+        if (fechaInicio && fechaFin) {
+          const desde = new Date(fechaInicio);
+          const hasta = new Date(fechaFin);
+          hasta.setHours(23, 59, 59, 999); // Incluir todo el día final
+          return fechaReporte >= desde && fechaReporte <= hasta;
+        } else if (fechaInicio) {
+          const desde = new Date(fechaInicio);
+          return fechaReporte >= desde;
+        } else if (fechaFin) {
+          const hasta = new Date(fechaFin);
+          hasta.setHours(23, 59, 59, 999);
+          return fechaReporte <= hasta;
+        }
+        
+        return true;
       });
     }
 
@@ -172,7 +182,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     }
 
     return filtrados;
-  }, [reportes, filtroFecha, filtroTipo, filtroArea]);
+  }, [reportes, fechaInicio, fechaFin, filtroTipo, filtroArea]);
 
   // Obtener áreas únicas para filtro
   const areasUnicas = useMemo(() => {
@@ -235,7 +245,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
     // Tendencias temporales avanzadas
     const tendencias = {
-      temporal: getTendenciaAvanzada(reportesFiltrados, filtroFecha),
+      temporal: getTendenciaAvanzada(reportesFiltrados, fechaInicio, fechaFin),
       mensual: getTendenciaMensual(reportesFiltrados),
       semanal: getTendenciaSemanal(reportesFiltrados)
     };
@@ -248,7 +258,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     };
 
     return { kpisExecutivos, distribuciones, tendencias, insights };
-  }, [reportesFiltrados, filtroFecha]);
+  }, [reportesFiltrados, fechaInicio, fechaFin]);
 
   // Funciones auxiliares empresariales
   function getEnterpriseColorByType(tipo) {
@@ -341,23 +351,24 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     }
   }
 
-  function getTendenciaAvanzada(reportes, filtro) {
+  function getTendenciaAvanzada(reportes, fechaInicio, fechaFin) {
     const datos = [];
-    const ahora = new Date();
-    let dias = 30;
+    
+    // Usar las fechas proporcionadas o valores por defecto
+    const fechaInicioDate = fechaInicio ? new Date(fechaInicio) : (() => {
+      const fecha = new Date();
+      fecha.setDate(fecha.getDate() - 30);
+      return fecha;
+    })();
+    const fechaFinDate = fechaFin ? new Date(fechaFin) : new Date();
+    
+    // Calcular número de días en el rango
+    const diffTiempo = fechaFinDate.getTime() - fechaInicioDate.getTime();
+    const diffDias = Math.ceil(diffTiempo / (1000 * 60 * 60 * 24));
 
-    switch (filtro) {
-      case '7dias': dias = 7; break;
-      case '30dias': dias = 30; break;
-      case '90dias': dias = 90; break;
-      case '6meses': dias = 180; break;
-      case '1año': dias = 365; break;
-      default: dias = 30;
-    }
-
-    for (let i = dias - 1; i >= 0; i--) {
-      const fecha = new Date(ahora);
-      fecha.setDate(fecha.getDate() - i);
+    for (let i = 0; i <= diffDias; i++) {
+      const fecha = new Date(fechaInicioDate);
+      fecha.setDate(fechaInicioDate.getDate() + i);
       const fechaStr = fecha.toISOString().split('T')[0];
       
       const reportesDelDia = reportes.filter(r => {
@@ -629,17 +640,27 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           <div className="filter-group">
             <label className="filter-label">
               <Icon name="Calendar" size={16} />
-              Período de Tiempo
+              Fecha de Inicio
             </label>
-            <select 
-              value={filtroFecha} 
-              onChange={(e) => setFiltroFecha(e.target.value)}
-              className="filter-select"
-            >
-              {opcionesFecha.map(opcion => (
-                <option key={opcion.value} value={opcion.value}>{opcion.label}</option>
-              ))}
-            </select>
+            <input 
+              type="date" 
+              value={fechaInicio} 
+              onChange={(e) => setFechaInicio(e.target.value)}
+              className="filter-select date-input"
+            />
+          </div>
+
+          <div className="filter-group">
+            <label className="filter-label">
+              <Icon name="Calendar" size={16} />
+              Fecha Final
+            </label>
+            <input 
+              type="date" 
+              value={fechaFin} 
+              onChange={(e) => setFechaFin(e.target.value)}
+              className="filter-select date-input"
+            />
           </div>
 
           <div className="filter-group">
@@ -673,6 +694,41 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
                 <option key={area} value={area}>{area}</option>
               ))}
             </select>
+          </div>
+        </div>
+
+        {/* Botones de período rápido y período seleccionado */}
+        <div className="periodo-controls">
+          <div className="periodo-buttons">
+            <span className="periodo-label">Período rápido:</span>
+            {[
+              { label: '7d', dias: 7 },
+              { label: '30d', dias: 30 },
+              { label: '90d', dias: 90 },
+              { label: '1a', dias: 365 }
+            ].map(periodo => (
+              <button
+                key={periodo.dias}
+                onClick={() => {
+                  const fin = new Date();
+                  const inicio = new Date();
+                  inicio.setDate(fin.getDate() - periodo.dias);
+                  setFechaInicio(inicio.toISOString().split('T')[0]);
+                  setFechaFin(fin.toISOString().split('T')[0]);
+                }}
+                className="periodo-btn"
+              >
+                {periodo.label}
+              </button>
+            ))}
+            <button onClick={limpiarFiltroFechas} className="periodo-btn reset-btn">
+              🔄 Reset
+            </button>
+          </div>
+          
+          {/* Mostrar período seleccionado */}
+          <div className="periodo-selected">
+            📊 Analizando: {new Date(fechaInicio).toLocaleDateString('es-ES')} - {new Date(fechaFin).toLocaleDateString('es-ES')}
           </div>
         </div>
 
@@ -1226,6 +1282,69 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           outline: none;
           border-color: ${enterpriseColors.primary.base};
           box-shadow: 0 0 0 4px rgba(${enterpriseColors.primary.rgb}, 0.1);
+        }
+
+        /* Controles de Período */
+        .periodo-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 20px 0;
+          padding: 16px;
+          background: ${enterpriseColors.neutral[50]};
+          border-radius: 12px;
+          border: 1px solid ${enterpriseColors.neutral[200]};
+        }
+
+        .periodo-buttons {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .periodo-label {
+          font-size: 0.85rem;
+          color: ${enterpriseColors.neutral[600]};
+          margin-right: 12px;
+          font-weight: 500;
+        }
+
+        .periodo-btn {
+          padding: 6px 12px;
+          border-radius: 6px;
+          border: 1px solid ${enterpriseColors.neutral[300]};
+          background: white;
+          color: ${enterpriseColors.neutral[700]};
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .periodo-btn:hover {
+          background: ${enterpriseColors.primary.base};
+          border-color: ${enterpriseColors.primary.base};
+          color: white;
+          transform: translateY(-1px);
+        }
+
+        .periodo-btn.reset-btn:hover {
+          background: ${enterpriseColors.warning.base};
+          border-color: ${enterpriseColors.warning.base};
+        }
+
+        .periodo-selected {
+          padding: 8px 12px;
+          background: ${enterpriseColors.primary.base}10;
+          border: 1px solid ${enterpriseColors.primary.base}30;
+          border-radius: 8px;
+          font-size: 0.85rem;
+          color: ${enterpriseColors.primary.dark};
+          font-weight: 500;
+        }
+
+        .date-input {
+          cursor: pointer;
         }
 
         /* KPI Dashboard */
@@ -1849,6 +1968,21 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
           .control-filters {
             grid-template-columns: 1fr;
             gap: 20px;
+          }
+
+          .periodo-controls {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+          }
+
+          .periodo-buttons {
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+
+          .periodo-selected {
+            text-align: center;
           }
 
           .kpi-dashboard {
