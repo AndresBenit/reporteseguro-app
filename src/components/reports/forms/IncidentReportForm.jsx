@@ -16,7 +16,7 @@ const areasDisponibles = [
 const IncidentReportForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
-    tipo: "Condición Insegura",
+    tipo: "incidencia",
     descripcion: "",
     severidad: "media",
     area: "",
@@ -190,25 +190,24 @@ const IncidentReportForm = () => {
         }
       }
 
-      console.log('🔄 Enviando datos:', {
+      const payloadToSend = {
         ...form,
         foto_url: fotoUrl,
         estado: "pendiente",
         tipo_reporte: "incidencia"
-      });
+      };
 
-      await dbHelpers.create("reportes", {
-        ...form,
-        foto_url: fotoUrl,
-        estado: "pendiente",
-        tipo_reporte: "incidencia"
-      });
+      console.log('🔄 Enviando datos completos:', payloadToSend);
+      console.log('🔍 Campo tipo específico:', payloadToSend.tipo);
+      console.log('🔍 Tipo de dato del campo tipo:', typeof payloadToSend.tipo);
+
+      await dbHelpers.create("reportes", payloadToSend);
       
       console.log('✅ Reporte creado exitosamente');
       
       setMensaje("✅ ¡Reporte enviado exitosamente!");
       setForm({
-        tipo: "Condición Insegura",
+        tipo: "incidencia",
         descripcion: "",
         severidad: "media", 
         area: "",
@@ -325,7 +324,7 @@ const IncidentReportForm = () => {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
               type="button"
-              onClick={() => handleTipoChange("Condición Insegura")}
+              onClick={() => handleTipoChange("incidencia")}
               style={{
                 padding: '12px 24px',
                 borderRadius: '25px',
@@ -333,8 +332,8 @@ const IncidentReportForm = () => {
                 cursor: 'pointer',
                 fontWeight: '600',
                 transition: 'all 0.3s ease',
-                background: form.tipo === "Condición Insegura" ? '#3b82f6' : '#f3f4f6',
-                color: form.tipo === "Condición Insegura" ? 'white' : '#374151',
+                background: form.tipo === "incidencia" ? '#3b82f6' : '#f3f4f6',
+                color: form.tipo === "incidencia" ? 'white' : '#374151',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
@@ -344,7 +343,7 @@ const IncidentReportForm = () => {
             </button>
             <button
               type="button"
-              onClick={() => handleTipoChange("Acto Inseguro")}
+              onClick={() => handleTipoChange("incidencia")}
               style={{
                 padding: '12px 24px',
                 borderRadius: '25px',
@@ -352,8 +351,8 @@ const IncidentReportForm = () => {
                 cursor: 'pointer',
                 fontWeight: '600',
                 transition: 'all 0.3s ease',
-                background: form.tipo === "Acto Inseguro" ? '#3b82f6' : '#f3f4f6',
-                color: form.tipo === "Acto Inseguro" ? 'white' : '#374151',
+                background: form.tipo === "incidencia" ? '#3b82f6' : '#f3f4f6',
+                color: form.tipo === "incidencia" ? 'white' : '#374151',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
