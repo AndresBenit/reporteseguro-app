@@ -57,11 +57,14 @@ const CustomTooltip = ({ active, payload, label }) => {
 const toPieData = (obj) =>
   Object.entries(obj).map(([name, value]) => ({ name, value }));
 
-const Graficos = ({ reportes }) => {
+const Graficos = ({ reportes = [] }) => {
   const [filtroTiempo, setFiltroTiempo] = useState("todos");
   const [fechaDesde, setFechaDesde] = useState("");
   const [fechaHasta, setFechaHasta] = useState("");
   const [usarRangoPersonalizado, setUsarRangoPersonalizado] = useState(false);
+
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
 
   // Filtrar reportes por período o rango personalizado
   const reportesFiltrados = useMemo(() => {
@@ -70,14 +73,14 @@ const Graficos = ({ reportes }) => {
       const hasta = new Date(fechaHasta);
       hasta.setHours(23, 59, 59, 999); // Incluir todo el día
 
-      return reportes.filter(reporte => {
+      return reportesValidos.filter(reporte => {
         if (!reporte.fecha || !reporte.fecha.toDate) return false;
         const fechaReporte = reporte.fecha.toDate();
         return fechaReporte >= desde && fechaReporte <= hasta;
       });
     }
 
-    if (filtroTiempo === "todos") return reportes;
+    if (filtroTiempo === "todos") return reportesValidos;
 
     const ahora = new Date();
     const fechaLimite = new Date();
@@ -99,14 +102,14 @@ const Graficos = ({ reportes }) => {
         fechaLimite.setFullYear(ahora.getFullYear() - 1);
         break;
       default:
-        return reportes;
+        return reportesValidos;
     }
 
-    return reportes.filter(reporte => {
+    return reportesValidos.filter(reporte => {
       if (!reporte.fecha || !reporte.fecha.toDate) return false;
       return reporte.fecha.toDate() >= fechaLimite;
     });
-  }, [reportes, filtroTiempo, fechaDesde, fechaHasta, usarRangoPersonalizado]);
+  }, [reportesValidos, filtroTiempo, fechaDesde, fechaHasta, usarRangoPersonalizado]);
 
   const contarPorCampo = (campo) =>
     reportesFiltrados.reduce((acc, r) => {
@@ -276,7 +279,7 @@ const Graficos = ({ reportes }) => {
     return null;
   };
 
-  if (reportes.length === 0) {
+  if (reportesValidos.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "60px 20px" }}>
         <div style={{ fontSize: "4rem", marginBottom: "20px", opacity: 0.3 }}>📊</div>
@@ -380,7 +383,7 @@ const Graficos = ({ reportes }) => {
           </strong>
         </span>
         <span style={{ color: "#6b7280", fontSize: "0.9rem" }}>
-          {reportesFiltrados.length} de {reportes.length} reportes
+          {reportesFiltrados.length} de {reportesValidos.length} reportes
         </span>
       </div>
 
