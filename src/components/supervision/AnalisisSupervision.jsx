@@ -60,7 +60,7 @@ const AnalisisSupervision = () => {
           <h3 style={{ marginTop: '20px' }}>Cargando datos de reportes...</h3>
         </div>
       ) : (
-        <EnterpriseGraficos reportes={reportes} />
+        <EnterpriseGraficos reportes={Array.isArray(reportes) ? reportes : []} />
       )}
 
     </div>
