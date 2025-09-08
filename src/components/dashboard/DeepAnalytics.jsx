@@ -16,9 +16,12 @@ import {
 } from "recharts";
 
 const DeepAnalytics = ({ reportes = [] }) => {
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  
   // 📊 ANÁLISIS PROFUNDO DE PATRONES
   const analytics = useMemo(() => {
-    if (reportes.length === 0) {
+    if (reportesValidos.length === 0) {
       return {
         patronesHorarios: [],
         patronesDiarios: [],
@@ -31,7 +34,7 @@ const DeepAnalytics = ({ reportes = [] }) => {
 
     // Patrones por hora del día
     const patronesHorarios = Array.from({ length: 24 }, (_, hora) => {
-      const reportesHora = reportes.filter((r) => {
+      const reportesHora = reportesValidos.filter((r) => {
         const fecha = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
         return fecha && fecha.getHours() === hora;
       });
@@ -46,7 +49,7 @@ const DeepAnalytics = ({ reportes = [] }) => {
     // Patrones por día de la semana
     const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
     const patronesDiarios = Array.from({ length: 7 }, (_, dia) => {
-      const reportesDia = reportes.filter((r) => {
+      const reportesDia = reportesValidos.filter((r) => {
         const fecha = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
         return fecha && fecha.getDay() === dia;
       });
@@ -75,7 +78,7 @@ const DeepAnalytics = ({ reportes = [] }) => {
       colaboradoresTop,
       tendenciasSeveridad,
     };
-  }, [reportes]);
+  }, [reportesValidos]);
 
   // 🎨 COLORES CONSISTENTES
   const colores = {
@@ -85,7 +88,7 @@ const DeepAnalytics = ({ reportes = [] }) => {
     danger: "#ef4444",
   };
 
-  if (reportes.length === 0) {
+  if (reportesValidos.length === 0) {
     return (
       <div className="deep-analytics-container">
         <div className="no-data-message">
@@ -128,7 +131,7 @@ const DeepAnalytics = ({ reportes = [] }) => {
           Análisis de Patrones
         </h2>
         <p className="analytics-subtitle">
-          Insights basados en {reportes.length} reportes
+          Insights basados en {reportesValidos.length} reportes
         </p>
       </div>
 
