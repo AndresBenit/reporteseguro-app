@@ -9,8 +9,6 @@ const ControlEPP = () => {
   const [form, setForm] = useState({
     titulo: "Registro Nueva Entrega",
     nombre: "",
-    elemento_epp: "",
-    cantidad: 1,
     area: "",
     observaciones: "",
     foto_url: "",
@@ -18,6 +16,11 @@ const ControlEPP = () => {
     firmado_por: "",
     fecha_firma: ""
   });
+
+  // Estado para elementos EPP múltiples
+  const [elementosSeleccionados, setElementosSeleccionados] = useState([
+    { id: Date.now(), producto: '', cantidad: 1 }
+  ]);
 
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -33,14 +36,9 @@ const ControlEPP = () => {
   const [showSugerencias, setShowSugerencias] = useState(false);
   const [colaboradoresFiltrados, setColaboradoresFiltrados] = useState([]);
 
-  // Lista de elementos EPP
-  const elementosEPP = [
-    "Casco de seguridad",
-    "Guantes de cuero", 
-    "Gafas de protección",
-    "Chaleco reflectante",
-    "Botas de seguridad"
-  ];
+  // Hook para obtener productos EPP desde la base de datos
+  const [productosEPP, setProductosEPP] = useState([]);
+  const [cargandoProductos, setCargandoProductos] = useState(true);
 
   // Áreas disponibles (estándar de la empresa)
   const areasDisponibles = [
@@ -64,23 +62,37 @@ const ControlEPP = () => {
     "Área de carga y descarga"
   ];
 
-  // Cargar colaboradores
+  // Cargar colaboradores y productos EPP
   useEffect(() => {
-    const fetchColaboradores = async () => {
+    const fetchData = async () => {
       try {
-        console.log('🔄 Cargando colaboradores...');
-        const data = await dbHelpers.getAll('colaboradores', {
+        console.log('🔄 Cargando datos...');
+        
+        // Cargar colaboradores
+        const colaboradoresData = await dbHelpers.getAll('colaboradores', {
           orderBy: 'nombre',
           ascending: true
         });
-        console.log('✅ Colaboradores cargados:', data.length);
-        setColaboradores(data);
+        console.log('✅ Colaboradores cargados:', colaboradoresData.length);
+        setColaboradores(colaboradoresData);
+
+        // Cargar productos EPP
+        const productosData = await dbHelpers.getAll('epp_productos', {
+          filters: { activo: true },
+          orderBy: 'nombre',
+          ascending: true
+        });
+        console.log('✅ Productos EPP cargados:', productosData.length);
+        setProductosEPP(productosData);
+        setCargandoProductos(false);
+        
       } catch (error) {
-        console.error('❌ Error fetching colaboradores:', error);
+        console.error('❌ Error cargando datos:', error);
+        setCargandoProductos(false);
       }
     };
 
-    fetchColaboradores();
+    fetchData();
   }, []);
 
   // Filtrar colaboradores cuando cambia el término de búsqueda
@@ -128,6 +140,56 @@ const ControlEPP = () => {
   // Cerrar sugerencias al hacer click fuera
   const handleBlurColaborador = () => {
     setTimeout(() => setShowSugerencias(false), 200);
+  };
+
+  // Funciones para manejar elementos EPP múltiples
+  const agregarElemento = () => {
+    setElementosSeleccionados([
+      ...elementosSeleccionados,
+      { id: Date.now(), producto: '', cantidad: 1 }
+    ]);
+  };
+
+  const eliminarElemento = (id) => {
+    if (elementosSeleccionados.length > 1) {
+      setElementosSeleccionados(elementosSeleccionados.filter(el => el.id !== id));
+    }
+  };
+
+  const actualizarElemento = (id, campo, valor) => {
+    setElementosSeleccionados(elementosSeleccionados.map(el => 
+      el.id === id ? { ...el, [campo]: valor } : el
+    ));
+  };
+
+  // Crear producto EPP si no existe
+  const crearProductoSiNoExiste = async (nombreProducto) => {
+    try {
+      // Buscar si ya existe
+      let producto = productosEPP.find(p => 
+        p.nombre.toLowerCase() === nombreProducto.toLowerCase()
+      );
+
+      if (!producto) {
+        console.log('🔄 Creando producto nuevo:', nombreProducto);
+        const nuevoProducto = await dbHelpers.create('epp_productos', {
+          nombre: nombreProducto,
+          stock_actual: 0,
+          stock_minimo: 5,
+          activo: true
+        });
+        
+        // Agregar a la lista local
+        setProductosEPP([...productosEPP, nuevoProducto]);
+        console.log('✅ Producto creado:', nuevoProducto);
+        return nuevoProducto;
+      }
+      
+      return producto;
+    } catch (error) {
+      console.error('❌ Error creando producto:', error);
+      throw error;
+    }
   };
 
   const handleChange = (e) => {
@@ -232,13 +294,10 @@ const ControlEPP = () => {
       return;
     }
 
-    if (!form.elemento_epp) {
-      setMensaje("❌ Debe seleccionar un elemento de protección personal");
-      return;
-    }
-
-    if (!form.cantidad || form.cantidad < 1) {
-      setMensaje("❌ La cantidad debe ser mayor a 0");
+    // Validar elementos seleccionados
+    const elementosValidos = elementosSeleccionados.filter(el => el.producto.trim() && el.cantidad > 0);
+    if (elementosValidos.length === 0) {
+      setMensaje("❌ Debe seleccionar al menos un elemento EPP con cantidad mayor a 0");
       return;
     }
 
@@ -266,28 +325,58 @@ const ControlEPP = () => {
         }
       }
 
-      // Guardar registro de EPP
+      // Procesar cada elemento EPP
+      const productosIds = [];
+      const elementosDetalle = [];
+
+      for (const elemento of elementosValidos) {
+        // Crear producto si no existe
+        const producto = await crearProductoSiNoExiste(elemento.producto);
+        productosIds.push(producto.id);
+        elementosDetalle.push({
+          id: producto.id,
+          nombre: producto.nombre,
+          cantidad: elemento.cantidad
+        });
+
+        // Registrar movimiento de salida en inventario
+        await dbHelpers.create('epp_movimientos', {
+          producto_id: producto.id,
+          tipo: 'salida',
+          cantidad: elemento.cantidad,
+          colaborador: form.nombre,
+          area: form.area,
+          observaciones: `Entrega a ${form.nombre} - ${form.observaciones || 'Sin observaciones'}`
+        });
+      }
+
+      // Crear descripción de la entrega
+      const descripcionElementos = elementosDetalle
+        .map(el => `${el.cantidad} ${el.nombre}`)
+        .join(', ');
+
+      // Guardar registro principal de EPP
       const eppData = {
         tipo: "epp",
         subtipo: "Entrega de EPP",
-        descripcion: `Entrega de ${form.cantidad} ${form.elemento_epp} a ${form.nombre}`,
-        severidad: "baja", // Las entregas de EPP son informativas
+        descripcion: `Entrega de elementos EPP a ${form.nombre}: ${descripcionElementos}`,
+        severidad: "baja",
         area: form.area,
-        reportante: "Control EPP", // Sistema de control
+        reportante: "Control EPP",
         foto_url: fotoUrl,
-        estado: "completado", // Las entregas se completan automáticamente
+        estado: "completado",
         tipo_reporte: "epp",
         prioridad: "normal",
         colaboradorinvolucrado: form.nombre,
-        accionrecomendada: `Entregar ${form.cantidad} ${form.elemento_epp}`,
-        // Campos específicos de EPP
-        elemento_epp: form.elemento_epp,
-        cantidad: form.cantidad,
+        accionrecomendada: `Entregar elementos EPP: ${descripcionElementos}`,
         observaciones: form.observaciones,
         // Campos de firma digital
         firma_url: form.firma_url,
         firmado_por: form.firmado_por,
-        fecha_firma: form.fecha_firma
+        fecha_firma: form.fecha_firma,
+        // Referencias a productos EPP
+        producto_epp_ids: productosIds,
+        elementos_epp: elementosDetalle
       };
 
       await dbHelpers.create('reportes', eppData);
@@ -296,8 +385,6 @@ const ControlEPP = () => {
       setForm({
         titulo: "Registro Nueva Entrega",
         nombre: "",
-        elemento_epp: "",
-        cantidad: 1,
         area: "",
         observaciones: "",
         foto_url: "",
@@ -305,6 +392,8 @@ const ControlEPP = () => {
         firmado_por: "",
         fecha_firma: ""
       });
+      setElementosSeleccionados([{ id: Date.now(), producto: '', cantidad: 1 }]);
+      setSearchTerm("");
       setSelectedImage(null);
       setImagePreview(null);
       setSignatureData(null);
@@ -513,68 +602,161 @@ const ControlEPP = () => {
           </div>
         </div>
 
-        {/* Elemento de Protección Personal */}
+        {/* Elementos de Protección Personal (Múltiples) */}
         <div style={{ marginBottom: "24px" }}>
           <label style={{ 
             display: "block", 
             fontWeight: "600", 
             color: "#374151", 
-            marginBottom: "8px",
+            marginBottom: "12px",
             fontSize: "14px"
           }}>
-            Elemento de Protección Personal *
+            🦺 Elementos de Protección Personal *
           </label>
-          <select
-            name="elemento_epp"
-            value={form.elemento_epp}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
+          
+          {elementosSeleccionados.map((elemento, index) => (
+            <div key={elemento.id} style={{
+              display: "flex",
+              gap: "12px",
+              alignItems: "end",
+              marginBottom: "12px",
+              padding: "16px",
+              background: "#f8fafc",
               borderRadius: "8px",
-              fontSize: "16px",
-              backgroundColor: "white",
-              cursor: "pointer"
+              border: "1px solid #e2e8f0"
+            }}>
+              <div style={{ flex: 2 }}>
+                <label style={{ 
+                  display: "block", 
+                  fontWeight: "500", 
+                  color: "#6b7280", 
+                  marginBottom: "6px",
+                  fontSize: "12px"
+                }}>
+                  Elemento EPP
+                </label>
+                {cargandoProductos ? (
+                  <div style={{ padding: "12px", textAlign: "center", color: "#6b7280" }}>
+                    🔄 Cargando...
+                  </div>
+                ) : (
+                  <select
+                    value={elemento.producto}
+                    onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
+                    required
+                    style={{
+                      width: "100%",
+                      padding: "12px",
+                      border: "2px solid #e5e7eb",
+                      borderRadius: "6px",
+                      fontSize: "14px",
+                      backgroundColor: "white",
+                      cursor: "pointer"
+                    }}
+                  >
+                    <option value="">Seleccionar elemento...</option>
+                    {productosEPP.map((producto) => (
+                      <option key={producto.id} value={producto.nombre}>
+                        {producto.nombre} (Stock: {producto.stock_actual})
+                      </option>
+                    ))}
+                    <option value="__nuevo__" style={{ borderTop: "1px solid #e5e7eb", fontStyle: "italic" }}>
+                      + Escribir nuevo elemento...
+                    </option>
+                  </select>
+                )}
+                
+                {/* Input para nuevo producto */}
+                {elemento.producto === '__nuevo__' && (
+                  <input
+                    type="text"
+                    placeholder="Escriba el nombre del nuevo elemento EPP..."
+                    style={{
+                      width: "100%",
+                      padding: "8px 12px",
+                      border: "2px solid #3b82f6",
+                      borderRadius: "6px",
+                      fontSize: "14px",
+                      marginTop: "8px"
+                    }}
+                    onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
+                    autoFocus
+                  />
+                )}
+              </div>
+              
+              <div style={{ flex: 1 }}>
+                <label style={{ 
+                  display: "block", 
+                  fontWeight: "500", 
+                  color: "#6b7280", 
+                  marginBottom: "6px",
+                  fontSize: "12px"
+                }}>
+                  Cantidad
+                </label>
+                <input
+                  type="number"
+                  value={elemento.cantidad}
+                  onChange={(e) => actualizarElemento(elemento.id, 'cantidad', parseInt(e.target.value) || 1)}
+                  min="1"
+                  max="100"
+                  style={{
+                    width: "100%",
+                    padding: "12px",
+                    border: "2px solid #e5e7eb",
+                    borderRadius: "6px",
+                    fontSize: "14px"
+                  }}
+                />
+              </div>
+              
+              <div style={{ display: "flex", gap: "4px" }}>
+                {elementosSeleccionados.length > 1 && (
+                  <button
+                    type="button"
+                    onClick={() => eliminarElemento(elemento.id)}
+                    style={{
+                      padding: "10px",
+                      background: "#ef4444",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "6px",
+                      cursor: "pointer",
+                      fontSize: "14px",
+                      fontWeight: "600",
+                      minWidth: "40px"
+                    }}
+                    title="Eliminar elemento"
+                  >
+                    ❌
+                  </button>
+                )}
+              </div>
+            </div>
+          ))}
+          
+          {/* Botón para agregar más elementos */}
+          <button
+            type="button"
+            onClick={agregarElemento}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              padding: "12px 16px",
+              background: "#10b981",
+              color: "white",
+              border: "none",
+              borderRadius: "8px",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "600",
+              marginTop: "8px"
             }}
           >
-            <option value="">Selecciona un elemento EPP</option>
-            {elementosEPP.map((elemento) => (
-              <option key={elemento} value={elemento}>
-                {elemento}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Cantidad */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            Cantidad *
-          </label>
-          <input
-            type="number"
-            name="cantidad"
-            value={form.cantidad}
-            onChange={handleChange}
-            min="1"
-            max="100"
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "16px"
-            }}
-          />
+            ➕ Agregar otro elemento EPP
+          </button>
         </div>
 
         {/* Área */}
