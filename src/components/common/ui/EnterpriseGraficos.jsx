@@ -148,6 +148,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
   // Filtrar reportes con lógica mejorada
   const reportesFiltrados = useMemo(() => {
+    if (!Array.isArray(reportes)) return [];
     let filtrados = [...reportes];
 
     // Filtro por rango de fechas
@@ -186,13 +187,14 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
 
   // Obtener áreas únicas para filtro
   const areasUnicas = useMemo(() => {
-    const areas = [...new Set(reportes.map(r => r.area).filter(Boolean))];
+    if (!Array.isArray(reportes)) return [];
+    const areas = [...new Set(reportes.map(r => r?.area).filter(Boolean))];
     return areas.sort();
   }, [reportes]);
 
   // Procesamiento de datos empresarial
   const datosEmpresariales = useMemo(() => {
-    if (!reportesFiltrados.length) {
+    if (!Array.isArray(reportesFiltrados) || !reportesFiltrados.length) {
       return {
         kpisExecutivos: {},
         distribuciones: {},
@@ -575,7 +577,7 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
     return null;
   }
 
-  if (!reportes.length) {
+  if (!Array.isArray(reportes) || !reportes.length) {
     return (
       <div className="enterprise-graficos">
         <div className="no-data-container">
@@ -2223,21 +2225,24 @@ const EnterpriseGraficos = ({ reportes = [] }) => {
   }
 
   function getUniqueCollaborators() {
-    const colaboradores = new Set(reportesFiltrados.map(r => r.colaboradorinvolucrado).filter(Boolean));
+    if (!Array.isArray(reportesFiltrados)) return 0;
+    const colaboradores = new Set(reportesFiltrados.map(r => r?.colaboradorinvolucrado).filter(Boolean));
     return colaboradores.size;
   }
 
   function getSafetyScore() {
+    if (!Array.isArray(reportesFiltrados)) return 0;
     const total = reportesFiltrados.length;
     if (total === 0) return 0;
-    const incidents = reportesFiltrados.filter(r => r.tipo_reporte === 'incidencia').length;
+    const incidents = reportesFiltrados.filter(r => r?.tipo_reporte === 'incidencia').length;
     return Math.max(0, Math.round(((total - incidents) / total) * 100));
   }
 
   function getIncidentRate() {
+    if (!Array.isArray(reportesFiltrados)) return '0.0';
     const total = reportesFiltrados.length;
     if (total === 0) return '0.0';
-    const incidents = reportesFiltrados.filter(r => r.tipo_reporte === 'incidencia').length;
+    const incidents = reportesFiltrados.filter(r => r?.tipo_reporte === 'incidencia').length;
     return (incidents / total * 100).toFixed(1);
   }
 
