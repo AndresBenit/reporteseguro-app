@@ -54,8 +54,9 @@ const ReportesHistorial = () => {
       const tipoReporte = String(r.tipoReporte || '').toLowerCase();
       
       return (
-        r.tipo === 'Acto Inseguro' ||
-        r.tipo === 'Condición Insegura' ||
+        r.tipo === 'incidencia' ||           // ✅ Nuevo valor correcto
+        r.tipo === 'Acto Inseguro' ||        // 🔄 Valores legacy
+        r.tipo === 'Condición Insegura' ||   // 🔄 Valores legacy
         r.tipo === 'Reporte de Incidencia' ||
         r.tipoReporte === 'incidencia' ||
         tipo.includes('acto') ||
@@ -69,7 +70,8 @@ const ReportesHistorial = () => {
       const tipoReporte = String(r.tipoReporte || '').toLowerCase();
       
       return (
-        r.tipo === 'Nueva Recomendación' ||
+        r.tipo === 'recomendacion' ||        // ✅ Nuevo valor correcto
+        r.tipo === 'Nueva Recomendación' ||  // 🔄 Valor legacy
         r.tipoReporte === 'recomendacion' ||
         tipo.includes('recomenda') ||
         tipo.includes('nueva') ||
@@ -82,7 +84,8 @@ const ReportesHistorial = () => {
       const tipoReporte = String(r.tipoReporte || '').toLowerCase();
       
       return (
-        r.tipo === 'Nuevo Abordaje en Campo' ||
+        r.tipo === 'abordaje' ||             // ✅ Nuevo valor correcto
+        r.tipo === 'Nuevo Abordaje en Campo' || // 🔄 Valor legacy
         r.tipoReporte === 'abordaje' ||
         tipo.includes('abordaj') ||
         tipo.includes('campo') ||
