@@ -149,7 +149,7 @@ const AbordajeCampo = () => {
     try {
       // Guardar abordaje
       const abordajeData = {
-        tipo: "Abordaje de Campo",
+        tipo: "abordaje",
         subtipo: "Abordaje de Seguridad",
         descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nAbordaje: ${form.abordaje}`,
         severidad: "media",

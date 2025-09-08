@@ -310,7 +310,7 @@ const SupervisionCampo = () => {
 
       // Guardar recomendación
       const recomendacionData = {
-        tipo: "Nueva Recomendación",
+        tipo: "recomendacion",
         subtipo: "Supervisión de Campo",
         descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nRecomendación: ${form.recomendacion}`,
         severidad: "media",
