@@ -53,6 +53,14 @@ const MainLayoutMejorado = ({ user, onLogout, children, reportes = [] }) => {
       color: '#7c3aed'
     },
     {
+      id: 'inventario',
+      label: 'Inventario',
+      icon: 'Package',
+      path: '/inventario',
+      description: 'Gestión de inventario EPP',
+      color: '#f97316'
+    },
+    {
       id: 'colaboradores',
       label: 'Personal',
       icon: 'Users',

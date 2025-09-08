@@ -13,6 +13,7 @@ import SupervisionMain from "./components/supervision/SupervisionMain";
 import SupervisionCampo from "./components/supervision/SupervisionCampo";
 import AbordajeCampo from "./components/supervision/AbordajeCampo";
 import ControlEPP from "./components/supervision/ControlEPP";
+import InventarioMain from "./components/inventory/InventarioMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -238,6 +239,9 @@ function App() {
                   
                   {/* Módulo de Colaboradores */}
                   <Route path="/colaboradores" element={<ColaboradoresMain />} />
+                  
+                  {/* Módulo de Inventario */}
+                  <Route path="/inventario" element={<InventarioMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />

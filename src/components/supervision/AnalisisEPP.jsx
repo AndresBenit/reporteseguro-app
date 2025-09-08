@@ -75,16 +75,19 @@ const AnalisisEPP = () => {
 
   // 📊 ANÁLISIS DE DATOS EPP
   const analisisEPP = useMemo(() => {
+    // Validar que reportesFiltrados sea un array
+    const reportesValidos = Array.isArray(reportesFiltrados) ? reportesFiltrados : [];
+    
     // 1. Estadísticas generales
-    const totalEntregas = reportesFiltrados.length;
-    const elementosUnicos = [...new Set(reportesFiltrados.map(r => r.elemento_epp))].filter(Boolean);
-    const personasAtendidas = [...new Set(reportesFiltrados.map(r => r.colaboradorinvolucrado))].filter(Boolean);
-    const areasAtendidas = [...new Set(reportesFiltrados.map(r => r.area))].filter(Boolean);
+    const totalEntregas = reportesValidos.length;
+    const elementosUnicos = [...new Set(reportesValidos.map(r => r?.elemento_epp).filter(Boolean))];
+    const personasAtendidas = [...new Set(reportesValidos.map(r => r?.colaboradorinvolucrado).filter(Boolean))];
+    const areasAtendidas = [...new Set(reportesValidos.map(r => r?.area).filter(Boolean))];
 
     // 2. EPP más pedidos (Top 5)
-    const elementosMasPedidos = reportesFiltrados.reduce((acc, reporte) => {
-      const elemento = reporte.elemento_epp || 'Sin especificar';
-      const cantidad = parseInt(reporte.cantidad);
+    const elementosMasPedidos = reportesValidos.reduce((acc, reporte) => {
+      const elemento = reporte?.elemento_epp || 'Sin especificar';
+      const cantidad = parseInt(reporte?.cantidad);
       const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
       acc[elemento] = (acc[elemento] || 0) + cantidadValida;
       return acc;
@@ -101,9 +104,9 @@ const AnalisisEPP = () => {
       .filter(item => item.cantidad > 0);
 
     // 3. Entregas por área
-    const entregasPorArea = reportesFiltrados.reduce((acc, reporte) => {
-      const area = reporte.area || 'Sin área';
-      const cantidad = parseInt(reporte.cantidad);
+    const entregasPorArea = reportesValidos.reduce((acc, reporte) => {
+      const area = reporte?.area || 'Sin área';
+      const cantidad = parseInt(reporte?.cantidad);
       const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
       acc[area] = (acc[area] || 0) + cantidadValida;
       return acc;
@@ -119,9 +122,9 @@ const AnalisisEPP = () => {
       .filter(item => item.cantidad > 0);
 
     // 4. Personas que han pedido EPP
-    const personasConEPP = reportesFiltrados.reduce((acc, reporte) => {
-      const persona = reporte.colaboradorinvolucrado || 'Anónimo';
-      const cantidad = parseInt(reporte.cantidad);
+    const personasConEPP = reportesValidos.reduce((acc, reporte) => {
+      const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
+      const cantidad = parseInt(reporte?.cantidad);
       const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
       acc[persona] = (acc[persona] || 0) + cantidadValida;
       return acc;
@@ -143,12 +146,12 @@ const AnalisisEPP = () => {
       fecha.setMonth(fecha.getMonth() - i);
       const mesYear = `${fecha.toLocaleDateString('es-ES', { month: 'short' })} ${fecha.getFullYear()}`;
       
-      const entregasDelMes = reportesFiltrados.filter(r => {
-        const fechaReporte = new Date(r.created_at);
+      const entregasDelMes = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r?.created_at);
         return fechaReporte.getMonth() === fecha.getMonth() && 
                fechaReporte.getFullYear() === fecha.getFullYear();
       }).reduce((sum, r) => {
-        const cantidad = parseInt(r.cantidad);
+        const cantidad = parseInt(r?.cantidad);
         const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
         return sum + cantidadValida;
       }, 0);
