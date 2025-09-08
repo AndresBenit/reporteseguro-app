@@ -4,16 +4,18 @@ import { Icon } from "../common/Icons";
 const ExecutiveAlerts = ({ reportes = [] }) => {
   // 🚨 ANÁLISIS DE ALERTAS CRÍTICAS
   const alertsData = useMemo(() => {
-    const criticos = reportes.filter((r) => r.severidad === "critica");
+    // Validar que reportes sea un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    const criticos = reportesValidos.filter((r) => r?.severidad === "critica");
     const pendientesCriticos = criticos.filter((r) => r.estado === "pendiente");
-    const sinResolver = reportes.filter((r) => {
+    const sinResolver = reportesValidos.filter((r) => {
       const fecha = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
       const hace7Dias = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
       return fecha < hace7Dias && !["resuelto", "cerrado"].includes(r.estado);
     });
 
     // Áreas problemáticas
-    const areaStats = reportes.reduce((acc, r) => {
+    const areaStats = reportesValidos.reduce((acc, r) => {
       const area = r.area || r.lugarLabor || "Sin especificar";
       if (!acc[area]) acc[area] = { total: 0, criticos: 0 };
       acc[area].total++;
@@ -31,9 +33,9 @@ const ExecutiveAlerts = ({ reportes = [] }) => {
       pendientesCriticos: pendientesCriticos.length,
       sinResolver: sinResolver.length,
       areasProblematicas,
-      totalReportes: reportes.length,
+      totalReportes: reportesValidos.length,
     };
-  }, [reportes]);
+  }, [reportesValidos]);
 
   // 🎯 GENERAR ALERTAS INTELIGENTES
   const alerts = useMemo(() => {

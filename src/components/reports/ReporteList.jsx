@@ -2,6 +2,9 @@ import React, { useState } from "react";
 import { reporteUtils, REPORTE_ESTADOS } from "../../constants/reporteStates";
 
 const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  
   const [filtroEstado, setFiltroEstado] = useState("todos");
   const [filtroSeveridad, setFiltroSeveridad] = useState("todos");
   const [busqueda, setBusqueda] = useState("");
@@ -10,7 +13,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
   const [imagenModal, setImagenModal] = useState(null);
 
   // Filtrar y ordenar reportes
-  const reportesFiltrados = reportes
+  const reportesFiltrados = reportesValidos
     .filter(reporte => {
       // Normalizar estado para comparación
       const estadoNormalizado = reporteUtils.normalizeEstado(reporte.estado);
@@ -143,7 +146,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
     );
   };
 
-  if (reportes.length === 0) {
+  if (reportesValidos.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "50px 20px" }}>
         <div style={{ fontSize: "3.5rem", marginBottom: "20px", opacity: 0.3 }}>📋</div>
@@ -245,7 +248,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
         gap: "10px"
       }}>
         <span style={{ fontWeight: "600", color: "#374151", fontSize: "0.9rem" }}>
-          📊 Mostrando {reportesFiltrados.length} de {reportes.length} reportes
+          📊 Mostrando {reportesFiltrados.length} de {reportesValidos.length} reportes
         </span>
         {(filtroEstado !== "todos" || filtroSeveridad !== "todos" || busqueda) && (
           <button
@@ -535,7 +538,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
         ))}
       </div>
 
-      {reportesFiltrados.length === 0 && reportes.length > 0 && (
+      {reportesFiltrados.length === 0 && reportesValidos.length > 0 && (
         <div style={{ textAlign: "center", padding: "40px 20px" }}>
           <div style={{ fontSize: "3rem", marginBottom: "15px", opacity: 0.3 }}>🔍</div>
           <h4 style={{ color: "#6b7280", marginBottom: "10px" }}>No se encontraron reportes</h4>
