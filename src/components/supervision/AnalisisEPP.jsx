@@ -22,130 +22,35 @@ import { Icon } from '../common/Icons';
 
 const AnalisisEPP = () => {
   const { reportes, loading } = useReportes();
-  const [filtroFecha, setFiltroFecha] = useState('30dias');
+  const [fechaInicio, setFechaInicio] = useState(() => {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - 30);
+    return fecha.toISOString().split('T')[0];
+  });
+  const [fechaFin, setFechaFin] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
 
   // Filtrar solo reportes EPP
   const reportesEPP = useMemo(() => {
     return reportes.filter(r => r.tipo === 'epp' || r.tipo_reporte === 'epp');
   }, [reportes]);
 
-  // Filtros de fecha
+  // Filtros de fecha por rango
   const reportesFiltrados = useMemo(() => {
-    const ahora = new Date();
-    let fechaLimite = new Date();
+    if (!fechaInicio || !fechaFin) return reportesEPP;
 
-    switch (filtroFecha) {
-      case '7dias':
-        fechaLimite.setDate(ahora.getDate() - 7);
-        break;
-      case '30dias':
-        fechaLimite.setDate(ahora.getDate() - 30);
-        break;
-      case '90dias':
-        fechaLimite.setDate(ahora.getDate() - 90);
-        break;
-      case '1año':
-        fechaLimite.setFullYear(ahora.getFullYear() - 1);
-        break;
-      default:
-        fechaLimite = new Date('2020-01-01'); // Todos los registros
-    }
+    const fechaInicioDate = new Date(fechaInicio);
+    const fechaFinDate = new Date(fechaFin);
+    fechaFinDate.setHours(23, 59, 59, 999); // Incluir todo el día final
 
     return reportesEPP.filter(reporte => {
       const fechaReporte = new Date(reporte.created_at);
-      return fechaReporte >= fechaLimite;
+      return fechaReporte >= fechaInicioDate && fechaReporte <= fechaFinDate;
     });
-  }, [reportesEPP, filtroFecha]);
+  }, [reportesEPP, fechaInicio, fechaFin]);
 
-  // 📊 ANÁLISIS DE DATOS EPP
-  const analisisEPP = useMemo(() => {
-    // 1. Estadísticas generales
-    const totalEntregas = reportesFiltrados.length;
-    const elementosUnicos = [...new Set(reportesFiltrados.map(r => r.elemento_epp))].filter(Boolean);
-    const personasAtendidas = [...new Set(reportesFiltrados.map(r => r.colaboradorinvolucrado))].filter(Boolean);
-    const areasAtendidas = [...new Set(reportesFiltrados.map(r => r.area))].filter(Boolean);
-
-    // 2. EPP más pedidos (Top 5)
-    const elementosMasPedidos = reportesFiltrados.reduce((acc, reporte) => {
-      const elemento = reporte.elemento_epp || 'Sin especificar';
-      const cantidad = parseInt(reporte.cantidad) || 1;
-      acc[elemento] = (acc[elemento] || 0) + cantidad;
-      return acc;
-    }, {});
-
-    const top5Elementos = Object.entries(elementosMasPedidos)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 5)
-      .map(([elemento, cantidad]) => ({
-        elemento,
-        cantidad,
-        color: getColorByElement(elemento)
-      }));
-
-    // 3. Entregas por área
-    const entregasPorArea = reportesFiltrados.reduce((acc, reporte) => {
-      const area = reporte.area || 'Sin área';
-      acc[area] = (acc[area] || 0) + (parseInt(reporte.cantidad) || 1);
-      return acc;
-    }, {});
-
-    const areasMasActivas = Object.entries(entregasPorArea)
-      .sort(([,a], [,b]) => b - a)
-      .map(([area, cantidad]) => ({
-        area: area.length > 15 ? area.substring(0, 15) + '...' : area,
-        cantidad,
-        color: getColorByArea(area)
-      }));
-
-    // 4. Personas que han pedido EPP
-    const personasConEPP = reportesFiltrados.reduce((acc, reporte) => {
-      const persona = reporte.colaboradorinvolucrado || 'Anónimo';
-      acc[persona] = (acc[persona] || 0) + (parseInt(reporte.cantidad) || 1);
-      return acc;
-    }, {});
-
-    const topPersonas = Object.entries(personasConEPP)
-      .sort(([,a], [,b]) => b - a)
-      .slice(0, 10)
-      .map(([persona, cantidad]) => ({
-        persona: persona.length > 20 ? persona.substring(0, 20) + '...' : persona,
-        cantidad
-      }));
-
-    // 5. Entregas por mes (últimos 6 meses)
-    const entregasPorMes = [];
-    for (let i = 5; i >= 0; i--) {
-      const fecha = new Date();
-      fecha.setMonth(fecha.getMonth() - i);
-      const mesYear = `${fecha.toLocaleDateString('es-ES', { month: 'short' })} ${fecha.getFullYear()}`;
-      
-      const entregasDelMes = reportesFiltrados.filter(r => {
-        const fechaReporte = new Date(r.created_at);
-        return fechaReporte.getMonth() === fecha.getMonth() && 
-               fechaReporte.getFullYear() === fecha.getFullYear();
-      }).reduce((sum, r) => sum + (parseInt(r.cantidad) || 1), 0);
-
-      entregasPorMes.push({
-        mes: mesYear,
-        entregas: entregasDelMes
-      });
-    }
-
-    return {
-      estadisticas: {
-        totalEntregas,
-        elementosUnicos: elementosUnicos.length,
-        personasAtendidas: personasAtendidas.length,
-        areasAtendidas: areasAtendidas.length
-      },
-      top5Elementos,
-      areasMasActivas,
-      topPersonas,
-      entregasPorMes
-    };
-  }, [reportesFiltrados]);
-
-  // Funciones auxiliares de colores
+  // Funciones auxiliares de colores (DEBE estar antes del useMemo)
   const getColorByElement = (elemento) => {
     const colors = {
       'Casco': '#ef4444',
@@ -167,6 +72,107 @@ const AnalisisEPP = () => {
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
     return colors[Math.abs(hash) % colors.length];
   };
+
+  // 📊 ANÁLISIS DE DATOS EPP
+  const analisisEPP = useMemo(() => {
+    // 1. Estadísticas generales
+    const totalEntregas = reportesFiltrados.length;
+    const elementosUnicos = [...new Set(reportesFiltrados.map(r => r.elemento_epp))].filter(Boolean);
+    const personasAtendidas = [...new Set(reportesFiltrados.map(r => r.colaboradorinvolucrado))].filter(Boolean);
+    const areasAtendidas = [...new Set(reportesFiltrados.map(r => r.area))].filter(Boolean);
+
+    // 2. EPP más pedidos (Top 5)
+    const elementosMasPedidos = reportesFiltrados.reduce((acc, reporte) => {
+      const elemento = reporte.elemento_epp || 'Sin especificar';
+      const cantidad = parseInt(reporte.cantidad);
+      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
+      acc[elemento] = (acc[elemento] || 0) + cantidadValida;
+      return acc;
+    }, {});
+
+    const top5Elementos = Object.entries(elementosMasPedidos)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([elemento, cantidad]) => ({
+        elemento: elemento || 'Sin especificar',
+        cantidad: isNaN(cantidad) ? 0 : cantidad,
+        color: getColorByElement(elemento)
+      }))
+      .filter(item => item.cantidad > 0);
+
+    // 3. Entregas por área
+    const entregasPorArea = reportesFiltrados.reduce((acc, reporte) => {
+      const area = reporte.area || 'Sin área';
+      const cantidad = parseInt(reporte.cantidad);
+      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
+      acc[area] = (acc[area] || 0) + cantidadValida;
+      return acc;
+    }, {});
+
+    const areasMasActivas = Object.entries(entregasPorArea)
+      .sort(([,a], [,b]) => b - a)
+      .map(([area, cantidad]) => ({
+        area: area && area.length > 15 ? area.substring(0, 15) + '...' : (area || 'Sin área'),
+        cantidad: isNaN(cantidad) ? 0 : cantidad,
+        color: getColorByArea(area || 'Sin área')
+      }))
+      .filter(item => item.cantidad > 0);
+
+    // 4. Personas que han pedido EPP
+    const personasConEPP = reportesFiltrados.reduce((acc, reporte) => {
+      const persona = reporte.colaboradorinvolucrado || 'Anónimo';
+      const cantidad = parseInt(reporte.cantidad);
+      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
+      acc[persona] = (acc[persona] || 0) + cantidadValida;
+      return acc;
+    }, {});
+
+    const topPersonas = Object.entries(personasConEPP)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 10)
+      .map(([persona, cantidad]) => ({
+        persona: persona && persona.length > 20 ? persona.substring(0, 20) + '...' : (persona || 'Anónimo'),
+        cantidad: isNaN(cantidad) ? 0 : cantidad
+      }))
+      .filter(item => item.cantidad > 0);
+
+    // 5. Entregas por mes (últimos 6 meses)
+    const entregasPorMes = [];
+    for (let i = 5; i >= 0; i--) {
+      const fecha = new Date();
+      fecha.setMonth(fecha.getMonth() - i);
+      const mesYear = `${fecha.toLocaleDateString('es-ES', { month: 'short' })} ${fecha.getFullYear()}`;
+      
+      const entregasDelMes = reportesFiltrados.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getMonth() === fecha.getMonth() && 
+               fechaReporte.getFullYear() === fecha.getFullYear();
+      }).reduce((sum, r) => {
+        const cantidad = parseInt(r.cantidad);
+        const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
+        return sum + cantidadValida;
+      }, 0);
+
+      entregasPorMes.push({
+        mes: mesYear,
+        entregas: isNaN(entregasDelMes) ? 0 : entregasDelMes
+      });
+    }
+
+    return {
+      estadisticas: {
+        totalEntregas: isNaN(totalEntregas) ? 0 : totalEntregas,
+        elementosUnicos: isNaN(elementosUnicos.length) ? 0 : elementosUnicos.length,
+        personasAtendidas: isNaN(personasAtendidas.length) ? 0 : personasAtendidas.length,
+        areasAtendidas: isNaN(areasAtendidas.length) ? 0 : areasAtendidas.length
+      },
+      top5Elementos: top5Elementos || [],
+      areasMasActivas: areasMasActivas || [],
+      topPersonas: topPersonas || [],
+      entregasPorMes: entregasPorMes || []
+    };
+  }, [reportesFiltrados, getColorByElement, getColorByArea]);
+
 
   if (loading) {
     return (
@@ -198,7 +204,7 @@ const AnalisisEPP = () => {
         </p>
       </div>
 
-      {/* Filtros */}
+      {/* Filtros de fecha */}
       <div style={{ 
         background: 'white',
         padding: '20px',
@@ -206,33 +212,107 @@ const AnalisisEPP = () => {
         marginBottom: '30px',
         boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
         display: 'flex',
-        gap: '15px',
-        alignItems: 'center'
+        gap: '20px',
+        alignItems: 'center',
+        flexWrap: 'wrap'
       }}>
-        <label style={{ fontWeight: '600', color: '#374151' }}>Período:</label>
-        {[
-          { value: '7dias', label: '7 días' },
-          { value: '30dias', label: '30 días' },
-          { value: '90dias', label: '90 días' },
-          { value: '1año', label: '1 año' },
-          { value: 'todos', label: 'Todo' }
-        ].map(opcion => (
-          <button
-            key={opcion.value}
-            onClick={() => setFiltroFecha(opcion.value)}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <label style={{ fontWeight: '600', color: '#374151', minWidth: '120px' }}>
+            📅 Fecha Inicio:
+          </label>
+          <input
+            type="date"
+            value={fechaInicio}
+            onChange={(e) => setFechaInicio(e.target.value)}
             style={{
-              padding: '8px 16px',
-              borderRadius: '6px',
-              border: '1px solid #d1d5db',
-              background: filtroFecha === opcion.value ? '#3b82f6' : 'white',
-              color: filtroFecha === opcion.value ? 'white' : '#374151',
-              cursor: 'pointer',
-              fontSize: '0.9rem'
+              padding: '10px 12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              minWidth: '150px',
+              outline: 'none',
+              transition: 'border-color 0.3s ease'
             }}
-          >
-            {opcion.label}
-          </button>
-        ))}
+            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+          />
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <label style={{ fontWeight: '600', color: '#374151', minWidth: '120px' }}>
+            📅 Fecha Fin:
+          </label>
+          <input
+            type="date"
+            value={fechaFin}
+            onChange={(e) => setFechaFin(e.target.value)}
+            style={{
+              padding: '10px 12px',
+              border: '2px solid #d1d5db',
+              borderRadius: '8px',
+              fontSize: '0.9rem',
+              minWidth: '150px',
+              outline: 'none',
+              transition: 'border-color 0.3s ease'
+            }}
+            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
+            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
+          />
+        </div>
+
+        {/* Botones de período rápido */}
+        <div style={{ display: 'flex', gap: '8px', marginLeft: '20px' }}>
+          <span style={{ fontSize: '0.85rem', color: '#6b7280', alignSelf: 'center' }}>Rápido:</span>
+          {[
+            { label: '7d', dias: 7 },
+            { label: '30d', dias: 30 },
+            { label: '90d', dias: 90 },
+            { label: '1a', dias: 365 }
+          ].map(periodo => (
+            <button
+              key={periodo.dias}
+              onClick={() => {
+                const fin = new Date();
+                const inicio = new Date();
+                inicio.setDate(fin.getDate() - periodo.dias);
+                setFechaInicio(inicio.toISOString().split('T')[0]);
+                setFechaFin(fin.toISOString().split('T')[0]);
+              }}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '4px',
+                border: '1px solid #d1d5db',
+                background: 'white',
+                color: '#374151',
+                cursor: 'pointer',
+                fontSize: '0.8rem',
+                fontWeight: '500',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = '#f3f4f6';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'white';
+              }}
+            >
+              {periodo.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Mostrar período seleccionado */}
+        <div style={{
+          marginLeft: 'auto',
+          padding: '8px 12px',
+          background: '#f0f9ff',
+          border: '1px solid #bae6fd',
+          borderRadius: '6px',
+          fontSize: '0.85rem',
+          color: '#0369a1'
+        }}>
+          📊 Analizando: {new Date(fechaInicio).toLocaleDateString('es-ES')} - {new Date(fechaFin).toLocaleDateString('es-ES')}
+        </div>
       </div>
 
       {/* Estadísticas principales */}
@@ -326,25 +406,38 @@ const AnalisisEPP = () => {
           }}>
             🏆 Top 5 EPP Más Pedidos
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={analisisEPP.top5Elementos}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis 
-                dataKey="elemento" 
-                tick={{ fontSize: 12 }}
-                angle={-45}
-                textAnchor="end"
-                height={60}
-              />
-              <YAxis />
-              <Tooltip />
-              <Bar 
-                dataKey="cantidad" 
-                fill="#3b82f6"
-                radius={[4, 4, 0, 0]}
-              />
-            </BarChart>
-          </ResponsiveContainer>
+          {analisisEPP.top5Elementos && analisisEPP.top5Elementos.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analisisEPP.top5Elementos}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis 
+                  dataKey="elemento" 
+                  tick={{ fontSize: 12 }}
+                  angle={-45}
+                  textAnchor="end"
+                  height={60}
+                />
+                <YAxis />
+                <Tooltip />
+                <Bar 
+                  dataKey="cantidad" 
+                  fill="#3b82f6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ 
+              height: '300px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#6b7280',
+              fontSize: '0.9rem'
+            }}>
+              No hay datos de EPP para mostrar
+            </div>
+          )}
         </div>
 
         {/* Entregas por área */}
@@ -365,24 +458,37 @@ const AnalisisEPP = () => {
           }}>
             🏭 Entregas por Área
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <PieChart>
-              <Pie
-                data={analisisEPP.areasMasActivas}
-                cx="50%"
-                cy="50%"
-                outerRadius={100}
-                dataKey="cantidad"
-                label={({area, percent}) => `${area}: ${(percent * 100).toFixed(0)}%`}
-                labelLine={false}
-              >
-                {analisisEPP.areasMasActivas.map((entry, index) => (
-                  <Cell key={`cell-${index}`} fill={entry.color} />
-                ))}
-              </Pie>
-              <Tooltip />
-            </PieChart>
-          </ResponsiveContainer>
+          {analisisEPP.areasMasActivas && analisisEPP.areasMasActivas.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={analisisEPP.areasMasActivas}
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  dataKey="cantidad"
+                  label={({area, percent}) => `${area}: ${(percent * 100).toFixed(0)}%`}
+                  labelLine={false}
+                >
+                  {analisisEPP.areasMasActivas.map((entry, index) => (
+                    <Cell key={`cell-${index}`} fill={entry.color} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ 
+              height: '300px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#6b7280',
+              fontSize: '0.9rem'
+            }}>
+              No hay datos de áreas para mostrar
+            </div>
+          )}
         </div>
       </div>
 
@@ -410,21 +516,34 @@ const AnalisisEPP = () => {
           }}>
             📈 Entregas Mensuales
           </h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <AreaChart data={analisisEPP.entregasPorMes}>
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="mes" />
-              <YAxis />
-              <Tooltip />
-              <Area 
-                type="monotone" 
-                dataKey="entregas" 
-                stroke="#10b981" 
-                fill="#10b981"
-                fillOpacity={0.3}
-              />
-            </AreaChart>
-          </ResponsiveContainer>
+          {analisisEPP.entregasPorMes && analisisEPP.entregasPorMes.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={analisisEPP.entregasPorMes}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="mes" />
+                <YAxis />
+                <Tooltip />
+                <Area 
+                  type="monotone" 
+                  dataKey="entregas" 
+                  stroke="#10b981" 
+                  fill="#10b981"
+                  fillOpacity={0.3}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          ) : (
+            <div style={{ 
+              height: '300px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#6b7280',
+              fontSize: '0.9rem'
+            }}>
+              No hay datos mensuales para mostrar
+            </div>
+          )}
         </div>
 
         {/* Top personas */}
@@ -445,28 +564,41 @@ const AnalisisEPP = () => {
           }}>
             👥 Personas que más EPP han recibido
           </h3>
-          <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-            {analisisEPP.topPersonas.map((persona, index) => (
-              <div key={index} style={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                padding: '12px 0',
-                borderBottom: '1px solid #f3f4f6'
-              }}>
-                <span style={{ fontSize: '0.9rem', color: '#374151' }}>
-                  {persona.persona}
-                </span>
-                <span style={{ 
-                  fontSize: '1rem',
-                  fontWeight: '600',
-                  color: '#3b82f6'
+          {analisisEPP.topPersonas && analisisEPP.topPersonas.length > 0 ? (
+            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
+              {analisisEPP.topPersonas.map((persona, index) => (
+                <div key={index} style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  padding: '12px 0',
+                  borderBottom: '1px solid #f3f4f6'
                 }}>
-                  {persona.cantidad}
-                </span>
-              </div>
-            ))}
-          </div>
+                  <span style={{ fontSize: '0.9rem', color: '#374151' }}>
+                    {persona.persona}
+                  </span>
+                  <span style={{ 
+                    fontSize: '1rem',
+                    fontWeight: '600',
+                    color: '#3b82f6'
+                  }}>
+                    {persona.cantidad}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div style={{ 
+              height: '300px', 
+              display: 'flex', 
+              alignItems: 'center', 
+              justifyContent: 'center',
+              color: '#6b7280',
+              fontSize: '0.9rem'
+            }}>
+              No hay datos de personas para mostrar
+            </div>
+          )}
         </div>
       </div>
 

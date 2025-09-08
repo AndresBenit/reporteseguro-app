@@ -26,8 +26,14 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
   const reportesValidos = Array.isArray(reportes) ? reportes : [];
   
   // Estados para filtros
-  const [fechaDesde, setFechaDesde] = useState('');
-  const [fechaHasta, setFechaHasta] = useState('');
+  const [fechaDesde, setFechaDesde] = useState(() => {
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - 30);
+    return fecha.toISOString().split('T')[0];
+  });
+  const [fechaHasta, setFechaHasta] = useState(() => {
+    return new Date().toISOString().split('T')[0];
+  });
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroArea, setFiltroArea] = useState('todas');
   const [vistaActiva, setVistaActiva] = useState('resumen');
@@ -54,8 +60,10 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
   };
 
   const limpiarFiltroFechas = () => {
-    setFechaDesde('');
-    setFechaHasta('');
+    const fecha = new Date();
+    fecha.setDate(fecha.getDate() - 30);
+    setFechaDesde(fecha.toISOString().split('T')[0]);
+    setFechaHasta(new Date().toISOString().split('T')[0]);
   };
 
   const opcionesTipo = [
@@ -452,9 +460,41 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
           </div>
         </div>
 
+        {/* Botones de período rápido y período seleccionado */}
+        <div className="periodo-controls">
+          <div className="periodo-buttons">
+            <span className="periodo-label">Período rápido:</span>
+            {[
+              { label: '7d', dias: 7 },
+              { label: '30d', dias: 30 },
+              { label: '90d', dias: 90 },
+              { label: '1a', dias: 365 }
+            ].map(periodo => (
+              <button
+                key={periodo.dias}
+                onClick={() => {
+                  const fin = new Date();
+                  const inicio = new Date();
+                  inicio.setDate(fin.getDate() - periodo.dias);
+                  setFechaDesde(inicio.toISOString().split('T')[0]);
+                  setFechaHasta(fin.toISOString().split('T')[0]);
+                }}
+                className="periodo-btn"
+              >
+                {periodo.label}
+              </button>
+            ))}
+          </div>
+          
+          {/* Mostrar período seleccionado */}
+          <div className="periodo-selected">
+            📊 Analizando: {new Date(fechaDesde).toLocaleDateString('es-ES')} - {new Date(fechaHasta).toLocaleDateString('es-ES')}
+          </div>
+        </div>
+
         <div className="filtros-acciones">
           <button onClick={limpiarFiltroFechas} className="btn-limpiar">
-            🗑️ Limpiar Fechas
+            🔄 Resetear Fechas
           </button>
         </div>
 
@@ -805,6 +845,58 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
           box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
 
+        .periodo-controls {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 20px 0;
+          padding: 16px;
+          background: #f8fafc;
+          border-radius: 8px;
+          border: 1px solid #e2e8f0;
+        }
+
+        .periodo-buttons {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+
+        .periodo-label {
+          font-size: 0.85rem;
+          color: #6b7280;
+          margin-right: 8px;
+          font-weight: 500;
+        }
+
+        .periodo-btn {
+          padding: 6px 12px;
+          border-radius: 4px;
+          border: 1px solid #d1d5db;
+          background: white;
+          color: #374151;
+          cursor: pointer;
+          font-size: 0.8rem;
+          font-weight: 500;
+          transition: all 0.2s ease;
+        }
+
+        .periodo-btn:hover {
+          background: #f3f4f6;
+          border-color: ${colores.primary};
+          color: ${colores.primary};
+        }
+
+        .periodo-selected {
+          padding: 8px 12px;
+          background: #f0f9ff;
+          border: 1px solid #bae6fd;
+          border-radius: 6px;
+          font-size: 0.85rem;
+          color: #0369a1;
+          font-weight: 500;
+        }
+
         .filtros-acciones {
           display: flex;
           gap: 12px;
@@ -980,6 +1072,21 @@ const EnhancedGraficosCompleto = ({ reportes = [] }) => {
 
           .grafico-card {
             padding: 20px;
+          }
+
+          .periodo-controls {
+            flex-direction: column;
+            gap: 12px;
+            align-items: stretch;
+          }
+
+          .periodo-buttons {
+            justify-content: center;
+            flex-wrap: wrap;
+          }
+
+          .periodo-selected {
+            text-align: center;
           }
         }
 
