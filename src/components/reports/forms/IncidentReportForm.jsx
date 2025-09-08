@@ -17,6 +17,7 @@ const IncidentReportForm = () => {
   const navigate = useNavigate();
   const [form, setForm] = useState({
     tipo: "incidencia",
+    subtipo: "condicion_insegura", // Nuevo campo para diferenciar
     descripcion: "",
     severidad: "media",
     area: "",
@@ -37,8 +38,8 @@ const IncidentReportForm = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleTipoChange = (tipo) => {
-    setForm({ ...form, tipo });
+  const handleSubtipoChange = (subtipo) => {
+    setForm({ ...form, subtipo });
   };
 
   // Función para comprimir imagen
@@ -208,6 +209,7 @@ const IncidentReportForm = () => {
       setMensaje("✅ ¡Reporte enviado exitosamente!");
       setForm({
         tipo: "incidencia",
+        subtipo: "condicion_insegura",
         descripcion: "",
         severidad: "media", 
         area: "",
@@ -324,7 +326,7 @@ const IncidentReportForm = () => {
           <div style={{ display: 'flex', gap: '12px' }}>
             <button
               type="button"
-              onClick={() => handleTipoChange("incidencia")}
+              onClick={() => handleSubtipoChange("condicion_insegura")}
               style={{
                 padding: '12px 24px',
                 borderRadius: '25px',
@@ -332,8 +334,8 @@ const IncidentReportForm = () => {
                 cursor: 'pointer',
                 fontWeight: '600',
                 transition: 'all 0.3s ease',
-                background: form.tipo === "incidencia" ? '#3b82f6' : '#f3f4f6',
-                color: form.tipo === "incidencia" ? 'white' : '#374151',
+                background: form.subtipo === "condicion_insegura" ? '#3b82f6' : '#f3f4f6',
+                color: form.subtipo === "condicion_insegura" ? 'white' : '#374151',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
@@ -343,7 +345,7 @@ const IncidentReportForm = () => {
             </button>
             <button
               type="button"
-              onClick={() => handleTipoChange("incidencia")}
+              onClick={() => handleSubtipoChange("acto_inseguro")}
               style={{
                 padding: '12px 24px',
                 borderRadius: '25px',
@@ -351,8 +353,8 @@ const IncidentReportForm = () => {
                 cursor: 'pointer',
                 fontWeight: '600',
                 transition: 'all 0.3s ease',
-                background: form.tipo === "incidencia" ? '#3b82f6' : '#f3f4f6',
-                color: form.tipo === "incidencia" ? 'white' : '#374151',
+                background: form.subtipo === "acto_inseguro" ? '#3b82f6' : '#f3f4f6',
+                color: form.subtipo === "acto_inseguro" ? 'white' : '#374151',
                 display: 'flex',
                 alignItems: 'center',
                 gap: '8px'
