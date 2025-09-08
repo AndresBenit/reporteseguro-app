@@ -10,16 +10,18 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
   
   // 📊 CÁLCULOS AVANZADOS DE KPIs
   const analytics = useMemo(() => {
-    const total = reportes.length;
-    const resueltos = reportes.filter(r => ['resuelto', 'cerrado'].includes(r.estado)).length;
-    const criticos = reportes.filter(r => r.severidad === 'critica').length;
-    const enProceso = reportes.filter(r => ['en_proceso', 'asignado'].includes(r.estado)).length;
-    const pendientes = reportes.filter(r => r.estado === 'pendiente').length;
+    // Validar que reportes sea un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    const total = reportesValidos.length;
+    const resueltos = reportesValidos.filter(r => ['resuelto', 'cerrado'].includes(r?.estado)).length;
+    const criticos = reportesValidos.filter(r => r?.severidad === 'critica').length;
+    const enProceso = reportesValidos.filter(r => ['en_proceso', 'asignado'].includes(r?.estado)).length;
+    const pendientes = reportesValidos.filter(r => r?.estado === 'pendiente').length;
     
     // Análisis temporal (últimos 30 días)
     const ahora = new Date();
     const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const reportesRecientes = reportes.filter(r => {
+    const reportesRecientes = reportesValidos.filter(r => {
       const fecha = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
       return fecha && fecha >= hace30Dias;
     });
@@ -29,22 +31,22 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
       Math.round(2.5 + Math.random() * 2) : 0; // Entre 2.5 y 4.5 días
 
     // Tasa de participación de colaboradores
-    const colaboradoresActivos = new Set(reportes.map(r => 
-      r.reportante || r.colaboradorNombre
+    const colaboradoresActivos = new Set(reportesValidos.map(r => 
+      r?.reportante || r?.colaboradorNombre
     ).filter(Boolean)).size;
 
     // Distribución por tipo
     const porTipo = {
-      incidencia: reportes.filter(r => r.tipoReporte === 'incidencia' || 
-        String(r.tipo || '').toLowerCase().includes('acto')).length,
-      recomendacion: reportes.filter(r => r.tipoReporte === 'recomendacion' || 
-        String(r.tipo || '').toLowerCase().includes('recomenda')).length,
-      abordaje: reportes.filter(r => r.tipoReporte === 'abordaje' || 
-        String(r.tipo || '').toLowerCase().includes('abordaj')).length
+      incidencia: reportesValidos.filter(r => r?.tipoReporte === 'incidencia' || 
+        String(r?.tipo || '').toLowerCase().includes('acto')).length,
+      recomendacion: reportesValidos.filter(r => r?.tipoReporte === 'recomendacion' || 
+        String(r?.tipo || '').toLowerCase().includes('recomenda')).length,
+      abordaje: reportesValidos.filter(r => r?.tipoReporte === 'abordaje' || 
+        String(r?.tipo || '').toLowerCase().includes('abordaj')).length
     };
 
     // Distribución por área
-    const porArea = reportes.reduce((acc, reporte) => {
+    const porArea = reportesValidos.reduce((acc, reporte) => {
       const area = reporte.area || reporte.lugarLabor || 'Sin especificar';
       acc[area] = (acc[area] || 0) + 1;
       return acc;
@@ -77,7 +79,7 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
       const inicioSemana = new Date(fecha.getTime() - fecha.getDay() * 24 * 60 * 60 * 1000);
       const finSemana = new Date(inicioSemana.getTime() + 6 * 24 * 60 * 60 * 1000);
       
-      const reportesSemana = reportes.filter(r => {
+      const reportesSemana = reportesValidos.filter(r => {
         const fechaReporte = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
         return fechaReporte && fechaReporte >= inicioSemana && fechaReporte <= finSemana;
       });
