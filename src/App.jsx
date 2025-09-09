@@ -15,6 +15,7 @@ import AbordajeCampo from "./components/supervision/AbordajeCampo";
 import ControlEPP from "./components/supervision/ControlEPP";
 import InventarioMain from "./components/inventory/InventarioMain";
 import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
+import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -252,6 +253,9 @@ function App() {
                   
                   {/* Módulo de Capacitaciones SST */}
                   <Route path="/capacitaciones" element={<CapacitacionesMain />} />
+                  
+                  {/* Módulo de Exámenes Médicos SST */}
+                  <Route path="/examenes-medicos" element={<ExamenesMedicosMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />

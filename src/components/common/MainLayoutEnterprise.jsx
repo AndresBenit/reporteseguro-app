@@ -111,7 +111,7 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
         {
           id: 'examenes',
           label: 'Exámenes Médicos',
-          icon: 'Activity',
+          icon: 'Heart',
           path: '/examenes-medicos',
           description: 'Vigilancia epidemiológica',
           isNew: true
