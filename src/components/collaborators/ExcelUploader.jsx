@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { supabase, dbHelpers } from '../../services/supabase';
+import { Icon } from '../common/Icons';
 
 const ExcelUploader = ({ onUploadComplete, onClose }) => {
   const [file, setFile] = useState(null);
@@ -12,7 +13,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
     if (!selectedFile) return;
 
     if (!selectedFile.name.toLowerCase().includes('.xlsx') && !selectedFile.name.toLowerCase().includes('.xls')) {
-      setMensaje('❌ Por favor selecciona un archivo Excel (.xlsx o .xls)');
+      setMensaje('Por favor selecciona un archivo Excel (.xlsx o .xls)');
       setTimeout(() => setMensaje(''), 3000);
       return;
     }
@@ -34,10 +35,10 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
       });
 
       setPreview(sheetsData);
-      setMensaje(`✅ Excel cargado: ${workbook.SheetNames.length} hoja(s) encontrada(s)`);
+      setMensaje(`Excel cargado: ${workbook.SheetNames.length} hoja(s) encontrada(s)`);
     } catch (error) {
       console.error('Error leyendo Excel:', error);
-      setMensaje('❌ Error leyendo el archivo Excel');
+      setMensaje('Error leyendo el archivo Excel');
     }
   };
 
@@ -45,7 +46,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
     if (!file) return;
 
     setUploading(true);
-    setMensaje('📊 Procesando Excel y migrando datos...');
+    setMensaje('Procesando Excel y migrando datos...');
 
     try {
       // Leer el archivo Excel usando SheetJS
@@ -62,7 +63,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
         const worksheet = workbook.Sheets[sheetName];
         const jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
         
-        setMensaje(`📋 Procesando hoja: ${sheetName}...`);
+        setMensaje(`Procesando hoja: ${sheetName}...`);
         
         // Buscar secciones de áreas y sus columnas
         const secciones = [];
@@ -114,7 +115,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
         
         // Procesar cada sección por separado
         for (const seccion of secciones) {
-          setMensaje(`📋 Procesando ${seccion.area}...`);
+          setMensaje(`Procesando ${seccion.area}...`);
           
           // Procesar datos en el rango de esta sección
           for (let i = seccion.startRow + 3; i <= seccion.endRow; i++) {
@@ -174,7 +175,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
       };
       
       setMensaje(
-        `✅ Migración completada:\n` +
+        `Migración completada:\n` +
         `• ${resultado.migrados} colaboradores migrados\n` +
         `• ${resultado.yaExisten} ya existían\n` +
         `• ${resultado.errores} errores\n` +
@@ -191,7 +192,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
       
     } catch (error) {
       console.error('Error en migración:', error);
-      setMensaje(`❌ Error procesando Excel: ${error.message}`);
+      setMensaje(`Error procesando Excel: ${error.message}`);
     } finally {
       setUploading(false);
     }
@@ -226,7 +227,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           color: '#1f2937',
           textAlign: 'center'
         }}>
-          📊 Subir Excel de Colaboradores
+          Subir Excel de Colaboradores
         </h2>
         
         <p style={{ 
@@ -241,9 +242,9 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
           <div style={{
             padding: '16px',
             borderRadius: '12px',
-            background: mensaje.includes('✅') ? '#d1fae5' : mensaje.includes('❌') ? '#fef2f2' : '#f0f9ff',
-            color: mensaje.includes('✅') ? '#065f46' : mensaje.includes('❌') ? '#991b1b' : '#1e40af',
-            border: `1px solid ${mensaje.includes('✅') ? '#a7f3d0' : mensaje.includes('❌') ? '#fecaca' : '#93c5fd'}`,
+            background: mensaje.includes('completada') || mensaje.includes('cargado') ? '#d1fae5' : mensaje.includes('Error') ? '#fef2f2' : '#f0f9ff',
+            color: mensaje.includes('completada') || mensaje.includes('cargado') ? '#065f46' : mensaje.includes('Error') ? '#991b1b' : '#1e40af',
+            border: `1px solid ${mensaje.includes('completada') || mensaje.includes('cargado') ? '#a7f3d0' : mensaje.includes('Error') ? '#fecaca' : '#93c5fd'}`,
             marginBottom: '20px',
             whiteSpace: 'pre-line',
             fontWeight: '600',
@@ -261,7 +262,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
             textAlign: 'center',
             background: '#f9fafb'
           }}>
-            <div style={{ fontSize: '3rem', marginBottom: '20px', opacity: 0.5 }}>📋</div>
+            <div style={{ fontSize: '3rem', marginBottom: '20px', opacity: 0.5, display: 'flex', justifyContent: 'center', alignItems: 'center', width: '64px', height: '64px', background: '#f3f4f6', borderRadius: '12px', margin: '0 auto 20px' }}><Icon name="FileText" size={32} color="#6b7280" /></div>
             <input
               type="file"
               accept=".xlsx,.xls"
@@ -285,7 +286,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
                 fontSize: '1rem'
               }}
             >
-              📋 Seleccionar Excel
+              Seleccionar Excel
             </label>
             <p style={{ marginTop: '15px', color: '#6b7280', fontSize: '0.9rem' }}>
               Formatos soportados: .xlsx, .xls<br/>
@@ -303,7 +304,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
               marginBottom: '20px'
             }}>
               <h3 style={{ color: '#1e40af', marginBottom: '10px' }}>
-                📋 {file.name}
+                {file.name}
               </h3>
               <p style={{ color: '#6b7280', fontSize: '0.9rem' }}>
                 Tamaño: {(file.size / 1024).toFixed(1)} KB
@@ -326,9 +327,9 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
                 }}
               >
                 {uploading ? (
-                  <>⏳ Procesando...</>
+                  <>Procesando...</>
                 ) : (
-                  <>🚀 Migrar Colaboradores</>
+                  <>Migrar Colaboradores</>
                 )}
               </button>
               
@@ -350,7 +351,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
                   fontSize: '1rem'
                 }}
               >
-                🔄 Cambiar Archivo
+                Cambiar Archivo
               </button>
             </div>
           </div>
@@ -373,7 +374,7 @@ const ExcelUploader = ({ onUploadComplete, onClose }) => {
               cursor: uploading ? 'not-allowed' : 'pointer'
             }}
           >
-            ❌ Cerrar
+            Cerrar
           </button>
         </div>
       </div>

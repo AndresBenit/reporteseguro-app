@@ -36,15 +36,15 @@ export const ESTADO_EQUIVALENCIAS = {
   'cancelado': REPORTE_ESTADOS.CANCELADO
 };
 
-// Iconos para cada estado
+// Iconos SVG profesionales para cada estado
 export const ESTADO_ICONS = {
-  [REPORTE_ESTADOS.PENDIENTE]: '⏳',
-  [REPORTE_ESTADOS.PROCESO]: '🔄',
-  [REPORTE_ESTADOS.RESUELTO]: '✅',
-  [REPORTE_ESTADOS.ASIGNADO]: '👤',
-  [REPORTE_ESTADOS.EN_PROCESO]: '🔄',
-  [REPORTE_ESTADOS.CERRADO]: '🔒',
-  [REPORTE_ESTADOS.CANCELADO]: '❌'
+  [REPORTE_ESTADOS.PENDIENTE]: 'Clock',
+  [REPORTE_ESTADOS.PROCESO]: 'RefreshCw',
+  [REPORTE_ESTADOS.RESUELTO]: 'CheckCircle',
+  [REPORTE_ESTADOS.ASIGNADO]: 'User',
+  [REPORTE_ESTADOS.EN_PROCESO]: 'RefreshCw',
+  [REPORTE_ESTADOS.CERRADO]: 'Lock',
+  [REPORTE_ESTADOS.CANCELADO]: 'XCircle'
 };
 
 // Colores para cada estado
@@ -74,12 +74,12 @@ export const SEVERIDAD_DISPLAY_MAP = {
   [REPORTE_SEVERIDADES.CRITICA]: 'Crítica'
 };
 
-// Iconos para severidades
+// Iconos SVG profesionales para severidades
 export const SEVERIDAD_ICONS = {
-  [REPORTE_SEVERIDADES.BAJA]: '🟢',
-  [REPORTE_SEVERIDADES.MEDIA]: '🟡',
-  [REPORTE_SEVERIDADES.ALTA]: '🟠',
-  [REPORTE_SEVERIDADES.CRITICA]: '🔴'
+  [REPORTE_SEVERIDADES.BAJA]: 'Circle',
+  [REPORTE_SEVERIDADES.MEDIA]: 'AlertCircle',
+  [REPORTE_SEVERIDADES.ALTA]: 'AlertTriangle',
+  [REPORTE_SEVERIDADES.CRITICA]: 'AlertOctagon'
 };
 
 // Colores para severidades
@@ -124,10 +124,10 @@ export const reporteUtils = {
     return ESTADO_DISPLAY_MAP[normalizado] || estado;
   },
 
-  // Obtener icono de estado
+  // Obtener icono de estado (nombre SVG)
   getEstadoIcon: (estado) => {
     const normalizado = reporteUtils.normalizeEstado(estado);
-    return ESTADO_ICONS[normalizado] || '❓';
+    return ESTADO_ICONS[normalizado] || 'HelpCircle';
   },
 
   // Obtener color de estado
@@ -142,18 +142,18 @@ export const reporteUtils = {
            Object.keys(ESTADO_EQUIVALENCIAS).includes(estado);
   },
 
-  // Obtener estados disponibles para select
+  // Obtener estados disponibles para select (sin iconos en labels)
   getEstadosForSelect: () => {
     return [
-      { value: REPORTE_ESTADOS.PENDIENTE, label: `${ESTADO_ICONS[REPORTE_ESTADOS.PENDIENTE]} ${ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.PENDIENTE]}` },
-      { value: REPORTE_ESTADOS.EN_PROCESO, label: `${ESTADO_ICONS[REPORTE_ESTADOS.EN_PROCESO]} ${ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.EN_PROCESO]}` },
-      { value: REPORTE_ESTADOS.RESUELTO, label: `${ESTADO_ICONS[REPORTE_ESTADOS.RESUELTO]} ${ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.RESUELTO]}` }
+      { value: REPORTE_ESTADOS.PENDIENTE, label: ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.PENDIENTE], icon: ESTADO_ICONS[REPORTE_ESTADOS.PENDIENTE] },
+      { value: REPORTE_ESTADOS.EN_PROCESO, label: ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.EN_PROCESO], icon: ESTADO_ICONS[REPORTE_ESTADOS.EN_PROCESO] },
+      { value: REPORTE_ESTADOS.RESUELTO, label: ESTADO_DISPLAY_MAP[REPORTE_ESTADOS.RESUELTO], icon: ESTADO_ICONS[REPORTE_ESTADOS.RESUELTO] }
     ];
   },
 
-  // Utilidades para severidad
+  // Utilidades para severidad (nombres SVG)
   getSeveridadIcon: (severidad) => {
-    return SEVERIDAD_ICONS[severidad] || '⚪';
+    return SEVERIDAD_ICONS[severidad] || 'Circle';
   },
 
   getSeveridadColor: (severidad) => {

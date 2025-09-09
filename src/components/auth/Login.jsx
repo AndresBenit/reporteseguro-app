@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { authHelpers } from "../../services/supabase";
+import { Icon } from "../common/Icons";
 
 const Login = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -59,9 +60,26 @@ const Login = () => {
         width: "100%",
         maxWidth: "420px"
       }}>
-        {/* Header */}
+        {/* Header Enterprise */}
         <div style={{ textAlign: "center", marginBottom: "35px" }}>
-          <div style={{ fontSize: "3.5rem", marginBottom: "20px" }}>🛡️</div>
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "center", 
+            marginBottom: "20px" 
+          }}>
+            <div style={{
+              width: "64px",
+              height: "64px",
+              background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+              borderRadius: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 8px 24px rgba(30, 64, 175, 0.25)"
+            }}>
+              <Icon name="Shield" size={32} color="white" />
+            </div>
+          </div>
           <h1 style={{
             fontSize: "2.2rem",
             fontWeight: "700",
@@ -93,7 +111,6 @@ const Login = () => {
             fontWeight: "600",
             fontSize: "0.9rem"
           }}>
-            <span>❌</span>
             {error}
           </div>
         )}
@@ -102,7 +119,7 @@ const Login = () => {
         <form onSubmit={handleSubmit}>
           <div className="form-group">
             <label className="form-label">
-              📧 Correo Electrónico
+              Correo Electrónico
             </label>
             <input
               type="email"
@@ -118,7 +135,7 @@ const Login = () => {
 
           <div className="form-group">
             <label className="form-label">
-              🔒 Contraseña
+              Contraseña
             </label>
             <input
               type="password"
@@ -146,12 +163,11 @@ const Login = () => {
           >
             {loading ? (
               <>
-                <span className="pulse">⏳</span>
                 Iniciando sesión...
               </>
             ) : (
               <>
-                🚀 Acceder al Sistema
+                Acceder al Sistema
               </>
             )}
           </button>
@@ -173,7 +189,8 @@ const Login = () => {
             gap: "8px",
             fontSize: "0.95rem"
           }}>
-            ℹ️ Características del Sistema
+            <Icon name="Info" size={16} />
+            Características del Sistema
           </h4>
           <ul style={{ 
             color: "#6b7280", 
@@ -201,7 +218,7 @@ const Login = () => {
             fontSize: "0.8rem",
             fontWeight: "500"
           }}>
-            🔐 Acceso autorizado únicamente
+            Acceso autorizado únicamente
           </p>
           <p style={{ 
             color: "#9ca3af", 

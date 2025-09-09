@@ -20,7 +20,7 @@ const InventarioMain = () => {
   useEffect(() => {
     const cargarDatos = async () => {
       try {
-        console.log('🔄 Cargando inventario...');
+        console.log('Cargando inventario...');
         
         // Cargar productos
         const productosData = await dbHelpers.getAll('epp_productos', {
@@ -38,14 +38,14 @@ const InventarioMain = () => {
         
         setProductos(productosData || []);
         setMovimientos(movimientosData || []);
-        console.log('✅ Inventario cargado:', { 
+        console.log('Inventario cargado:', { 
           productos: productosData?.length || 0,
           movimientos: movimientosData?.length || 0 
         });
         
       } catch (error) {
-        console.error('❌ Error cargando inventario:', error);
-        setMensaje('❌ Error cargando datos del inventario');
+        console.error('Error cargando inventario:', error);
+        setMensaje('Error cargando datos del inventario');
       } finally {
         setLoading(false);
       }
@@ -59,7 +59,7 @@ const InventarioMain = () => {
     e.preventDefault();
     
     if (!nuevoProducto.nombre.trim()) {
-      setMensaje('❌ El nombre del producto es obligatorio');
+      setMensaje('El nombre del producto es obligatorio');
       return;
     }
 
@@ -72,12 +72,12 @@ const InventarioMain = () => {
       setProductos([...productos, productoCreado]);
       setNuevoProducto({ nombre: '', descripcion: '', stock_minimo: 5, precio_unitario: 0 });
       setShowFormulario(false);
-      setMensaje('✅ Producto creado exitosamente');
+      setMensaje('Producto creado exitosamente');
       setTimeout(() => setMensaje(''), 3000);
       
     } catch (error) {
-      console.error('❌ Error creando producto:', error);
-      setMensaje('❌ Error creando el producto');
+      console.error('Error creando producto:', error);
+      setMensaje('Error creando el producto');
       setTimeout(() => setMensaje(''), 3000);
     }
   };
@@ -101,12 +101,12 @@ const InventarioMain = () => {
       });
       setProductos(productosActualizados);
       
-      setMensaje(`✅ Stock ${tipoMovimiento === 'entrada' ? 'aumentado' : 'reducido'} correctamente`);
+      setMensaje(`Stock ${tipoMovimiento === 'entrada' ? 'aumentado' : 'reducido'} correctamente`);
       setTimeout(() => setMensaje(''), 3000);
       
     } catch (error) {
-      console.error('❌ Error ajustando stock:', error);
-      setMensaje('❌ Error ajustando el stock');
+      console.error('Error ajustando stock:', error);
+      setMensaje('Error ajustando el stock');
       setTimeout(() => setMensaje(''), 3000);
     }
   };
@@ -195,9 +195,9 @@ const InventarioMain = () => {
           padding: '12px 16px',
           marginBottom: '20px',
           borderRadius: '8px',
-          backgroundColor: mensaje.includes('❌') ? '#fef2f2' : '#f0fdf4',
-          borderLeft: `4px solid ${mensaje.includes('❌') ? '#ef4444' : '#10b981'}`,
-          color: mensaje.includes('❌') ? '#dc2626' : '#059669',
+          backgroundColor: mensaje.includes('Error') ? '#fef2f2' : '#f0fdf4',
+          borderLeft: `4px solid ${mensaje.includes('Error') ? '#ef4444' : '#10b981'}`,
+          color: mensaje.includes('Error') ? '#dc2626' : '#059669',
           fontSize: '14px',
           fontWeight: '500'
         }}>

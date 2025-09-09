@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { authHelpers } from "../../services/supabase";
+import { Icon } from "../common/Icons";
 
 const LoginMejorado = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -60,7 +61,7 @@ const LoginMejorado = () => {
         {/* Header */}
         <div className="login-header">
           <div className="logo-animation">
-            <div className="logo-shield">🛡️</div>
+            <div className="logo-shield"><Icon name="Shield" size={32} color="white" /></div>
             <div className="logo-glow"></div>
           </div>
           <h1 className="login-title">
@@ -74,7 +75,6 @@ const LoginMejorado = () => {
         {/* Error Message */}
         {error && (
           <div className="mobile-alert error login-error">
-            <span>❌</span>
             {error}
           </div>
         )}
@@ -83,7 +83,7 @@ const LoginMejorado = () => {
         <form onSubmit={handleSubmit} className="login-form">
           <div className="form-group">
             <label className="form-label">
-              📧 Correo Electrónico
+              Correo Electrónico
             </label>
             <input
               type="email"
@@ -101,7 +101,7 @@ const LoginMejorado = () => {
 
           <div className="form-group">
             <label className="form-label">
-              🔒 Contraseña
+              Contraseña
             </label>
             <input
               type="password"
@@ -122,12 +122,11 @@ const LoginMejorado = () => {
           >
             {loading ? (
               <>
-                <span className="pulse">⏳</span>
                 Iniciando sesión...
               </>
             ) : (
               <>
-                🚀 Acceder al Sistema
+                Acceder al Sistema
               </>
             )}
           </button>
@@ -136,7 +135,8 @@ const LoginMejorado = () => {
         {/* Info del sistema */}
         <div className="login-features">
           <h4 className="features-title">
-            ℹ️ Características del Sistema
+            <Icon name="Info" size={16} />
+            Características del Sistema
           </h4>
           <ul className="features-list">
             <li>Gestión centralizada de reportes</li>
@@ -150,7 +150,7 @@ const LoginMejorado = () => {
         {/* Footer */}
         <div className="login-footer">
           <p className="footer-security">
-            🔐 Acceso autorizado únicamente
+            Acceso autorizado únicamente
           </p>
           <p className="footer-contact">
             Sistema privado · Contacta al administrador

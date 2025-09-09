@@ -118,11 +118,17 @@ function App() {
           maxWidth: '360px'
         }}>
           <div style={{
-            fontSize: '3rem',
-            marginBottom: '20px',
-            color: '#1e40af'
+            width: "64px",
+            height: "64px",
+            background: "linear-gradient(135deg, #1e40af 0%, #3b82f6 100%)",
+            borderRadius: "16px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            boxShadow: "0 8px 24px rgba(30, 64, 175, 0.25)",
+            margin: "0 auto 20px"
           }}>
-            🛡️
+            <Icon name="Shield" size={32} color="white" />
           </div>
           <h2 style={{
             color: '#1e293b',

@@ -71,19 +71,19 @@ const IncidentReportForm = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith('image/')) {
-        setMensaje("❌ Por favor selecciona solo archivos de imagen");
+        setMensaje("Por favor selecciona solo archivos de imagen");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setMensaje("❌ La imagen debe ser menor a 5MB");
+        setMensaje("La imagen debe ser menor a 5MB");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
 
       try {
-        setMensaje("🔄 Optimizando imagen...");
+        setMensaje("Optimizando imagen...");
         const compressedBlob = await compressImage(file);
         const compressedFile = new File([compressedBlob], file.name, {
           type: 'image/jpeg',
@@ -96,7 +96,7 @@ const IncidentReportForm = () => {
         reader.onload = (e) => setImagePreview(e.target.result);
         reader.readAsDataURL(compressedFile);
         
-        setMensaje("✅ Imagen cargada correctamente");
+        setMensaje("Imagen cargada correctamente");
         setTimeout(() => setMensaje(""), 3000);
       } catch (error) {
         console.error('Error procesando imagen:', error);
@@ -206,7 +206,7 @@ const IncidentReportForm = () => {
       
       console.log('✅ Reporte creado exitosamente');
       
-      setMensaje("✅ ¡Reporte enviado exitosamente!");
+      setMensaje("¡Reporte enviado exitosamente!");
       setForm({
         tipo: "incidencia",
         subtipo: "condicion_insegura",
@@ -232,7 +232,7 @@ const IncidentReportForm = () => {
       console.error("❌ Error message:", error.message);
       console.error("❌ Error details:", error.details);
       
-      let mensajeError = "❌ Error al enviar el reporte";
+      let mensajeError = "Error al enviar el reporte";
       if (error.message) {
         mensajeError += `: ${error.message}`;
       }
@@ -297,9 +297,9 @@ const IncidentReportForm = () => {
           marginBottom: '20px',
           fontWeight: '600',
           textAlign: 'center',
-          background: mensaje.includes('✅') ? '#d1fae5' : '#fef2f2',
-          color: mensaje.includes('✅') ? '#065f46' : '#dc2626',
-          border: `1px solid ${mensaje.includes('✅') ? '#a7f3d0' : '#fecaca'}`
+          background: mensaje.includes('exitosamente') || mensaje.includes('correctamente') ? '#d1fae5' : '#fef2f2',
+          color: mensaje.includes('exitosamente') || mensaje.includes('correctamente') ? '#065f46' : '#dc2626',
+          border: `1px solid ${mensaje.includes('exitosamente') || mensaje.includes('correctamente') ? '#a7f3d0' : '#fecaca'}`
         }}>
           {mensaje}
         </div>
@@ -341,7 +341,7 @@ const IncidentReportForm = () => {
                 gap: '8px'
               }}
             >
-              💡 Condición Insegura
+              Condición Insegura
             </button>
             <button
               type="button"
@@ -360,7 +360,7 @@ const IncidentReportForm = () => {
                 gap: '8px'
               }}
             >
-              ⚠️ Acto Inseguro
+              Acto Inseguro
             </button>
           </div>
         </div>
