@@ -6,6 +6,7 @@ const PerfilIndividual = () => {
   const [colaboradores, setColaboradores] = useState([]);
   const [recomendaciones, setRecomendaciones] = useState([]);
   const [abordajes, setAbordajes] = useState([]);
+  const [reportes, setReportes] = useState([]);
   const [selectedColaborador, setSelectedColaborador] = useState(null);
   const [loading, setLoading] = useState(true);
   
@@ -31,6 +32,10 @@ const PerfilIndividual = () => {
         // Cargar abordajes
         const abordajesData = await dbHelpers.getAll('abordajes_campo');
         setAbordajes(abordajesData);
+
+        // Cargar reportes (incluye EPP, incidencias, etc.)
+        const reportesData = await dbHelpers.getAll('reportes');
+        setReportes(Array.isArray(reportesData) ? reportesData : []);
       } catch (error) {
         console.error('Error loading data:', error);
       } finally {
@@ -44,11 +49,13 @@ const PerfilIndividual = () => {
     const colaboradoresSubscription = dbHelpers.subscribe('colaboradores', () => fetchData());
     const recomendacionesSubscription = dbHelpers.subscribe('recomendaciones_campo', () => fetchData());
     const abordajesSubscription = dbHelpers.subscribe('abordajes_campo', () => fetchData());
+    const reportesSubscription = dbHelpers.subscribe('reportes', () => fetchData());
 
     return () => {
       if (colaboradoresSubscription) colaboradoresSubscription.unsubscribe();
       if (recomendacionesSubscription) recomendacionesSubscription.unsubscribe();
       if (abordajesSubscription) abordajesSubscription.unsubscribe();
+      if (reportesSubscription) reportesSubscription.unsubscribe();
     };
   }, []);
 
@@ -93,7 +100,7 @@ const PerfilIndividual = () => {
     setTimeout(() => setShowSugerencias(false), 200);
   };
 
-  // Obtener recomendaciones y abordajes del colaborador seleccionado
+  // Obtener todas las intervenciones del colaborador seleccionado (recomendaciones, abordajes y reportes)
   const getIntervencionesColaborador = () => {
     if (!selectedColaborador) return [];
     
@@ -105,8 +112,25 @@ const PerfilIndividual = () => {
       .filter(abordaje => abordaje.colaborador?.id === selectedColaborador.id)
       .map(abordaje => ({ ...abordaje, tipo: 'abordaje' }));
     
+    // Reportes del colaborador (EPP, incidencias, etc.)
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    const reportesColaborador = reportesValidos
+      .filter(reporte => 
+        reporte.reportante === selectedColaborador.nombre ||
+        reporte.reportante === selectedColaborador.cedula ||
+        (reporte.descripcion && 
+         reporte.descripcion.toLowerCase().includes(selectedColaborador.nombre.toLowerCase()))
+      )
+      .map(reporte => ({ 
+        ...reporte, 
+        tipo: reporte.tipo || 'incidencia',
+        hallazgo: reporte.descripcion || reporte.observaciones || 'Sin descripción',
+        recomendacion: reporte.accionesTomadas || reporte.medidas || 'Sin acciones específicas',
+        lugarLabor: reporte.ubicacion || reporte.lugar || 'No especificado'
+      }));
+    
     // Combinar y ordenar por fecha
-    const todasIntervenciones = [...recsColaborador, ...abordajesColaborador]
+    const todasIntervenciones = [...recsColaborador, ...abordajesColaborador, ...reportesColaborador]
       .sort((a, b) => {
         if (!a.fecha || !b.fecha) return 0;
         return new Date(b.fecha) - new Date(a.fecha);
@@ -135,6 +159,9 @@ const PerfilIndividual = () => {
       return {
         totalRecomendaciones: 0,
         totalAbordajes: 0,
+        totalReportes: 0,
+        totalEPP: 0,
+        totalIncidencias: 0,
         totalIntervenciones: 0,
         ultimaIntervencion: null,
         lugares: {},
@@ -146,6 +173,9 @@ const PerfilIndividual = () => {
     // Contar por tipo
     const recomendacionesCount = todasIntervenciones.filter(i => i.tipo === 'recomendacion').length;
     const abordajesCount = todasIntervenciones.filter(i => i.tipo === 'abordaje').length;
+    const eppCount = todasIntervenciones.filter(i => i.tipo === 'epp').length;
+    const incidenciasCount = todasIntervenciones.filter(i => i.tipo === 'incidencia' || i.tipo === 'incidente').length;
+    const reportesCount = eppCount + incidenciasCount;
 
     // Contar por lugares
     const lugares = {};
@@ -165,6 +195,8 @@ const PerfilIndividual = () => {
         fecha: fecha,
         recomendaciones: 0,
         abordajes: 0,
+        epp: 0,
+        incidencias: 0,
         total: 0
       });
     }
@@ -180,8 +212,12 @@ const PerfilIndividual = () => {
         if (mesIndex !== -1) {
           if (intervencion.tipo === 'recomendacion') {
             meses[mesIndex].recomendaciones++;
-          } else {
+          } else if (intervencion.tipo === 'abordaje') {
             meses[mesIndex].abordajes++;
+          } else if (intervencion.tipo === 'epp') {
+            meses[mesIndex].epp = (meses[mesIndex].epp || 0) + 1;
+          } else {
+            meses[mesIndex].incidencias = (meses[mesIndex].incidencias || 0) + 1;
           }
           meses[mesIndex].total++;
         }
@@ -208,6 +244,9 @@ const PerfilIndividual = () => {
     return {
       totalRecomendaciones: recomendacionesCount,
       totalAbordajes: abordajesCount,
+      totalReportes: reportesCount,
+      totalEPP: eppCount,
+      totalIncidencias: incidenciasCount,
       totalIntervenciones: todasIntervenciones.length,
       ultimaIntervencion: todasIntervenciones[0]?.fecha,
       lugares,
@@ -389,7 +428,14 @@ const PerfilIndividual = () => {
                 {colaboradoresFiltrados.map(colaborador => {
                   const recsColaborador = recomendaciones.filter(r => r.colaborador?.id === colaborador.id);
                   const abordajesColaborador = abordajes.filter(a => a.colaborador?.id === colaborador.id);
-                  const totalIntervenciones = recsColaborador.length + abordajesColaborador.length;
+                  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+                  const reportesColaborador = reportesValidos.filter(reporte => 
+                    reporte.reportante === colaborador.nombre ||
+                    reporte.reportante === colaborador.cedula ||
+                    (reporte.descripcion && 
+                     reporte.descripcion.toLowerCase().includes(colaborador.nombre.toLowerCase()))
+                  );
+                  const totalIntervenciones = recsColaborador.length + abordajesColaborador.length + reportesColaborador.length;
                   return (
                     <div
                       key={colaborador.id}
@@ -503,12 +549,14 @@ const PerfilIndividual = () => {
       {/* Dashboard del Colaborador Seleccionado */}
       {selectedColaborador ? (
         <div>
-          {/* Estadísticas Premium del Colaborador */}
+          {/* Estadísticas Premium del Colaborador con EPP */}
           <div style={{
             display: "grid",
             gridTemplateColumns: window.innerWidth <= 768 
               ? "repeat(2, 1fr)" 
-              : "repeat(4, 1fr)",
+              : window.innerWidth <= 1024
+                ? "repeat(3, 1fr)"
+                : "repeat(5, 1fr)",
             gap: "16px",
             marginBottom: "24px"
           }}>
@@ -543,6 +591,42 @@ const PerfilIndividual = () => {
               </div>
               <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
                 🔄 Abordajes
+              </div>
+            </div>
+            
+            {/* Card EPP */}
+            <div style={{
+              background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(139, 92, 246, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.totalEPP}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                🛡️ Control EPP
+              </div>
+            </div>
+            
+            {/* Card Incidencias */}
+            <div style={{
+              background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.totalIncidencias}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                🚨 Incidencias
               </div>
             </div>
             
@@ -758,6 +842,24 @@ const PerfilIndividual = () => {
                         dot={{ fill: '#10b981', strokeWidth: 2, r: 5 }}
                         activeDot={{ r: 7, stroke: '#10b981', strokeWidth: 2, fill: 'white' }}
                         name="Abordajes"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="epp" 
+                        stroke="#8b5cf6" 
+                        strokeWidth={2}
+                        dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#8b5cf6', strokeWidth: 2, fill: 'white' }}
+                        name="Control EPP"
+                      />
+                      <Line 
+                        type="monotone" 
+                        dataKey="incidencias" 
+                        stroke="#ef4444" 
+                        strokeWidth={2}
+                        dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
+                        activeDot={{ r: 6, stroke: '#ef4444', strokeWidth: 2, fill: 'white' }}
+                        name="Incidencias"
                       />
                     </LineChart>
                   </ResponsiveContainer>
