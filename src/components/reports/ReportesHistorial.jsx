@@ -26,16 +26,18 @@ const ReportesHistorial = () => {
 
   // DEBUG: Ver qué tipos tenemos cuando cambien los reportes
   useEffect(() => {
-    if (reportes.length > 0) {
+    // Validar que reportes sea un array válido
+    const reportesValidos = Array.isArray(reportes) ? reportes : [];
+    if (reportesValidos.length > 0) {
       console.log('=== TIPOS DE REPORTES ENCONTRADOS ===');
-      const tiposUnicos = [...new Set(reportes.map(r => r.tipo))];
-      const tiposReporteUnicos = [...new Set(reportes.map(r => r.tipoReporte))];
+      const tiposUnicos = [...new Set(reportesValidos.map(r => r?.tipo))];
+      const tiposReporteUnicos = [...new Set(reportesValidos.map(r => r?.tipoReporte))];
       console.log('Tipos (campo "tipo"):', tiposUnicos);
       console.log('Tipos (campo "tipoReporte"):', tiposReporteUnicos);
-      console.log('Total reportes:', reportes.length);
+      console.log('Total reportes:', reportesValidos.length);
       
       console.log('=== DETALLES DE CADA REPORTE ===');
-      reportes.forEach(r => {
+      reportesValidos.forEach(r => {
         console.log(`ID: ${r.id}`);
         console.log(`  - Tipo: "${r.tipo}"`);
         console.log(`  - TipoReporte: "${r.tipoReporte}"`);
@@ -570,7 +572,7 @@ const ReportesHistorial = () => {
           textAlign: 'center'
         }}>
           <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b7280' }}>
-            {reportes.length}
+            {reportesValidos.length}
           </div>
           <div style={{ color: '#374151', fontWeight: '600' }}>Total</div>
         </div>

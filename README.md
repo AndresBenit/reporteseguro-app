@@ -14,7 +14,7 @@
 
 *💰 Plataforma SaaS probada en minería que genera ROI del 340% en 12 meses*
 
-[**🚀 Demo Live**](https://reporteseguro-app.vercel.app) • [**💵 Pricing**](#pricing) • [**📊 Case Studies**](#casos-de-exito) • [**💬 Contacto Comercial**](mailto:ventas@reporteseguro.com)
+[**🚀 Demo Live**](https://reporteseguro-app.vercel.app) • [**💵 Pricing**](#pricing) • [**📊 Case Studies**](#casos-de-exito) • [**💬 Contacto Comercial**](mailto:benitezgrajalesfelipe@gmail.com)
 
 </div>
 

@@ -130,7 +130,9 @@ export const debounce = (func, wait) => {
  * Calcula estadísticas básicas de un array de reportes
  */
 export const calculateReportStats = (reportes) => {
-  const total = reportes.length;
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+  const total = reportesValidos.length;
   
   if (total === 0) {
     return {
@@ -144,9 +146,9 @@ export const calculateReportStats = (reportes) => {
     };
   }
   
-  const pendientes = reportes.filter(r => r.estado === "pendiente").length;
-  const criticos = reportes.filter(r => r.severidad === "critica").length;
-  const resueltos = reportes.filter(r => r.estado === "resuelto").length;
+  const pendientes = reportesValidos.filter(r => r?.estado === "pendiente").length;
+  const criticos = reportesValidos.filter(r => r?.severidad === "critica").length;
+  const resueltos = reportesValidos.filter(r => r?.estado === "resuelto").length;
   
   return {
     total,
