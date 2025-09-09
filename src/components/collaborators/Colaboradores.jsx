@@ -7,6 +7,7 @@ const Colaboradores = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({ total: 0, activos: 0, centroIndustrial: 0, hornosSolera: 0 });
+  const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
   const [filtroArea, setFiltroArea] = useState('TODOS');
   const [filtroBusqueda, setFiltroBusqueda] = useState('');
   const [mensaje, setMensaje] = useState('');
@@ -206,65 +207,101 @@ const Colaboradores = () => {
 
   return (
     <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Header */}
+      {/* Header Mejorado */}
       <div style={{
-        display: "flex",
-        flexDirection: window.innerWidth <= 768 ? "column" : "row",
-        justifyContent: "space-between",
-        alignItems: window.innerWidth <= 768 ? "flex-start" : "center",
-        marginBottom: "30px",
-        gap: "20px"
+        background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
+        borderRadius: "16px",
+        padding: "24px",
+        marginBottom: "24px",
+        color: "white",
+        boxShadow: "0 4px 20px rgba(37, 99, 235, 0.15)"
       }}>
-        <div>
-          <h1 style={{ 
-            fontSize: window.innerWidth <= 768 ? "2rem" : "2.5rem", 
-            fontWeight: "700", 
-            color: "#1f2937",
-            marginBottom: "8px"
-          }}>
-            👥 Gestión de Colaboradores
-          </h1>
-          <p style={{ color: "#6b7280", fontSize: "1rem" }}>
-            Administra la base de datos de colaboradores por área
-          </p>
-        </div>
-        
         <div style={{
           display: "flex",
-          flexDirection: window.innerWidth <= 480 ? "column" : "row",
-          gap: "12px",
-          width: window.innerWidth <= 768 ? "100%" : "auto"
+          flexDirection: window.innerWidth <= 768 ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: window.innerWidth <= 768 ? "flex-start" : "center",
+          gap: "20px"
         }}>
-          <button
-            onClick={() => setShowAddForm(true)}
-            className="btn btn-primary"
-            style={{
-              padding: "12px 20px",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              whiteSpace: "nowrap",
-              width: window.innerWidth <= 480 ? "100%" : "auto"
-            }}
-          >
-            ➕ Agregar Individual
-          </button>
-          
-          <button
-            onClick={() => setShowExcelUploader(true)}
-            className="btn"
-            style={{
-              padding: "12px 20px",
-              fontSize: "0.9rem",
-              fontWeight: "600",
-              background: "#10b981",
+          <div>
+            <h1 style={{ 
+              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.2rem", 
+              fontWeight: "700", 
               color: "white",
-              border: "none",
-              whiteSpace: "nowrap",
-              width: window.innerWidth <= 480 ? "100%" : "auto"
-            }}
-          >
-            📊 Subir Excel
-          </button>
+              marginBottom: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px"
+            }}>
+              👥 Gestión de Colaboradores
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem", margin: 0 }}>
+              Administra la base de datos de colaboradores por área • {stats.total} colaboradores registrados
+            </p>
+          </div>
+          
+          <div style={{
+            display: "flex",
+            flexDirection: window.innerWidth <= 480 ? "column" : "row",
+            gap: "12px",
+            width: window.innerWidth <= 768 ? "100%" : "auto"
+          }}>
+            <button
+              onClick={() => setShowAddForm(true)}
+              style={{
+                padding: "12px 20px",
+                fontSize: "0.9rem",
+                fontWeight: "600",
+                background: "rgba(255,255,255,0.2)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.3)",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                backdropFilter: "blur(10px)",
+                whiteSpace: "nowrap",
+                width: window.innerWidth <= 480 ? "100%" : "auto"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "rgba(255,255,255,0.25)";
+                e.target.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "rgba(255,255,255,0.2)";
+                e.target.style.transform = "translateY(0)";
+              }}
+            >
+              ➕ Agregar Individual
+            </button>
+            
+            <button
+              onClick={() => setShowExcelUploader(true)}
+              style={{
+                padding: "12px 20px",
+                fontSize: "0.9rem",
+                fontWeight: "600",
+                background: "rgba(16, 185, 129, 0.9)",
+                color: "white",
+                border: "1px solid rgba(255,255,255,0.3)",
+                borderRadius: "8px",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+                backdropFilter: "blur(10px)",
+                whiteSpace: "nowrap",
+                width: window.innerWidth <= 480 ? "100%" : "auto"
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "rgba(16, 185, 129, 1)";
+                e.target.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "rgba(16, 185, 129, 0.9)";
+                e.target.style.transform = "translateY(0)";
+              }}
+            >
+              📊 Subir Excel
+            </button>
+          </div>
         </div>
       </div>
 
@@ -284,68 +321,154 @@ const Colaboradores = () => {
         </div>
       )}
 
-      {/* Estadísticas */}
+      {/* Estadísticas Mejoradas */}
       <div style={{
         display: "grid",
         gridTemplateColumns: window.innerWidth <= 768 
           ? "repeat(2, 1fr)" 
-          : "repeat(auto-fit, minmax(200px, 1fr))",
-        gap: "20px",
-        marginBottom: "30px"
+          : "repeat(4, 1fr)",
+        gap: "16px",
+        marginBottom: "24px"
       }}>
-        <div className="card" style={{ 
-          padding: "20px", 
+        <div style={{
+          background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+          borderRadius: "12px",
+          padding: "20px",
+          color: "white",
           textAlign: "center",
-          borderLeft: "4px solid #3b82f6"
+          boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)",
+          border: "1px solid rgba(255,255,255,0.1)"
         }}>
-          <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#3b82f6" }}>
+          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
             {stats.total}
           </div>
-          <div style={{ color: "#374151", fontWeight: "600", fontSize: "0.9rem" }}>Total Colaboradores</div>
+          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+            👥 Total Colaboradores
+          </div>
         </div>
         
-        <div className="card" style={{ 
-          padding: "20px", 
+        <div style={{
+          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+          borderRadius: "12px",
+          padding: "20px",
+          color: "white",
           textAlign: "center",
-          borderLeft: "4px solid #10b981"
+          boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+          border: "1px solid rgba(255,255,255,0.1)"
         }}>
-          <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#10b981" }}>
+          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
             {stats.activos}
           </div>
-          <div style={{ color: "#374151", fontWeight: "600", fontSize: "0.9rem" }}>Activos</div>
+          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+            ✅ Activos
+          </div>
         </div>
         
-        <div className="card" style={{ 
-          padding: "20px", 
+        <div style={{
+          background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+          borderRadius: "12px",
+          padding: "20px",
+          color: "white",
           textAlign: "center",
-          borderLeft: "4px solid #f59e0b"
+          boxShadow: "0 4px 12px rgba(245, 158, 11, 0.15)",
+          border: "1px solid rgba(255,255,255,0.1)"
         }}>
-          <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#f59e0b" }}>
+          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
             {stats.centroIndustrial}
           </div>
-          <div style={{ color: "#374151", fontWeight: "600", fontSize: "0.9rem" }}>Centro Industrial</div>
+          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+            🏭 Centro Industrial
+          </div>
         </div>
         
-        <div className="card" style={{ 
-          padding: "20px", 
+        <div style={{
+          background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
+          borderRadius: "12px",
+          padding: "20px",
+          color: "white",
           textAlign: "center",
-          borderLeft: "4px solid #ef4444"
+          boxShadow: "0 4px 12px rgba(239, 68, 68, 0.15)",
+          border: "1px solid rgba(255,255,255,0.1)"
         }}>
-          <div style={{ fontSize: "2.5rem", fontWeight: "700", color: "#ef4444" }}>
+          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
             {stats.hornosSolera}
           </div>
-          <div style={{ color: "#374151", fontWeight: "600", fontSize: "0.9rem" }}>Hornos Solera</div>
+          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+            🔥 Hornos Solera
+          </div>
         </div>
       </div>
 
-      {/* Filtros */}
-      <div className="card" style={{ padding: "20px", marginBottom: "20px" }}>
+      {/* Filtros y Controles */}
+      <div style={{
+        background: "white",
+        borderRadius: "12px",
+        padding: "20px",
+        marginBottom: "20px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #e5e7eb"
+      }}>
+        <div style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: "16px",
+          flexWrap: "wrap",
+          gap: "12px"
+        }}>
+          <h3 style={{ margin: 0, color: "#1f2937", fontWeight: "600", fontSize: "1.1rem" }}>
+            🔍 Filtros y Vista
+          </h3>
+          
+          {/* Toggle Vista */}
+          <div style={{
+            display: "flex",
+            background: "#f3f4f6",
+            borderRadius: "8px",
+            padding: "4px"
+          }}>
+            <button
+              onClick={() => setViewMode('table')}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "none",
+                background: viewMode === 'table' ? "#2563eb" : "transparent",
+                color: viewMode === 'table' ? "white" : "#6b7280",
+                fontWeight: "600",
+                fontSize: "0.875rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              📋 Tabla
+            </button>
+            <button
+              onClick={() => setViewMode('cards')}
+              style={{
+                padding: "8px 16px",
+                borderRadius: "6px",
+                border: "none",
+                background: viewMode === 'cards' ? "#2563eb" : "transparent",
+                color: viewMode === 'cards' ? "white" : "#6b7280",
+                fontWeight: "600",
+                fontSize: "0.875rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease"
+              }}
+            >
+              🃏 Cards
+            </button>
+          </div>
+        </div>
+        
         <div style={{
           display: "grid",
           gridTemplateColumns: window.innerWidth <= 768 
             ? "1fr" 
-            : "repeat(auto-fit, minmax(250px, 1fr))",
-          gap: "16px"
+            : "1fr 200px 120px",
+          gap: "16px",
+          alignItems: "end"
         }}>
           <div>
             <label style={{ 
@@ -428,18 +551,28 @@ const Colaboradores = () => {
         )}
       </div>
 
-      {/* Lista de colaboradores */}
-      <div className="card" style={{ overflow: "hidden" }}>
+      {/* Lista de Colaboradores Mejorada */}
+      <div style={{
+        background: "white",
+        borderRadius: "12px",
+        overflow: "hidden",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #e5e7eb"
+      }}>
         <div style={{
           padding: "20px",
           borderBottom: "1px solid #e5e7eb",
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          flexWrap: "wrap",
-          gap: "10px"
+          background: "#f8fafc"
         }}>
-          <h2 style={{ margin: 0, color: "#1f2937", fontSize: window.innerWidth <= 768 ? "1.3rem" : "1.5rem" }}>
+          <h2 style={{ 
+            margin: 0, 
+            color: "#1f2937", 
+            fontSize: "1.3rem",
+            fontWeight: "600",
+            display: "flex",
+            alignItems: "center",
+            gap: "8px"
+          }}>
             📋 Lista de Colaboradores ({colaboradoresFiltrados.length})
           </h2>
         </div>
@@ -454,7 +587,132 @@ const Colaboradores = () => {
             <h3 style={{ marginBottom: "10px" }}>No se encontraron colaboradores</h3>
             <p>Intenta ajustar los filtros o agrega nuevos colaboradores</p>
           </div>
+        ) : viewMode === 'table' && window.innerWidth > 768 ? (
+          // Vista Tabla Desktop
+          <div style={{ padding: "0" }}>
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead style={{ background: "#f8fafc" }}>
+                <tr>
+                  <th style={{ padding: "16px", textAlign: "left", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
+                    Colaborador
+                  </th>
+                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
+                    Cédula
+                  </th>
+                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
+                    Área
+                  </th>
+                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
+                    Estado
+                  </th>
+                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
+                    Acciones
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                {colaboradoresFiltrados.map((colaborador) => (
+                  <tr key={colaborador.id} style={{ 
+                    borderBottom: "1px solid #f3f4f6",
+                    transition: "background 0.2s ease",
+                    background: "white"
+                  }}
+                  onMouseEnter={(e) => e.target.parentElement.style.background = "#f8fafc"}
+                  onMouseLeave={(e) => e.target.parentElement.style.background = "white"}
+                  >
+                    <td style={{ padding: "16px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                        <div style={{
+                          width: "40px",
+                          height: "40px",
+                          borderRadius: "50%",
+                          background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          color: "white",
+                          fontWeight: "700",
+                          fontSize: "0.9rem"
+                        }}>
+                          {colaborador.nombre.charAt(0).toUpperCase()}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: "600", color: "#1f2937", fontSize: "0.95rem" }}>
+                            {colaborador.nombre}
+                          </div>
+                          <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                            {colaborador.area}
+                          </div>
+                        </div>
+                      </div>
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <span style={{
+                        background: "#f3f4f6",
+                        padding: "4px 8px",
+                        borderRadius: "6px",
+                        fontFamily: "monospace",
+                        fontSize: "0.85rem",
+                        color: "#374151"
+                      }}>
+                        {colaborador.cedula}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <span style={{
+                        padding: "6px 12px",
+                        borderRadius: "20px",
+                        fontSize: "0.8rem",
+                        fontWeight: "600",
+                        background: colaborador.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
+                        color: colaborador.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
+                      }}>
+                        {colaborador.area === 'Centro Industrial' ? '🏭 Centro Industrial' : '🔥 Hornos Solera'}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <span style={{
+                        padding: "6px 12px",
+                        borderRadius: "20px",
+                        fontSize: "0.8rem",
+                        fontWeight: "600",
+                        background: colaborador.activo !== false ? '#d1fae5' : '#f3f4f6',
+                        color: colaborador.activo !== false ? '#065f46' : '#374151'
+                      }}>
+                        {colaborador.activo !== false ? '✅ Activo' : '⏸️ Inactivo'}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <button
+                        onClick={() => handleToggleActivo(colaborador.id, !(colaborador.activo !== false))}
+                        style={{
+                          padding: "8px 16px",
+                          background: colaborador.activo !== false ? "#ef4444" : "#10b981",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.8rem",
+                          fontWeight: "600",
+                          transition: "all 0.2s ease"
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.transform = "scale(1.05)";
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.transform = "scale(1)";
+                        }}
+                      >
+                        {colaborador.activo !== false ? '🚫 Desactivar' : '✅ Activar'}
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
+          // Vista Cards (Mobile y Cards Mode)
           <div style={{ padding: "20px" }}>
             <div style={{
               display: "grid",
@@ -467,55 +725,77 @@ const Colaboradores = () => {
             }}>
               {colaboradoresFiltrados.map((colaborador) => (
                 <div key={colaborador.id} style={{
-                  padding: "16px",
+                  padding: "20px",
                   border: "1px solid #e5e7eb",
                   borderRadius: "12px",
-                  background: "#f9fafb",
-                  transition: "all 0.3s ease"
-                }}>
+                  background: "white",
+                  transition: "all 0.3s ease",
+                  boxShadow: "0 2px 4px rgba(0,0,0,0.04)"
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.1)";
+                  e.target.style.transform = "translateY(-2px)";
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.04)";
+                  e.target.style.transform = "translateY(0)";
+                }}
+                >
                   <div style={{ 
                     display: "flex", 
-                    justifyContent: "space-between", 
-                    alignItems: "start",
-                    marginBottom: "8px"
+                    alignItems: "center",
+                    gap: "12px",
+                    marginBottom: "16px"
                   }}>
-                    <div style={{ 
-                      fontWeight: "600", 
-                      color: "#1f2937", 
-                      fontSize: "0.95rem",
-                      flex: 1,
-                      marginRight: "8px"
+                    <div style={{
+                      width: "48px",
+                      height: "48px",
+                      borderRadius: "50%",
+                      background: "linear-gradient(135deg, #3b82f6, #2563eb)",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      color: "white",
+                      fontWeight: "700",
+                      fontSize: "1.1rem"
                     }}>
-                      {colaborador.nombre}
+                      {colaborador.nombre.charAt(0).toUpperCase()}
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ 
+                        fontWeight: "600", 
+                        color: "#1f2937", 
+                        fontSize: "1rem",
+                        marginBottom: "4px"
+                      }}>
+                        {colaborador.nombre}
+                      </div>
+                      <div style={{ fontSize: "0.85rem", color: "#6b7280" }}>
+                        📧 {colaborador.cedula}
+                      </div>
                     </div>
                     <span style={{
-                      padding: "2px 6px",
-                      borderRadius: "4px",
-                      fontSize: "0.7rem",
+                      padding: "4px 8px",
+                      borderRadius: "8px",
+                      fontSize: "0.75rem",
                       fontWeight: "600",
                       background: colaborador.activo !== false ? '#d1fae5' : '#f3f4f6',
-                      color: colaborador.activo !== false ? '#065f46' : '#374151',
-                      flexShrink: 0
+                      color: colaborador.activo !== false ? '#065f46' : '#374151'
                     }}>
                       {colaborador.activo !== false ? '✅' : '⏸️'}
                     </span>
-                  </div>
-                  
-                  <div style={{ fontSize: "0.85rem", color: "#6b7280", marginBottom: "8px" }}>
-                    📧 {colaborador.cedula}
                   </div>
                   
                   <div style={{
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    flexWrap: "wrap",
-                    gap: "8px"
+                    gap: "12px"
                   }}>
                     <span style={{ 
-                      padding: "4px 8px",
-                      borderRadius: "6px",
-                      fontSize: "0.75rem",
+                      padding: "6px 12px",
+                      borderRadius: "8px",
+                      fontSize: "0.8rem",
                       fontWeight: "600",
                       background: colaborador.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
                       color: colaborador.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
@@ -526,14 +806,21 @@ const Colaboradores = () => {
                     <button
                       onClick={() => handleToggleActivo(colaborador.id, !(colaborador.activo !== false))}
                       style={{
-                        padding: "4px 8px",
+                        padding: "8px 16px",
                         background: colaborador.activo !== false ? "#ef4444" : "#10b981",
                         color: "white",
                         border: "none",
-                        borderRadius: "4px",
+                        borderRadius: "6px",
                         cursor: "pointer",
-                        fontSize: "0.7rem",
-                        fontWeight: "600"
+                        fontSize: "0.8rem",
+                        fontWeight: "600",
+                        transition: "all 0.2s ease"
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.transform = "scale(1.05)";
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.transform = "scale(1)";
                       }}
                     >
                       {colaborador.activo !== false ? '🚫' : '✅'}
