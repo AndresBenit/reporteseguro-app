@@ -243,32 +243,100 @@ const PerfilIndividual = () => {
 
   return (
     <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: '700', 
-          color: '#1f2937',
-          marginBottom: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '15px'
+      {/* Header Premium */}
+      <div style={{
+        background: "linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)",
+        borderRadius: "16px",
+        padding: "24px",
+        marginBottom: "24px",
+        color: "white",
+        boxShadow: "0 4px 20px rgba(124, 58, 237, 0.15)"
+      }}>
+        <div style={{
+          display: "flex",
+          flexDirection: window.innerWidth <= 768 ? "column" : "row",
+          justifyContent: "space-between",
+          alignItems: window.innerWidth <= 768 ? "flex-start" : "center",
+          gap: "20px"
         }}>
-          👤 Perfil Individual
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-          Análisis detallado de recomendaciones por colaborador
-        </p>
+          <div>
+            <h1 style={{ 
+              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.2rem", 
+              fontWeight: "700", 
+              color: "white",
+              marginBottom: "8px",
+              display: "flex",
+              alignItems: "center",
+              gap: "12px"
+            }}>
+              👤 Perfil Individual
+            </h1>
+            <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem", margin: 0 }}>
+              Análisis detallado de seguridad por colaborador • {colaboradores.length} colaboradores disponibles
+            </p>
+          </div>
+          
+          {selectedColaborador && (
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              background: "rgba(255,255,255,0.15)",
+              padding: "16px",
+              borderRadius: "12px",
+              backdropFilter: "blur(10px)"
+            }}>
+              <div style={{
+                width: "56px",
+                height: "56px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#7c3aed",
+                fontWeight: "800",
+                fontSize: "1.5rem",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              }}>
+                {selectedColaborador.nombre.charAt(0).toUpperCase()}
+              </div>
+              <div>
+                <div style={{ fontWeight: "700", fontSize: "1.1rem" }}>
+                  {selectedColaborador.nombre}
+                </div>
+                <div style={{ opacity: 0.9, fontSize: "0.9rem" }}>
+                  {selectedColaborador.area} • {stats.totalIntervenciones} intervenciones
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
 
-      {/* Buscador */}
-      <div className="card" style={{ padding: '25px', marginBottom: '25px' }}>
-        <h3 style={{ marginBottom: '20px', color: '#1f2937' }}>
+      {/* Buscador Premium */}
+      <div style={{
+        background: "white",
+        borderRadius: "12px",
+        padding: "24px",
+        marginBottom: "24px",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+        border: "1px solid #e5e7eb"
+      }}>
+        <h3 style={{ 
+          marginBottom: "20px", 
+          color: "#1f2937",
+          fontWeight: "600",
+          fontSize: "1.2rem",
+          display: "flex",
+          alignItems: "center",
+          gap: "8px"
+        }}>
           🔍 Buscar Colaborador
         </h3>
         
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: '500px' }}>
+          <div style={{ position: 'relative', flex: 1, maxWidth: '600px' }}>
             <input
               type="text"
               placeholder="Escribe el nombre o cédula del colaborador..."
@@ -276,13 +344,15 @@ const PerfilIndividual = () => {
               onChange={handleSearchChange}
               onFocus={() => searchTerm && setShowSugerencias(colaboradoresFiltrados.length > 0)}
               onBlur={handleBlur}
-              className="form-input"
               style={{
                 width: '100%',
                 fontSize: '1rem',
-                padding: '12px 16px',
-                borderColor: selectedColaborador ? '#10b981' : '#d1d5db',
-                backgroundColor: selectedColaborador ? '#f0fdf4' : 'white'
+                padding: '16px 20px',
+                border: `2px solid ${selectedColaborador ? '#10b981' : '#e5e7eb'}`,
+                borderRadius: '12px',
+                backgroundColor: selectedColaborador ? '#f0fdf4' : 'white',
+                transition: 'all 0.2s ease',
+                boxShadow: selectedColaborador ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none'
               }}
             />
             
@@ -300,7 +370,7 @@ const PerfilIndividual = () => {
               </div>
             )}
             
-            {/* Lista de sugerencias */}
+            {/* Lista de sugerencias Premium */}
             {showSugerencias && (
               <div style={{
                 position: 'absolute',
@@ -311,9 +381,9 @@ const PerfilIndividual = () => {
                 background: 'white',
                 border: '1px solid #e5e7eb',
                 borderTop: 'none',
-                borderRadius: '0 0 8px 8px',
-                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                maxHeight: '250px',
+                borderRadius: '0 0 12px 12px',
+                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
+                maxHeight: '300px',
                 overflowY: 'auto'
               }}>
                 {colaboradoresFiltrados.map(colaborador => {
@@ -325,45 +395,68 @@ const PerfilIndividual = () => {
                       key={colaborador.id}
                       onClick={() => seleccionarColaborador(colaborador)}
                       style={{
-                        padding: '12px 16px',
+                        padding: '16px 20px',
                         cursor: 'pointer',
                         borderBottom: '1px solid #f3f4f6',
                         display: 'flex',
-                        justifyContent: 'space-between',
                         alignItems: 'center',
-                        transition: 'background-color 0.2s ease'
+                        gap: '12px',
+                        transition: 'all 0.2s ease'
                       }}
-                      onMouseEnter={(e) => e.target.closest('div').style.backgroundColor = '#f9fafb'}
-                      onMouseLeave={(e) => e.target.closest('div').style.backgroundColor = 'white'}
+                      onMouseEnter={(e) => {
+                        e.target.closest('div').style.backgroundColor = '#f8fafc';
+                        e.target.closest('div').style.transform = 'translateX(4px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.closest('div').style.backgroundColor = 'white';
+                        e.target.closest('div').style.transform = 'translateX(0)';
+                      }}
                     >
-                      <div>
-                        <div style={{ fontWeight: '600', color: '#1f2937' }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: 'white',
+                        fontWeight: '700',
+                        fontSize: '0.9rem',
+                        flexShrink: 0
+                      }}>
+                        {colaborador.nombre.charAt(0).toUpperCase()}
+                      </div>
+                      
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: '600', color: '#1f2937', marginBottom: '2px' }}>
                           {colaborador.nombre}
                         </div>
                         <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
-                          {colaborador.cedula} • {colaborador.area}
+                          📧 {colaborador.cedula} • 🏢 {colaborador.area}
                         </div>
                       </div>
+                      
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                         <span style={{
-                          padding: '2px 6px',
-                          borderRadius: '12px',
-                          fontSize: '0.7rem',
+                          padding: '4px 8px',
+                          borderRadius: '8px',
+                          fontSize: '0.75rem',
                           fontWeight: '600',
                           backgroundColor: totalIntervenciones > 0 ? '#fef3c7' : '#f3f4f6',
                           color: totalIntervenciones > 0 ? '#92400e' : '#6b7280'
                         }}>
-                          {recsColaborador.length}R + {abordajesColaborador.length}A
+                          {totalIntervenciones} intervenciones
                         </span>
                         <span style={{
-                          padding: '2px 6px',
-                          borderRadius: '4px',
-                          fontSize: '0.7rem',
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontSize: '0.75rem',
                           fontWeight: '600',
                           backgroundColor: colaborador.area === 'Centro Industrial' ? '#dbeafe' : '#fee2e2',
                           color: colaborador.area === 'Centro Industrial' ? '#1e40af' : '#991b1b'
                         }}>
-                          {colaborador.area === 'Centro Industrial' ? 'CI' : 'HS'}
+                          {colaborador.area === 'Centro Industrial' ? '🏭 CI' : '🔥 HS'}
                         </span>
                       </div>
                     </div>
@@ -373,26 +466,33 @@ const PerfilIndividual = () => {
             )}
           </div>
           
-          {/* Botón limpiar */}
+          {/* Botón limpiar Premium */}
           {selectedColaborador && (
             <button
               onClick={limpiarSeleccion}
               style={{
-                padding: '12px 16px',
-                background: '#ef4444',
+                padding: '16px 20px',
+                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
+                borderRadius: '12px',
                 cursor: 'pointer',
                 fontWeight: '600',
                 fontSize: '0.9rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '6px',
-                transition: 'all 0.3s ease'
+                gap: '8px',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)'
               }}
-              onMouseEnter={(e) => e.target.style.background = '#dc2626'}
-              onMouseLeave={(e) => e.target.style.background = '#ef4444'}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.35)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
+              }}
             >
               🗑️ Limpiar
             </button>
@@ -400,88 +500,254 @@ const PerfilIndividual = () => {
         </div>
       </div>
 
-      {/* Perfil del colaborador seleccionado */}
+      {/* Dashboard del Colaborador Seleccionado */}
       {selectedColaborador ? (
         <div>
-          {/* Info del colaborador */}
-          <div className="card" style={{ padding: '25px', marginBottom: '25px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start' }}>
-              <div>
+          {/* Estadísticas Premium del Colaborador */}
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: window.innerWidth <= 768 
+              ? "repeat(2, 1fr)" 
+              : "repeat(4, 1fr)",
+            gap: "16px",
+            marginBottom: "24px"
+          }}>
+            <div style={{
+              background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.totalRecomendaciones}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                💡 Recomendaciones
+              </div>
+            </div>
+            
+            <div style={{
+              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.totalAbordajes}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                🔄 Abordajes
+              </div>
+            </div>
+            
+            <div style={{
+              background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: "0 4px 12px rgba(245, 158, 11, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.totalIntervenciones}
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                📊 Total
+              </div>
+            </div>
+            
+            <div style={{
+              background: stats.ultimaIntervencion ? 
+                "linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)" :
+                "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
+              borderRadius: "12px",
+              padding: "20px",
+              color: "white",
+              textAlign: "center",
+              boxShadow: stats.ultimaIntervencion ? 
+                "0 4px 12px rgba(124, 58, 237, 0.15)" :
+                "0 4px 12px rgba(107, 114, 128, 0.15)",
+              border: "1px solid rgba(255,255,255,0.1)"
+            }}>
+              <div style={{ fontSize: "1.4rem", fontWeight: "800", marginBottom: "4px" }}>
+                {stats.ultimaIntervencion ? 
+                  (() => {
+                    const diasDiferencia = Math.floor((new Date() - new Date(stats.ultimaIntervencion)) / (1000 * 60 * 60 * 24));
+                    return diasDiferencia === 0 ? 'Hoy' : `${diasDiferencia}d`;
+                  })() : 
+                  'N/A'
+                }
+              </div>
+              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+                🕒 Última Actividad
+              </div>
+            </div>
+          </div>
+          
+          {/* Info Detallada del Colaborador */}
+          <div style={{
+            background: "white",
+            borderRadius: "12px",
+            padding: "24px",
+            marginBottom: "24px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+            border: "1px solid #e5e7eb"
+          }}>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'center',
+              gap: '20px',
+              marginBottom: '16px'
+            }}>
+              <div style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "white",
+                fontWeight: "800",
+                fontSize: "2rem",
+                boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)"
+              }}>
+                {selectedColaborador.nombre.charAt(0).toUpperCase()}
+              </div>
+              
+              <div style={{ flex: 1 }}>
                 <h2 style={{ 
-                  fontSize: '2rem', 
+                  fontSize: '1.8rem', 
                   fontWeight: '700', 
                   color: '#1f2937',
-                  marginBottom: '10px'
+                  marginBottom: '8px'
                 }}>
                   {selectedColaborador.nombre}
                 </h2>
-                <div style={{ fontSize: '1.1rem', color: '#6b7280', marginBottom: '15px' }}>
-                  📧 {selectedColaborador.cedula} • 🏢 {selectedColaborador.area}
+                <div style={{ 
+                  fontSize: '1rem', 
+                  color: '#6b7280',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  flexWrap: 'wrap'
+                }}>
+                  <span>📧 {selectedColaborador.cedula}</span>
+                  <span>🏢 {selectedColaborador.area}</span>
+                  {selectedColaborador.activo !== false && (
+                    <span style={{
+                      padding: '4px 8px',
+                      background: '#d1fae5',
+                      color: '#065f46',
+                      borderRadius: '6px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600'
+                    }}>
+                      ✅ Activo
+                    </span>
+                  )}
                 </div>
               </div>
               
-              <div style={{ textAlign: 'right' }}>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center', justifyContent: 'flex-end' }}>
-                  <div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#3b82f6' }}>
-                      {stats.totalRecomendaciones}
-                    </div>
-                    <div style={{ color: '#6b7280', fontWeight: '600', fontSize: '0.8rem' }}>Recomendaciones</div>
+              {stats.ultimaIntervencion && (
+                <div style={{ 
+                  textAlign: 'right',
+                  background: '#f8fafc',
+                  padding: '12px',
+                  borderRadius: '8px'
+                }}>
+                  <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '4px' }}>
+                    Última intervención:
                   </div>
-                  <div>
-                    <div style={{ fontSize: '1.5rem', fontWeight: '700', color: '#10b981' }}>
-                      {stats.totalAbordajes}
-                    </div>
-                    <div style={{ color: '#6b7280', fontWeight: '600', fontSize: '0.8rem' }}>Abordajes</div>
-                  </div>
-                  <div>
-                    <div style={{ fontSize: '2.5rem', fontWeight: '700', color: '#f59e0b' }}>
-                      {stats.totalIntervenciones}
-                    </div>
-                    <div style={{ color: '#6b7280', fontWeight: '600', fontSize: '0.8rem' }}>Total</div>
+                  <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1f2937' }}>
+                    {new Date(stats.ultimaIntervencion).toLocaleDateString('es-ES')}
                   </div>
                 </div>
-                {stats.ultimaIntervencion && (
-                  <div style={{ fontSize: '0.8rem', color: '#6b7280', marginTop: '10px' }}>
-                    Última: {new Date(stats.ultimaIntervencion).toLocaleDateString('es-ES')}
-                  </div>
-                )}
-              </div>
+              )}
             </div>
           </div>
 
           {stats.totalIntervenciones > 0 ? (
             <>
-              {/* Gráficas */}
+              {/* Gráficas Premium */}
               <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-                gap: '25px',
-                marginBottom: '30px'
+                gap: '20px',
+                marginBottom: '24px'
               }}>
-                {/* Tendencia Mensual */}
-                <div className="card" style={{ padding: '25px' }}>
-                  <h3 style={{ 
-                    marginBottom: '20px', 
-                    color: '#1f2937',
-                    fontSize: '1.3rem',
+                {/* Tendencia Mensual Premium */}
+                <div style={{
+                  background: "white",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  border: "1px solid #e5e7eb"
+                }}>
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    justifyContent: 'space-between',
+                    marginBottom: '20px'
                   }}>
-                    📈 Tendencia Mensual
-                  </h3>
-                  <ResponsiveContainer width="100%" height={250}>
-                    <LineChart data={stats.tendenciaMensual}>
-                      <XAxis dataKey="mes" tick={{ fontSize: 11 }} />
-                      <YAxis tick={{ fontSize: 11 }} />
-                      <Tooltip />
+                    <h3 style={{ 
+                      margin: 0,
+                      color: '#1f2937',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      📈 Tendencia Mensual
+                    </h3>
+                    <div style={{
+                      background: '#f8fafc',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      color: '#6b7280'
+                    }}>
+                      Últimos 6 meses
+                    </div>
+                  </div>
+                  <ResponsiveContainer width="100%" height={280}>
+                    <LineChart data={stats.tendenciaMensual} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                      <XAxis 
+                        dataKey="mes" 
+                        tick={{ fontSize: 12, fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                      />
+                      <YAxis 
+                        tick={{ fontSize: 12, fill: '#6b7280' }}
+                        axisLine={{ stroke: '#e5e7eb' }}
+                        tickLine={{ stroke: '#e5e7eb' }}
+                        gridLine={{ stroke: '#f3f4f6' }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          background: 'white',
+                          border: '1px solid #e5e7eb',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                        }}
+                      />
                       <Line 
                         type="monotone" 
                         dataKey="recomendaciones" 
                         stroke="#3b82f6" 
                         strokeWidth={3}
-                        dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: '#3b82f6', strokeWidth: 2, r: 5 }}
+                        activeDot={{ r: 7, stroke: '#3b82f6', strokeWidth: 2, fill: 'white' }}
                         name="Recomendaciones"
                       />
                       <Line 
@@ -489,56 +755,133 @@ const PerfilIndividual = () => {
                         dataKey="abordajes" 
                         stroke="#10b981" 
                         strokeWidth={3}
-                        dot={{ fill: '#10b981', strokeWidth: 2, r: 4 }}
+                        dot={{ fill: '#10b981', strokeWidth: 2, r: 5 }}
+                        activeDot={{ r: 7, stroke: '#10b981', strokeWidth: 2, fill: 'white' }}
                         name="Abordajes"
                       />
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
 
-                {/* Top Lugares */}
-                <div className="card" style={{ padding: '25px' }}>
-                  <h3 style={{ 
-                    marginBottom: '20px', 
-                    color: '#1f2937',
-                    fontSize: '1.3rem',
+                {/* Top Lugares Premium */}
+                <div style={{
+                  background: "white",
+                  borderRadius: "12px",
+                  padding: "24px",
+                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                  border: "1px solid #e5e7eb"
+                }}>
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    justifyContent: 'space-between',
+                    marginBottom: '20px'
                   }}>
-                    📍 Lugares Más Frecuentes
-                  </h3>
+                    <h3 style={{ 
+                      margin: 0,
+                      color: '#1f2937',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      📍 Lugares Más Frecuentes
+                    </h3>
+                    <div style={{
+                      background: '#fef3c7',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600',
+                      color: '#92400e'
+                    }}>
+                      Top {Math.min(topLugares.length, 3)}
+                    </div>
+                  </div>
                   {topLugares.length > 0 ? (
-                    <ResponsiveContainer width="100%" height={250}>
-                      <BarChart data={topLugares}>
-                        <XAxis dataKey="lugar" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 11 }} />
-                        <Tooltip />
-                        <Bar dataKey="cantidad" fill="#f59e0b" radius={[4, 4, 0, 0]} />
+                    <ResponsiveContainer width="100%" height={280}>
+                      <BarChart data={topLugares} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                        <XAxis 
+                          dataKey="lugar" 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#e5e7eb' }}
+                          tickLine={{ stroke: '#e5e7eb' }}
+                        />
+                        <YAxis 
+                          tick={{ fontSize: 12, fill: '#6b7280' }}
+                          axisLine={{ stroke: '#e5e7eb' }}
+                          tickLine={{ stroke: '#e5e7eb' }}
+                          gridLine={{ stroke: '#f3f4f6' }}
+                        />
+                        <Tooltip 
+                          contentStyle={{
+                            background: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}
+                        />
+                        <Bar 
+                          dataKey="cantidad" 
+                          fill="url(#colorGradient)" 
+                          radius={[6, 6, 0, 0]}
+                        />
+                        <defs>
+                          <linearGradient id="colorGradient" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#f59e0b" stopOpacity={1}/>
+                            <stop offset="95%" stopColor="#d97706" stopOpacity={1}/>
+                          </linearGradient>
+                        </defs>
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
                     <div style={{ textAlign: 'center', color: '#6b7280', padding: '60px' }}>
-                      <div style={{ fontSize: '2rem', marginBottom: '10px', opacity: 0.5 }}>📍</div>
-                      <p>No hay datos de lugares</p>
+                      <div style={{ fontSize: '3rem', marginBottom: '15px', opacity: 0.3 }}>📍</div>
+                      <h4 style={{ marginBottom: '8px' }}>No hay datos de lugares</h4>
+                      <p style={{ margin: 0, fontSize: '0.9rem' }}>Las intervenciones aparecerán aquí cuando se registren</p>
                     </div>
                   )}
                 </div>
 
-                {/* Tipos de Hallazgos */}
+                {/* Tipos de Hallazgos Premium */}
                 {tiposHallazgosPie.length > 0 && (
-                  <div className="card" style={{ padding: '25px' }}>
-                    <h3 style={{ 
-                      marginBottom: '20px', 
-                      color: '#1f2937',
-                      fontSize: '1.3rem',
+                  <div style={{
+                    background: "white",
+                    borderRadius: "12px",
+                    padding: "24px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                    border: "1px solid #e5e7eb"
+                  }}>
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '10px'
+                      justifyContent: 'space-between',
+                      marginBottom: '20px'
                     }}>
-                      🔍 Tipos de Hallazgos
-                    </h3>
-                    <ResponsiveContainer width="100%" height={250}>
+                      <h3 style={{ 
+                        margin: 0,
+                        color: '#1f2937',
+                        fontSize: '1.2rem',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}>
+                        🔍 Tipos de Hallazgos
+                      </h3>
+                      <div style={{
+                        background: '#f0f9ff',
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        fontSize: '0.8rem',
+                        fontWeight: '600',
+                        color: '#0369a1'
+                      }}>
+                        Distribución
+                      </div>
+                    </div>
+                    <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
                         <Pie
                           data={tiposHallazgosPie}
@@ -546,84 +889,152 @@ const PerfilIndividual = () => {
                           nameKey="tipo"
                           cx="50%"
                           cy="50%"
-                          outerRadius={80}
-                          label={({ percent }) => `${(percent * 100).toFixed(0)}%`}
+                          outerRadius={90}
+                          innerRadius={40}
+                          label={({ percent }) => percent > 0.05 ? `${(percent * 100).toFixed(0)}%` : ''}
+                          labelLine={false}
                         >
                           {tiposHallazgosPie.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                           ))}
                         </Pie>
-                        <Tooltip />
+                        <Tooltip 
+                          contentStyle={{
+                            background: 'white',
+                            border: '1px solid #e5e7eb',
+                            borderRadius: '8px',
+                            boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+                          }}
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
                 )}
               </div>
 
-              {/* Historial Detallado */}
-              <div className="card" style={{ overflow: 'hidden' }}>
+              {/* Historial Detallado Premium */}
+              <div style={{
+                background: "white",
+                borderRadius: "12px",
+                overflow: "hidden",
+                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+                border: "1px solid #e5e7eb"
+              }}>
                 <div style={{
-                  padding: '25px 25px 0 25px',
-                  borderBottom: '1px solid #e5e7eb'
+                  padding: '24px',
+                  borderBottom: '1px solid #e5e7eb',
+                  background: '#f8fafc'
                 }}>
-                  <h3 style={{ 
-                    margin: '0 0 20px 0', 
-                    color: '#1f2937',
-                    fontSize: '1.3rem',
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '10px'
+                    justifyContent: 'space-between'
                   }}>
-                    📋 Historial Completo ({stats.totalIntervenciones})
-                  </h3>
+                    <h3 style={{ 
+                      margin: 0, 
+                      color: '#1f2937',
+                      fontSize: '1.2rem',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      📋 Historial Completo
+                    </h3>
+                    <div style={{
+                      background: '#7c3aed',
+                      color: 'white',
+                      padding: '6px 12px',
+                      borderRadius: '8px',
+                      fontSize: '0.8rem',
+                      fontWeight: '600'
+                    }}>
+                      {stats.totalIntervenciones} registros
+                    </div>
+                  </div>
                 </div>
                 
-                <div style={{ padding: '25px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                <div style={{ padding: '24px' }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                     {getIntervencionesColaborador().slice(0, 10).map((intervencion, index) => (
                       <div key={intervencion.id || index} style={{
                         padding: '20px',
                         border: '1px solid #e5e7eb',
                         borderRadius: '12px',
-                        background: intervencion.tipo === 'recomendacion' ? '#fefcf3' : '#f0fdf4',
-                        borderLeft: `4px solid ${intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981'}`
-                      }}>
+                        background: 'white',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
+                        borderLeft: `4px solid ${intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981'}`,
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
+                        e.target.style.transform = 'translateY(-2px)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.04)';
+                        e.target.style.transform = 'translateY(0)';
+                      }}
+                      >
                         <div style={{ 
                           display: 'flex', 
                           justifyContent: 'space-between', 
                           alignItems: 'start',
-                          marginBottom: '12px'
+                          marginBottom: '16px'
                         }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                             <span style={{
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontSize: '0.7rem',
-                              fontWeight: '600',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '0.75rem',
+                              fontWeight: '700',
                               backgroundColor: intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981',
-                              color: 'white'
+                              color: 'white',
+                              textTransform: 'uppercase',
+                              letterSpacing: '0.5px'
                             }}>
-                              {intervencion.tipo === 'recomendacion' ? 'RECOMENDACIÓN' : 'ABORDAJE'}
+                              {intervencion.tipo === 'recomendacion' ? '💡 Recomendación' : '🔄 Abordaje'}
                             </span>
-                            <div style={{ 
-                              fontSize: '0.9rem', 
-                              fontWeight: '600', 
-                              color: intervencion.tipo === 'recomendacion' ? '#92400e' : '#065f46'
+                            <div style={{
+                              background: '#f8fafc',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              color: '#6b7280'
                             }}>
-                              📅 {new Date(intervencion.fecha).toLocaleDateString('es-ES')} • 📍 {intervencion.lugarLabor}
+                              📅 {new Date(intervencion.fecha).toLocaleDateString('es-ES')}
+                            </div>
+                            <div style={{
+                              background: '#fef3c7',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              fontSize: '0.8rem',
+                              fontWeight: '600',
+                              color: '#92400e'
+                            }}>
+                              📍 {intervencion.lugarLabor}
                             </div>
                           </div>
                           {intervencion.fotoFirmada && (
                             <button
                               onClick={() => window.open(intervencion.fotoFirmada, '_blank')}
                               style={{
-                                padding: '4px 8px',
-                                background: '#3b82f6',
+                                padding: '8px 12px',
+                                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
                                 color: 'white',
                                 border: 'none',
-                                borderRadius: '4px',
-                                fontSize: '0.7rem',
-                                cursor: 'pointer'
+                                borderRadius: '8px',
+                                fontSize: '0.8rem',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.target.style.transform = 'scale(1.05)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.target.style.transform = 'scale(1)';
                               }}
                             >
                               📸 Ver Evidencia
@@ -631,18 +1042,57 @@ const PerfilIndividual = () => {
                           )}
                         </div>
                         
-                        <div style={{ marginBottom: '8px' }}>
-                          <strong style={{ color: '#1f2937' }}>🔍 Hallazgo:</strong>
-                          <p style={{ margin: '4px 0', color: '#374151', fontSize: '0.9rem' }}>
+                        <div style={{ 
+                          marginBottom: '16px',
+                          padding: '16px',
+                          background: '#f8fafc',
+                          borderRadius: '8px',
+                          border: '1px solid #e5e7eb'
+                        }}>
+                          <div style={{ 
+                            fontSize: '0.9rem',
+                            fontWeight: '700',
+                            color: '#374151',
+                            marginBottom: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}>
+                            🔍 Hallazgo Identificado
+                          </div>
+                          <p style={{ 
+                            margin: 0, 
+                            color: '#1f2937', 
+                            fontSize: '0.95rem',
+                            lineHeight: '1.5'
+                          }}>
                             {intervencion.hallazgo}
                           </p>
                         </div>
                         
-                        <div>
-                          <strong style={{ color: '#1f2937' }}>
-                            {intervencion.tipo === 'recomendacion' ? '💡 Recomendación:' : '🔄 Abordaje:'}
-                          </strong>
-                          <p style={{ margin: '4px 0', color: '#374151', fontSize: '0.9rem' }}>
+                        <div style={{
+                          padding: '16px',
+                          background: intervencion.tipo === 'recomendacion' ? '#fefcf3' : '#f0fdf4',
+                          borderRadius: '8px',
+                          border: `1px solid ${intervencion.tipo === 'recomendacion' ? '#fef3c7' : '#d1fae5'}`
+                        }}>
+                          <div style={{ 
+                            fontSize: '0.9rem',
+                            fontWeight: '700',
+                            color: intervencion.tipo === 'recomendacion' ? '#92400e' : '#065f46',
+                            marginBottom: '8px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                          }}>
+                            {intervencion.tipo === 'recomendacion' ? '💡 Recomendación Aplicada' : '🔄 Abordaje Realizado'}
+                          </div>
+                          <p style={{ 
+                            margin: 0, 
+                            color: '#1f2937', 
+                            fontSize: '0.95rem',
+                            lineHeight: '1.5'
+                          }}>
                             {intervencion.tipo === 'recomendacion' ? intervencion.recomendacion : intervencion.abordaje}
                           </p>
                         </div>
