@@ -101,8 +101,7 @@ const InventarioMain = () => {
     try {
       // Soft delete: marcar como inactivo en lugar de eliminar físicamente
       await dbHelpers.update('epp_productos', productoId, {
-        activo: false,
-        fecha_eliminacion: new Date().toISOString()
+        activo: false
       });
       
       // Recargar lista de productos (solo activos)
