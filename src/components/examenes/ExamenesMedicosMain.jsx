@@ -94,9 +94,22 @@ const ExamenesMedicosMain = () => {
       return;
     }
 
+    // Validar fechas si se proporciona fecha de vencimiento
+    if (formData.fecha_vencimiento && formData.fecha_realizacion) {
+      const fechaRealizacion = new Date(formData.fecha_realizacion);
+      const fechaVencimiento = new Date(formData.fecha_vencimiento);
+      
+      if (fechaVencimiento <= fechaRealizacion) {
+        setMensaje('La fecha de vencimiento debe ser posterior a la fecha de realización');
+        return;
+      }
+    }
+
     try {
       const dataToSave = {
         ...formData,
+        // Si no hay fecha de vencimiento, enviar null en lugar de string vacío
+        fecha_vencimiento: formData.fecha_vencimiento || null,
         created_at: editingExamen ? undefined : new Date().toISOString()
       };
 
