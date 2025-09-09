@@ -99,18 +99,36 @@ const InventarioMain = () => {
     if (!confirmacion2) return;
 
     try {
-      // Soft delete: marcar como inactivo en lugar de eliminar físicamente
+      // 1. Registrar movimiento de eliminación ANTES de marcar como inactivo
+      await dbHelpers.create('epp_movimientos', {
+        producto_id: productoId,
+        tipo: 'eliminacion',
+        cantidad: 0, // No afecta stock, es solo registro
+        observaciones: `Producto eliminado: ${nombreProducto}`,
+        usuario: 'Sistema', // o puedes usar el usuario logueado
+        fecha: new Date().toISOString()
+      });
+
+      // 2. Soft delete: marcar como inactivo en lugar de eliminar físicamente
       await dbHelpers.update('epp_productos', productoId, {
         activo: false
       });
       
-      // Recargar lista de productos (solo activos)
+      // 3. Recargar lista de productos (solo activos)
       const productosActualizados = await dbHelpers.getAll('epp_productos', {
         filters: { activo: true },
         orderBy: 'nombre',
         ascending: true
       });
       setProductos(productosActualizados || []);
+
+      // 4. Recargar movimientos para mostrar la eliminación
+      const movimientosData = await dbHelpers.getAll('epp_movimientos', {
+        orderBy: 'created_at',
+        ascending: false,
+        limit: 50
+      });
+      setMovimientos(movimientosData || []);
       
       setMensaje(`Producto "${nombreProducto}" eliminado exitosamente`);
       setTimeout(() => setMensaje(''), 3000);
@@ -572,28 +590,37 @@ const InventarioMain = () => {
                       </td>
                       <td style={{ padding: '12px', textAlign: 'center' }}>
                         <span style={{
-                          background: movimiento.tipo === 'entrada' ? '#f0fdf4' : '#fef2f2',
-                          color: movimiento.tipo === 'entrada' ? '#059669' : '#dc2626',
+                          background: 
+                            movimiento.tipo === 'entrada' ? '#f0fdf4' : 
+                            movimiento.tipo === 'eliminacion' ? '#fef3c7' : '#fef2f2',
+                          color: 
+                            movimiento.tipo === 'entrada' ? '#059669' : 
+                            movimiento.tipo === 'eliminacion' ? '#d97706' : '#dc2626',
                           padding: '4px 8px',
                           borderRadius: '4px',
                           fontSize: '12px',
                           fontWeight: '600'
                         }}>
-                          {movimiento.tipo === 'entrada' ? '📥 ENTRADA' : '📤 SALIDA'}
+                          {movimiento.tipo === 'entrada' ? 'ENTRADA' : 
+                           movimiento.tipo === 'eliminacion' ? 'ELIMINACIÓN' : 'SALIDA'}
                         </span>
                       </td>
                       <td style={{ 
                         padding: '12px', 
                         textAlign: 'center',
                         fontWeight: '600',
-                        color: movimiento.tipo === 'entrada' ? '#059669' : '#dc2626'
+                        color: movimiento.tipo === 'entrada' ? '#059669' : 
+                               movimiento.tipo === 'eliminacion' ? '#d97706' : '#dc2626'
                       }}>
-                        {movimiento.tipo === 'entrada' ? '+' : '-'}{movimiento.cantidad}
+                        {movimiento.tipo === 'eliminacion' ? 
+                          'N/A' : 
+                          `${movimiento.tipo === 'entrada' ? '+' : '-'}${movimiento.cantidad}`
+                        }
                       </td>
                       <td style={{ padding: '12px', fontSize: '14px', color: '#6b7280' }}>
                         {movimiento.colaborador && (
                           <div style={{ fontWeight: '500', color: '#374151' }}>
-                            👤 {movimiento.colaborador}
+                            {movimiento.colaborador}
                           </div>
                         )}
                         {movimiento.observaciones && (
