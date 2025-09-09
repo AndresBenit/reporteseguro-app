@@ -4,7 +4,6 @@ import { Icon } from '../common/Icons';
 
 const CapacitacionesMain = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
-  const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingCapacitacion, setEditingCapacitacion] = useState(null);
@@ -14,7 +13,7 @@ const CapacitacionesMain = () => {
     titulo: '',
     descripcion: '',
     fecha_realizacion: '',
-    colaborador_id: '',
+    area: '',
     tipo_capacitacion: '',
     instructor: '',
     duracion_horas: '',
@@ -37,6 +36,11 @@ const CapacitacionesMain = () => {
     'Otro'
   ];
 
+  const areas = [
+    'Centro Industrial',
+    'Hornos Solera'
+  ];
+
   useEffect(() => {
     cargarDatos();
   }, []);
@@ -45,20 +49,12 @@ const CapacitacionesMain = () => {
     try {
       setLoading(true);
       
-      const [capacitacionesData, colaboradoresData] = await Promise.all([
-        dbHelpers.getAll('capacitaciones_sst', {
-          orderBy: 'fecha_realizacion',
-          ascending: false
-        }),
-        dbHelpers.getAll('colaboradores', {
-          filters: { activo: true },
-          orderBy: 'nombre',
-          ascending: true
-        })
-      ]);
+      const capacitacionesData = await dbHelpers.getAll('capacitaciones_sst', {
+        orderBy: 'fecha_realizacion',
+        ascending: false
+      });
 
       setCapacitaciones(capacitacionesData || []);
-      setColaboradores(colaboradoresData || []);
     } catch (error) {
       console.error('Error cargando datos:', error);
       setMensaje('Error al cargar los datos');
@@ -70,7 +66,7 @@ const CapacitacionesMain = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.titulo || !formData.colaborador_id || !formData.fecha_realizacion) {
+    if (!formData.titulo || !formData.area || !formData.fecha_realizacion) {
       setMensaje('Por favor complete los campos obligatorios');
       return;
     }
@@ -105,7 +101,7 @@ const CapacitacionesMain = () => {
       titulo: capacitacion.titulo || '',
       descripcion: capacitacion.descripcion || '',
       fecha_realizacion: capacitacion.fecha_realizacion || '',
-      colaborador_id: capacitacion.colaborador_id || '',
+      area: capacitacion.area || '',
       tipo_capacitacion: capacitacion.tipo_capacitacion || '',
       instructor: capacitacion.instructor || '',
       duracion_horas: capacitacion.duracion_horas || '',
@@ -136,7 +132,7 @@ const CapacitacionesMain = () => {
       titulo: '',
       descripcion: '',
       fecha_realizacion: '',
-      colaborador_id: '',
+      area: '',
       tipo_capacitacion: '',
       instructor: '',
       duracion_horas: '',
@@ -148,10 +144,6 @@ const CapacitacionesMain = () => {
     setMensaje('');
   };
 
-  const getColaboradorNombre = (colaboradorId) => {
-    const colaborador = colaboradores.find(c => c.id === colaboradorId);
-    return colaborador ? colaborador.nombre : 'Colaborador no encontrado';
-  };
 
   const isVencida = (fechaVencimiento) => {
     if (!fechaVencimiento) return false;
@@ -413,11 +405,11 @@ const CapacitacionesMain = () => {
                   color: '#374151',
                   marginBottom: '6px'
                 }}>
-                  Colaborador *
+                  Área *
                 </label>
                 <select
-                  value={formData.colaborador_id}
-                  onChange={(e) => setFormData({...formData, colaborador_id: e.target.value})}
+                  value={formData.area}
+                  onChange={(e) => setFormData({...formData, area: e.target.value})}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -427,10 +419,10 @@ const CapacitacionesMain = () => {
                   }}
                   required
                 >
-                  <option value="">Seleccionar colaborador</option>
-                  {colaboradores.map(colaborador => (
-                    <option key={colaborador.id} value={colaborador.id}>
-                      {colaborador.nombre}
+                  <option value="">Seleccionar área</option>
+                  {areas.map(area => (
+                    <option key={area} value={area}>
+                      {area}
                     </option>
                   ))}
                 </select>
@@ -703,7 +695,7 @@ const CapacitacionesMain = () => {
                     Capacitación
                   </th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Colaborador
+                    Área
                   </th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     Tipo
@@ -747,8 +739,17 @@ const CapacitacionesMain = () => {
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '16px', color: '#374151' }}>
-                        {getColaboradorNombre(capacitacion.colaborador_id)}
+                      <td style={{ padding: '16px' }}>
+                        <span style={{
+                          padding: '4px 8px',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          background: capacitacion.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
+                          color: capacitacion.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
+                        }}>
+                          {capacitacion.area === 'Centro Industrial' ? '🏭 Centro Industrial' : '🔥 Hornos Solera'}
+                        </span>
                       </td>
                       <td style={{ padding: '16px' }}>
                         <span style={{
