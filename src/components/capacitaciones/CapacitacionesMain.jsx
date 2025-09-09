@@ -118,12 +118,29 @@ const CapacitacionesMain = () => {
     }
 
     try {
-      await dbHelpers.delete('capacitaciones_sst', id);
+      console.log('🗑️ Intentando eliminar capacitación con ID:', id);
+      const result = await dbHelpers.delete('capacitaciones_sst', id);
+      console.log('✅ Resultado de eliminación:', result);
+      
       await cargarDatos();
       setMensaje('Capacitación eliminada exitosamente');
     } catch (error) {
-      console.error('Error eliminando capacitación:', error);
-      setMensaje('Error al eliminar la capacitación');
+      console.error('❌ Error eliminando capacitación:', error);
+      console.error('❌ Detalles del error:', {
+        message: error.message,
+        code: error.code,
+        details: error.details,
+        hint: error.hint
+      });
+      
+      // Mensaje más específico basado en el tipo de error
+      if (error.code === '42501') {
+        setMensaje('Error: No tienes permisos para eliminar esta capacitación');
+      } else if (error.code === '23503') {
+        setMensaje('Error: No se puede eliminar porque está siendo referenciada');
+      } else {
+        setMensaje(`Error al eliminar: ${error.message || 'Error desconocido'}`);
+      }
     }
   };
 
