@@ -14,6 +14,7 @@ import SupervisionCampo from "./components/supervision/SupervisionCampo";
 import AbordajeCampo from "./components/supervision/AbordajeCampo";
 import ControlEPP from "./components/supervision/ControlEPP";
 import InventarioMain from "./components/inventory/InventarioMain";
+import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -248,6 +249,9 @@ function App() {
                   
                   {/* Módulo de Inventario */}
                   <Route path="/inventario" element={<InventarioMain />} />
+                  
+                  {/* Módulo de Capacitaciones SST */}
+                  <Route path="/capacitaciones" element={<CapacitacionesMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
