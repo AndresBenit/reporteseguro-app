@@ -4,7 +4,7 @@ import { supabase, authHelpers } from "./services/supabase";
 
 // Componentes principales
 import LoginMejorado from "./components/auth/LoginMejorado";
-import MainLayoutMejorado from "./components/common/MainLayoutMejorado";
+import MainLayoutEnterprise from "./components/common/MainLayoutEnterprise";
 import MainDashboard from "./components/dashboard/MainDashboard";
 import ReportTypeSelector from "./components/reports/ReportTypeSelector";
 import ReporteList from "./components/reports/ReporteList";
@@ -160,7 +160,7 @@ function App() {
           path="/*"
           element={
             user ? (
-              <MainLayoutMejorado user={user} onLogout={handleLogout} reportes={reportes}>
+              <MainLayoutEnterprise user={user} onLogout={handleLogout} reportes={reportes}>
                 <Routes>
                   {/* Dashboard principal */}
                   <Route
@@ -252,7 +252,7 @@ function App() {
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
-              </MainLayoutMejorado>
+              </MainLayoutEnterprise>
             ) : (
               <Navigate to="/login" replace />
             )
