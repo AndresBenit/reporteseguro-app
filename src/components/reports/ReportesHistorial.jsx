@@ -24,10 +24,11 @@ const ReportesHistorial = () => {
 
   const reportesPorPagina = 10;
 
+  // Validar que reportes sea un array válido
+  const reportesValidos = Array.isArray(reportes) ? reportes : [];
+
   // DEBUG: Ver qué tipos tenemos cuando cambien los reportes
   useEffect(() => {
-    // Validar que reportes sea un array válido
-    const reportesValidos = Array.isArray(reportes) ? reportes : [];
     if (reportesValidos.length > 0) {
       console.log('=== TIPOS DE REPORTES ENCONTRADOS ===');
       const tiposUnicos = [...new Set(reportesValidos.map(r => r?.tipo))];
