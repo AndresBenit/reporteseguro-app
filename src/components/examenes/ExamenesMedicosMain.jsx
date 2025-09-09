@@ -11,7 +11,7 @@ const ExamenesMedicosMain = () => {
 
   const [formData, setFormData] = useState({
     tipo_examen: '',
-    area: '',
+    colaborador_nombre: '',
     fecha_realizacion: '',
     entidad_realiza: '',
     medico_tratante: '',
@@ -37,10 +37,6 @@ const ExamenesMedicosMain = () => {
     'Otro'
   ];
 
-  const areas = [
-    'Centro Industrial',
-    'Hornos Solera'
-  ];
 
   const resultadosPosibles = [
     'pendiente',
@@ -84,7 +80,7 @@ const ExamenesMedicosMain = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!formData.tipo_examen || !formData.area || !formData.fecha_realizacion) {
+    if (!formData.tipo_examen || !formData.colaborador_nombre || !formData.fecha_realizacion) {
       setMensaje('Por favor complete los campos obligatorios');
       return;
     }
@@ -116,7 +112,7 @@ const ExamenesMedicosMain = () => {
     setEditingExamen(examen);
     setFormData({
       tipo_examen: examen.tipo_examen || '',
-      area: examen.area || '',
+      colaborador_nombre: examen.colaborador_nombre || '',
       fecha_realizacion: examen.fecha_realizacion || '',
       entidad_realiza: examen.entidad_realiza || '',
       medico_tratante: examen.medico_tratante || '',
@@ -148,7 +144,7 @@ const ExamenesMedicosMain = () => {
   const resetForm = () => {
     setFormData({
       tipo_examen: '',
-      area: '',
+      colaborador_nombre: '',
       fecha_realizacion: '',
       entidad_realiza: '',
       medico_tratante: '',
@@ -445,11 +441,12 @@ const ExamenesMedicosMain = () => {
                   color: '#374151',
                   marginBottom: '6px'
                 }}>
-                  Área *
+                  Nombre del Colaborador *
                 </label>
-                <select
-                  value={formData.area}
-                  onChange={(e) => setFormData({...formData, area: e.target.value})}
+                <input
+                  type="text"
+                  value={formData.colaborador_nombre}
+                  onChange={(e) => setFormData({...formData, colaborador_nombre: e.target.value})}
                   style={{
                     width: '100%',
                     padding: '10px 12px',
@@ -457,13 +454,9 @@ const ExamenesMedicosMain = () => {
                     borderRadius: '8px',
                     fontSize: '14px'
                   }}
+                  placeholder="Nombre completo del colaborador"
                   required
-                >
-                  <option value="">Seleccionar área</option>
-                  {areas.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div>
@@ -737,7 +730,7 @@ const ExamenesMedicosMain = () => {
                     Examen
                   </th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    Área
+                    Colaborador
                   </th>
                   <th style={{ padding: '12px 16px', textAlign: 'left', fontSize: '12px', fontWeight: '600', color: '#475569', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     Fecha
@@ -784,17 +777,10 @@ const ExamenesMedicosMain = () => {
                           )}
                         </div>
                       </td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          background: examen.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
-                          color: examen.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
-                        }}>
-                          {examen.area === 'Centro Industrial' ? '🏭 Centro Industrial' : '🔥 Hornos Solera'}
-                        </span>
+                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                        <div style={{ fontWeight: '500', color: '#1e293b' }}>
+                          {examen.colaborador_nombre || 'Sin especificar'}
+                        </div>
                       </td>
                       <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
                         {examen.fecha_realizacion ? 
