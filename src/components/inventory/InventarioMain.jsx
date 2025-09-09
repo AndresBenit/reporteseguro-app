@@ -89,6 +89,40 @@ const InventarioMain = () => {
     }
   };
 
+  // Eliminar producto (soft delete)
+  const eliminarProducto = async (productoId, nombreProducto) => {
+    // Confirmación doble para evitar eliminaciones accidentales
+    const confirmacion1 = window.confirm(`¿Estás seguro de que deseas eliminar "${nombreProducto}"?`);
+    if (!confirmacion1) return;
+    
+    const confirmacion2 = window.confirm(`Esta acción no se puede deshacer. ¿Confirmas la eliminación de "${nombreProducto}"?`);
+    if (!confirmacion2) return;
+
+    try {
+      // Soft delete: marcar como inactivo en lugar de eliminar físicamente
+      await dbHelpers.update('epp_productos', productoId, {
+        activo: false,
+        fecha_eliminacion: new Date().toISOString()
+      });
+      
+      // Recargar lista de productos (solo activos)
+      const productosActualizados = await dbHelpers.getAll('epp_productos', {
+        filters: { activo: true },
+        orderBy: 'nombre',
+        ascending: true
+      });
+      setProductos(productosActualizados || []);
+      
+      setMensaje(`Producto "${nombreProducto}" eliminado exitosamente`);
+      setTimeout(() => setMensaje(''), 3000);
+      
+    } catch (error) {
+      console.error('Error eliminando producto:', error);
+      setMensaje('Error al eliminar el producto');
+      setTimeout(() => setMensaje(''), 3000);
+    }
+  };
+
   // Ajustar stock
   const ajustarStock = async (productoId, tipoMovimiento, cantidad, observaciones) => {
     try {
@@ -400,7 +434,7 @@ const InventarioMain = () => {
                           fontSize: '12px',
                           fontWeight: '600'
                         }}>
-                          🔴 BAJO
+                          BAJO
                         </span>
                       ) : (
                         <span style={{
@@ -411,7 +445,7 @@ const InventarioMain = () => {
                           fontSize: '12px',
                           fontWeight: '600'
                         }}>
-                          ✅ OK
+                          OK
                         </span>
                       )}
                     </td>
@@ -458,6 +492,25 @@ const InventarioMain = () => {
                           title="Quitar stock"
                         >
                           -
+                        </button>
+                        <button
+                          onClick={() => eliminarProducto(producto.id, producto.nombre)}
+                          style={{
+                            padding: '6px 8px',
+                            background: '#dc2626',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '4px',
+                            cursor: 'pointer',
+                            fontSize: '12px',
+                            fontWeight: '600',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center'
+                          }}
+                          title="Eliminar producto"
+                        >
+                          <Icon name="Trash" size={12} />
                         </button>
                       </div>
                     </td>
