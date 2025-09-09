@@ -16,6 +16,7 @@ import ControlEPP from "./components/supervision/ControlEPP";
 import InventarioMain from "./components/inventory/InventarioMain";
 import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
 import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
+import COPASSTMain from "./components/copasst/COPASSTMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -256,6 +257,9 @@ function App() {
                   
                   {/* Módulo de Exámenes Médicos SST */}
                   <Route path="/examenes-medicos" element={<ExamenesMedicosMain />} />
+                  
+                  {/* Módulo de COPASST SST */}
+                  <Route path="/copasst" element={<COPASSTMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />

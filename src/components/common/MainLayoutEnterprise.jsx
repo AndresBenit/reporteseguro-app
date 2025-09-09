@@ -115,6 +115,14 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           path: '/examenes-medicos',
           description: 'Vigilancia epidemiológica',
           isNew: true
+        },
+        {
+          id: 'copasst',
+          label: 'COPASST',
+          icon: 'Users',
+          path: '/copasst',
+          description: 'Comité Paritario SST',
+          isNew: true
         }
       ]
     },
