@@ -64,12 +64,19 @@ const InventarioMain = () => {
     }
 
     try {
-      const productoCreado = await dbHelpers.create('epp_productos', {
+      await dbHelpers.create('epp_productos', {
         ...nuevoProducto,
         activo: true
       });
       
-      setProductos([...productos, productoCreado]);
+      // Recargar productos en lugar de intentar usar el valor devuelto
+      const productosActualizados = await dbHelpers.getAll('epp_productos', {
+        filters: { activo: true },
+        orderBy: 'nombre',
+        ascending: true
+      });
+      setProductos(productosActualizados || []);
+      
       setNuevoProducto({ nombre: '', descripcion: '', stock_minimo: 5, precio_unitario: 0 });
       setShowFormulario(false);
       setMensaje('Producto creado exitosamente');

@@ -443,6 +443,12 @@ export const Icons = {
       <polyline points="3.27,6.96 12,12.01 20.73,6.96" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
       <line x1="12" y1="22.08" x2="12" y2="12" stroke={color} strokeWidth="2" strokeLinecap="round" />
     </svg>
+  ),
+
+  Plus: ({ size = 20, color = "currentColor", className = "" }) => (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className}>
+      <path d="M12 5V19M5 12H19" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
   )
 };
 
