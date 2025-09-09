@@ -17,6 +17,7 @@ import InventarioMain from "./components/inventory/InventarioMain";
 import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
 import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
 import COPASSTMain from "./components/copasst/COPASSTMain";
+import ReportesLegalesMain from "./components/reportes-legales/ReportesLegalesMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -260,6 +261,9 @@ function App() {
                   
                   {/* Módulo de COPASST SST */}
                   <Route path="/copasst" element={<COPASSTMain />} />
+                  
+                  {/* Módulo de Reportes Legales SST */}
+                  <Route path="/reportes-legales" element={<ReportesLegalesMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
