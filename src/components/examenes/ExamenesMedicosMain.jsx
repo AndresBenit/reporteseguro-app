@@ -4,6 +4,7 @@ import { Icon } from '../common/Icons';
 
 const ExamenesMedicosMain = () => {
   const [examenes, setExamenes] = useState([]);
+  const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingExamen, setEditingExamen] = useState(null);
@@ -63,12 +64,20 @@ const ExamenesMedicosMain = () => {
     try {
       setLoading(true);
       
-      const examenesData = await dbHelpers.getAll('examenes_medicos_sst', {
-        orderBy: 'fecha_realizacion',
-        ascending: false
-      });
+      const [examenesData, colaboradoresData] = await Promise.all([
+        dbHelpers.getAll('examenes_medicos_sst', {
+          orderBy: 'fecha_realizacion',
+          ascending: false
+        }),
+        dbHelpers.getAll('colaboradores', {
+          orderBy: 'nombre',
+          ascending: true,
+          filters: { activo: true }
+        })
+      ]);
 
       setExamenes(examenesData || []);
+      setColaboradores(colaboradoresData || []);
     } catch (error) {
       console.error('Error cargando datos:', error);
       setMensaje('Error al cargar los datos');
@@ -445,6 +454,7 @@ const ExamenesMedicosMain = () => {
                 </label>
                 <input
                   type="text"
+                  list="colaboradores-list"
                   value={formData.colaborador_nombre}
                   onChange={(e) => setFormData({...formData, colaborador_nombre: e.target.value})}
                   style={{
@@ -454,9 +464,14 @@ const ExamenesMedicosMain = () => {
                     borderRadius: '8px',
                     fontSize: '14px'
                   }}
-                  placeholder="Nombre completo del colaborador"
+                  placeholder="Escriba el nombre del colaborador"
                   required
                 />
+                <datalist id="colaboradores-list">
+                  {colaboradores.map(colaborador => (
+                    <option key={colaborador.id} value={colaborador.nombre} />
+                  ))}
+                </datalist>
               </div>
 
               <div>
