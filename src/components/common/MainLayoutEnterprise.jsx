@@ -72,14 +72,6 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           isNew: true
         },
         {
-          id: 'inspecciones',
-          label: 'Inspecciones',
-          icon: 'CheckSquare',
-          path: '/inspecciones', 
-          description: 'Inspecciones programadas',
-          isNew: true
-        },
-        {
           id: 'auditorias',
           label: 'Auditorías',
           icon: 'Settings',
