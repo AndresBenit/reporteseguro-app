@@ -145,6 +145,14 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           path: '/planes-emergencia',
           description: 'Gestión de emergencias',
           isNew: true
+        },
+        {
+          id: 'inspecciones',
+          label: 'Inspecciones SST',
+          icon: 'CheckSquare',
+          path: '/inspecciones',
+          description: 'Sistema de inspecciones',
+          isNew: true
         }
       ]
     },

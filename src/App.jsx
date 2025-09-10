@@ -19,6 +19,7 @@ import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
 import COPASSTMain from "./components/copasst/COPASSTMain";
 import ReportesLegalesMain from "./components/reportes-legales/ReportesLegalesMain";
 import PlanesEmergenciaMain from "./components/emergencias/PlanesEmergenciaMain";
+import InspeccionesMain from "./components/inspecciones/InspeccionesMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -268,6 +269,9 @@ function App() {
                   
                   {/* Módulo de Planes de Emergencia SST */}
                   <Route path="/planes-emergencia" element={<PlanesEmergenciaMain />} />
+                  
+                  {/* Módulo de Inspecciones SST */}
+                  <Route path="/inspecciones" element={<InspeccionesMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
