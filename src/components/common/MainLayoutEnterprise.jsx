@@ -49,14 +49,6 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           path: '/reportes',
           description: 'Crear y gestionar reportes'
         },
-        {
-          id: 'investigaciones',
-          label: 'Investigaciones',
-          icon: 'Activity',
-          path: '/investigaciones',
-          description: 'Investigación de accidentes',
-          isNew: true
-        }
       ]
     },
     {
