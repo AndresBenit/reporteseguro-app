@@ -18,6 +18,7 @@ import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
 import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
 import COPASSTMain from "./components/copasst/COPASSTMain";
 import ReportesLegalesMain from "./components/reportes-legales/ReportesLegalesMain";
+import PlanesEmergenciaMain from "./components/emergencias/PlanesEmergenciaMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
@@ -264,6 +265,9 @@ function App() {
                   
                   {/* Módulo de Reportes Legales SST */}
                   <Route path="/reportes-legales" element={<ReportesLegalesMain />} />
+                  
+                  {/* Módulo de Planes de Emergencia SST */}
+                  <Route path="/planes-emergencia" element={<PlanesEmergenciaMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />

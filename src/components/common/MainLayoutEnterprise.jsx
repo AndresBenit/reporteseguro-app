@@ -139,11 +139,11 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           isNew: true
         },
         {
-          id: 'emergencias',
-          label: 'Emergencias',
-          icon: 'AlertCircle',
-          path: '/emergencias',
-          description: 'Planes de emergencia',
+          id: 'planes-emergencia',
+          label: 'Planes de Emergencia',
+          icon: 'Shield',
+          path: '/planes-emergencia',
+          description: 'Gestión de emergencias',
           isNew: true
         }
       ]
