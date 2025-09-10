@@ -145,6 +145,14 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           path: '/inspecciones',
           description: 'Sistema de inspecciones',
           isNew: true
+        },
+        {
+          id: 'investigacion-accidentes',
+          label: 'Investigación Accidentes',
+          icon: 'Search',
+          path: '/investigacion-accidentes',
+          description: 'Análisis de incidentes',
+          isNew: true
         }
       ]
     },
