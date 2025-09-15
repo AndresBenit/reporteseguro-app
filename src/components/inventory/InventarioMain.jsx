@@ -16,6 +16,8 @@ const InventarioMain = () => {
   });
   const [showFormulario, setShowFormulario] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [editandoProducto, setEditandoProducto] = useState(null);
+  const [productoEditado, setProductoEditado] = useState({});
 
   // Cargar datos
   useEffect(() => {
@@ -137,6 +139,53 @@ const InventarioMain = () => {
     } catch (error) {
       console.error('Error eliminando producto:', error);
       setMensaje('Error al eliminar el producto');
+      setTimeout(() => setMensaje(''), 3000);
+    }
+  };
+
+  // Iniciar edición de producto
+  const iniciarEdicion = (producto) => {
+    setEditandoProducto(producto.id);
+    setProductoEditado({
+      nombre: producto.nombre,
+      descripcion: producto.descripcion || '',
+      marca: producto.marca || '',
+      stock_minimo: producto.stock_minimo
+    });
+  };
+
+  // Cancelar edición
+  const cancelarEdicion = () => {
+    setEditandoProducto(null);
+    setProductoEditado({});
+  };
+
+  // Guardar cambios de edición
+  const guardarEdicion = async (productoId) => {
+    if (!productoEditado.nombre.trim()) {
+      setMensaje('El nombre del producto es obligatorio');
+      return;
+    }
+
+    try {
+      await dbHelpers.update('epp_productos', productoId, productoEditado);
+
+      // Recargar productos
+      const productosActualizados = await dbHelpers.getAll('epp_productos', {
+        filters: { activo: true },
+        orderBy: 'nombre',
+        ascending: true
+      });
+      setProductos(productosActualizados || []);
+
+      setEditandoProducto(null);
+      setProductoEditado({});
+      setMensaje('Producto actualizado exitosamente');
+      setTimeout(() => setMensaje(''), 3000);
+
+    } catch (error) {
+      console.error('Error actualizando producto:', error);
+      setMensaje('Error actualizando el producto');
       setTimeout(() => setMensaje(''), 3000);
     }
   };
@@ -439,21 +488,70 @@ const InventarioMain = () => {
                 {productos.map((producto) => (
                   <tr key={producto.id} style={{ borderBottom: '1px solid #f3f4f6' }}>
                     <td style={{ padding: '12px' }}>
-                      <div>
-                        <div style={{ fontWeight: '600', color: '#1f2937' }}>
-                          {producto.nombre}
+                      {editandoProducto === producto.id ? (
+                        <div>
+                          <input
+                            type="text"
+                            value={productoEditado.nombre}
+                            onChange={(e) => setProductoEditado({...productoEditado, nombre: e.target.value})}
+                            style={{
+                              width: '100%',
+                              padding: '6px',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              marginBottom: '4px'
+                            }}
+                            placeholder="Nombre del producto"
+                          />
+                          <input
+                            type="text"
+                            value={productoEditado.descripcion}
+                            onChange={(e) => setProductoEditado({...productoEditado, descripcion: e.target.value})}
+                            style={{
+                              width: '100%',
+                              padding: '6px',
+                              border: '1px solid #d1d5db',
+                              borderRadius: '4px',
+                              fontSize: '12px'
+                            }}
+                            placeholder="Descripción"
+                          />
                         </div>
-                        {producto.descripcion && (
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            {producto.descripcion}
+                      ) : (
+                        <div>
+                          <div style={{ fontWeight: '600', color: '#1f2937' }}>
+                            {producto.nombre}
                           </div>
-                        )}
-                      </div>
+                          {producto.descripcion && (
+                            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                              {producto.descripcion}
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '12px' }}>
-                      <div style={{ fontWeight: '500', color: '#374151' }}>
-                        {producto.marca || 'Sin especificar'}
-                      </div>
+                      {editandoProducto === producto.id ? (
+                        <input
+                          type="text"
+                          value={productoEditado.marca}
+                          onChange={(e) => setProductoEditado({...productoEditado, marca: e.target.value})}
+                          style={{
+                            width: '100%',
+                            padding: '6px',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '4px',
+                            fontSize: '14px'
+                          }}
+                          placeholder="Marca"
+                        />
+                      ) : (
+                        <div style={{ fontWeight: '500', color: '#374151' }}>
+                          {producto.marca || 'Sin especificar'}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <span style={{
@@ -465,7 +563,24 @@ const InventarioMain = () => {
                       </span>
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center', color: '#6b7280' }}>
-                      {producto.stock_minimo}
+                      {editandoProducto === producto.id ? (
+                        <input
+                          type="number"
+                          value={productoEditado.stock_minimo}
+                          onChange={(e) => setProductoEditado({...productoEditado, stock_minimo: parseInt(e.target.value) || 0})}
+                          min="0"
+                          style={{
+                            width: '60px',
+                            padding: '6px',
+                            border: '1px solid #d1d5db',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            textAlign: 'center'
+                          }}
+                        />
+                      ) : (
+                        producto.stock_minimo
+                      )}
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       {producto.stock_actual <= producto.stock_minimo ? (
@@ -494,67 +609,131 @@ const InventarioMain = () => {
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center' }}>
                       <div style={{ display: 'flex', gap: '4px', justifyContent: 'center' }}>
-                        <button
-                          onClick={() => {
-                            const cantidad = prompt('¿Cuántas unidades desea agregar?');
-                            if (cantidad && parseInt(cantidad) > 0) {
-                              ajustarStock(producto.id, 'entrada', parseInt(cantidad), `Entrada manual: +${cantidad}`);
-                            }
-                          }}
-                          style={{
-                            padding: '6px 10px',
-                            background: '#10b981',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: '600'
-                          }}
-                          title="Agregar stock"
-                        >
-                          +
-                        </button>
-                        <button
-                          onClick={() => {
-                            const cantidad = prompt('¿Cuántas unidades desea quitar?');
-                            if (cantidad && parseInt(cantidad) > 0) {
-                              ajustarStock(producto.id, 'salida', parseInt(cantidad), `Salida manual: -${cantidad}`);
-                            }
-                          }}
-                          style={{
-                            padding: '6px 10px',
-                            background: '#ef4444',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: '600'
-                          }}
-                          title="Quitar stock"
-                        >
-                          -
-                        </button>
-                        <button
-                          onClick={() => eliminarProducto(producto.id, producto.nombre)}
-                          style={{
-                            padding: '6px 8px',
-                            background: '#dc2626',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '12px',
-                            fontWeight: '600',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center'
-                          }}
-                          title="Eliminar producto"
-                        >
-                          <Icon name="Trash" size={12} />
-                        </button>
+                        {editandoProducto === producto.id ? (
+                          <>
+                            <button
+                              onClick={() => guardarEdicion(producto.id)}
+                              style={{
+                                padding: '6px 8px',
+                                background: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Guardar cambios"
+                            >
+                              <Icon name="CheckCircle" size={12} />
+                            </button>
+                            <button
+                              onClick={cancelarEdicion}
+                              style={{
+                                padding: '6px 8px',
+                                background: '#6b7280',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Cancelar edición"
+                            >
+                              ✕
+                            </button>
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => iniciarEdicion(producto)}
+                              style={{
+                                padding: '6px 8px',
+                                background: '#3b82f6',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Editar producto"
+                            >
+                              <Icon name="Edit" size={12} />
+                            </button>
+                            <button
+                              onClick={() => {
+                                const cantidad = prompt('¿Cuántas unidades desea agregar?');
+                                if (cantidad && parseInt(cantidad) > 0) {
+                                  ajustarStock(producto.id, 'entrada', parseInt(cantidad), `Entrada manual: +${cantidad}`);
+                                }
+                              }}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#10b981',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600'
+                              }}
+                              title="Agregar stock"
+                            >
+                              +
+                            </button>
+                            <button
+                              onClick={() => {
+                                const cantidad = prompt('¿Cuántas unidades desea quitar?');
+                                if (cantidad && parseInt(cantidad) > 0) {
+                                  ajustarStock(producto.id, 'salida', parseInt(cantidad), `Salida manual: -${cantidad}`);
+                                }
+                              }}
+                              style={{
+                                padding: '6px 10px',
+                                background: '#ef4444',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600'
+                              }}
+                              title="Quitar stock"
+                            >
+                              -
+                            </button>
+                            <button
+                              onClick={() => eliminarProducto(producto.id, producto.nombre)}
+                              style={{
+                                padding: '6px 8px',
+                                background: '#dc2626',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                fontSize: '12px',
+                                fontWeight: '600',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}
+                              title="Eliminar producto"
+                            >
+                              <Icon name="Trash" size={12} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>
