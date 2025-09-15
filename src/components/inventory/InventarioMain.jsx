@@ -108,8 +108,7 @@ const InventarioMain = () => {
         tipo: 'eliminacion',
         cantidad: 0, // No afecta stock, es solo registro
         observaciones: `Producto eliminado: ${nombreProducto}`,
-        usuario: 'Sistema', // o puedes usar el usuario logueado
-        fecha: new Date().toISOString()
+        usuario: 'Sistema' // o puedes usar el usuario logueado
       });
 
       // 2. Soft delete: marcar como inactivo en lugar de eliminar físicamente
