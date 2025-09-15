@@ -10,6 +10,7 @@ const InventarioMain = () => {
   const [nuevoProducto, setNuevoProducto] = useState({
     nombre: '',
     descripcion: '',
+    marca: '',
     stock_minimo: 5,
     precio_unitario: 0
   });
@@ -77,7 +78,7 @@ const InventarioMain = () => {
       });
       setProductos(productosActualizados || []);
       
-      setNuevoProducto({ nombre: '', descripcion: '', stock_minimo: 5, precio_unitario: 0 });
+      setNuevoProducto({ nombre: '', descripcion: '', marca: '', stock_minimo: 5, precio_unitario: 0 });
       setShowFormulario(false);
       setMensaje('Producto creado exitosamente');
       setTimeout(() => setMensaje(''), 3000);
@@ -303,7 +304,7 @@ const InventarioMain = () => {
               marginBottom: '20px'
             }}>
               <h3 style={{ marginTop: 0 }}>Agregar Nuevo Producto EPP</h3>
-              <div style={{ display: 'grid', gridTemplateColumns: '2fr 3fr 1fr 1fr', gap: '15px', alignItems: 'end' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '2fr 2fr 1.5fr 1fr 1fr', gap: '15px', alignItems: 'end' }}>
                 <div>
                   <label style={{ display: 'block', fontWeight: '600', marginBottom: '5px' }}>
                     Nombre *
@@ -330,6 +331,23 @@ const InventarioMain = () => {
                     value={nuevoProducto.descripcion}
                     onChange={(e) => setNuevoProducto({...nuevoProducto, descripcion: e.target.value})}
                     placeholder="Descripción del producto"
+                    style={{
+                      width: '100%',
+                      padding: '10px',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px'
+                    }}
+                  />
+                </div>
+                <div>
+                  <label style={{ display: 'block', fontWeight: '600', marginBottom: '5px' }}>
+                    Marca
+                  </label>
+                  <input
+                    type="text"
+                    value={nuevoProducto.marca}
+                    onChange={(e) => setNuevoProducto({...nuevoProducto, marca: e.target.value})}
+                    placeholder="Ej: 3M, MSA, Honeywell"
                     style={{
                       width: '100%',
                       padding: '10px',
@@ -400,6 +418,9 @@ const InventarioMain = () => {
                   <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
                     Producto
                   </th>
+                  <th style={{ padding: '12px', textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+                    Marca
+                  </th>
                   <th style={{ padding: '12px', textAlign: 'center', borderBottom: '1px solid #e5e7eb' }}>
                     Stock Actual
                   </th>
@@ -427,6 +448,11 @@ const InventarioMain = () => {
                             {producto.descripcion}
                           </div>
                         )}
+                      </div>
+                    </td>
+                    <td style={{ padding: '12px' }}>
+                      <div style={{ fontWeight: '500', color: '#374151' }}>
+                        {producto.marca || 'Sin especificar'}
                       </div>
                     </td>
                     <td style={{ padding: '12px', textAlign: 'center' }}>
