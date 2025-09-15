@@ -27,6 +27,7 @@ import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
 import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ComponenteMigracion from "./components/reports/ComponenteMigracion";
+import ErrorBoundary from "./components/common/ErrorBoundary";
 
 // Hooks y servicios
 import { useReportes } from "./hooks/useReportes";
