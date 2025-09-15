@@ -24,11 +24,7 @@ import InvestigacionAccidentesMain from "./components/investigacion/Investigacio
 import AuditoriasMain from "./components/auditorias/AuditoriasMain";
 import MatrizRiesgosMain from "./components/riesgos/MatrizRiesgosMain";
 import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
-import ReportesHistorial from "./components/reports/ReportesHistorial";
 import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
-import ComponenteMigracion from "./components/admin/ComponenteMigracion";
-import TestForm from "./components/debug/TestForm";
-import ErrorBoundary from "./components/debug/ErrorBoundary";
 
 // Hooks y servicios
 import { useReportes } from "./hooks/useReportes";
