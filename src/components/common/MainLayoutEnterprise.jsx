@@ -6,34 +6,25 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
-  const [activeCategory, setActiveCategory] = useState('OPERACIONES');
 
-  // Detectar si es móvil
+  // Detectar móvil y cerrar menú cuando sea necesario
   useEffect(() => {
-    const checkIsMobile = () => {
-      setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) {
+        setMobileMenuOpen(false);
+      }
     };
-    
-    checkIsMobile();
-    window.addEventListener('resize', checkIsMobile);
-    
-    return () => window.removeEventListener('resize', checkIsMobile);
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Cerrar menú móvil cuando se redimensiona a desktop
-  useEffect(() => {
-    if (!isMobile) {
-      setMobileMenuOpen(false);
-    }
-  }, [isMobile]);
-
-  // NUEVA ESTRUCTURA ENTERPRISE SST - SIDEBAR MODULAR
+  // NUEVA ESTRUCTURA ENTERPRISE SST
   const enterpriseModules = [
     {
       category: "OPERACIONES",
-      color: "#3b82f6",
+      color: "primary",
       modules: [
         {
           id: 'dashboard',
@@ -45,784 +36,361 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
         {
           id: 'reportes',
           label: 'Reportes',
-          icon: 'FileText', 
+          icon: 'FileText',
           path: '/reportes',
           description: 'Crear y gestionar reportes'
         },
+        {
+          id: 'colaboradores',
+          label: 'Colaboradores',
+          icon: 'Users',
+          path: '/colaboradores',
+          description: 'Gestión de personal'
+        }
       ]
     },
     {
-      category: "GESTIÓN DE RIESGOS",
-      color: "#dc2626",
+      category: "SEGURIDAD",
+      color: "secondary",
       modules: [
         {
-          id: 'riesgos',
-          label: 'Matriz de Riesgos',
-          icon: 'AlertTriangle',
-          path: '/riesgos',
-          description: 'Identificación y evaluación',
-          isNew: true
+          id: 'supervision',
+          label: 'Supervisión',
+          icon: 'Eye',
+          path: '/supervision',
+          description: 'Control en campo'
+        },
+        {
+          id: 'investigacion',
+          label: 'Investigación',
+          icon: 'Search',
+          path: '/investigacion-accidentes',
+          description: 'Investigación de accidentes'
+        },
+        {
+          id: 'inspecciones',
+          label: 'Inspecciones',
+          icon: 'CheckSquare',
+          path: '/inspecciones',
+          description: 'Inspecciones SST'
         },
         {
           id: 'auditorias',
           label: 'Auditorías',
-          icon: 'Settings',
-          path: '/auditorias',
-          description: 'Auditorías internas SST',
-          isNew: true
-        }
-      ]
-    },
-    {
-      category: "RECURSOS HUMANOS",
-      color: "#059669", 
-      modules: [
-        {
-          id: 'colaboradores',
-          label: 'Personal',
-          icon: 'Users',
-          path: '/colaboradores',
-          description: 'Gestión de colaboradores'
-        },
-        {
-          id: 'capacitaciones',
-          label: 'Capacitaciones',
-          icon: 'BookOpen',
-          path: '/capacitaciones',
-          description: 'Programa de entrenamiento',
-          isNew: true
-        },
-        {
-          id: 'examenes',
-          label: 'Exámenes Médicos',
-          icon: 'Heart',
-          path: '/examenes-medicos',
-          description: 'Vigilancia epidemiológica',
-          isNew: true
-        }
-      ]
-    },
-    {
-      category: "CUMPLIMIENTO LEGAL",
-      color: "#7c3aed",
-      modules: [
-        {
-          id: 'copasst',
-          label: 'COPASST',
-          icon: 'Users',
-          path: '/copasst',
-          description: 'Comité Paritario SST',
-          isNew: true
-        },
-        {
-          id: 'reportes-legales',
-          label: 'Reportes Legales',
-          icon: 'FileText',
-          path: '/reportes-legales', 
-          description: 'Reportes obligatorios',
-          isNew: true
-        },
-        {
-          id: 'planes-emergencia',
-          label: 'Planes de Emergencia',
           icon: 'Shield',
-          path: '/planes-emergencia',
-          description: 'Gestión de emergencias',
-          isNew: true
-        },
-        {
-          id: 'inspecciones',
-          label: 'Inspecciones SST',
-          icon: 'CheckSquare',
-          path: '/inspecciones',
-          description: 'Sistema de inspecciones',
-          isNew: true
-        },
-        {
-          id: 'investigacion-accidentes',
-          label: 'Investigación Accidentes',
-          icon: 'Search',
-          path: '/investigacion-accidentes',
-          description: 'Análisis de incidentes',
-          isNew: true
+          path: '/auditorias',
+          description: 'Auditorías del sistema'
         }
       ]
     },
     {
       category: "RECURSOS",
-      color: "#f97316",
+      color: "orange",
       modules: [
         {
           id: 'inventario',
           label: 'Inventario EPP',
           icon: 'Package',
           path: '/inventario',
-          description: 'Gestión de inventario EPP'
+          description: 'Gestión de equipos'
         },
         {
-          id: 'supervision',
-          label: 'Análisis',
-          icon: 'BarChart3',
-          path: '/supervision',
-          description: 'Herramientas de análisis'
+          id: 'capacitaciones',
+          label: 'Capacitaciones',
+          icon: 'BookOpen',
+          path: '/capacitaciones',
+          description: 'Formación SST'
+        },
+        {
+          id: 'examenes',
+          label: 'Exámenes Médicos',
+          icon: 'Heart',
+          path: '/examenes-medicos',
+          description: 'Control médico'
+        },
+        {
+          id: 'planes-emergencia',
+          label: 'Planes Emergencia',
+          icon: 'AlertTriangle',
+          path: '/planes-emergencia',
+          description: 'Gestión de emergencias'
+        }
+      ]
+    },
+    {
+      category: "GESTIÓN",
+      color: "purple",
+      modules: [
+        {
+          id: 'copasst',
+          label: 'COPASST',
+          icon: 'Users',
+          path: '/copasst',
+          description: 'Comité paritario'
+        },
+        {
+          id: 'reportes-legales',
+          label: 'Reportes Legales',
+          icon: 'FileText',
+          path: '/reportes-legales',
+          description: 'Documentación legal'
+        },
+        {
+          id: 'matriz-riesgos',
+          label: 'Matriz de Riesgos',
+          icon: 'AlertCircle',
+          path: '/matriz-riesgos',
+          description: 'Gestión de riesgos'
         }
       ]
     }
   ];
-
-  const isActiveRoute = (path) => {
-    if (path === '/') {
-      return location.pathname === '/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
-  const isActiveModule = (module) => {
-    return isActiveRoute(module.path);
-  };
-
-  const isActiveCategory = (category) => {
-    return category.modules.some(module => isActiveModule(module));
-  };
 
   const handleNavigation = (path) => {
     navigate(path);
     setMobileMenuOpen(false);
   };
 
-  const toggleSidebar = () => {
-    setSidebarCollapsed(!sidebarCollapsed);
+  const isActiveRoute = (path) => {
+    if (path === '/') return location.pathname === '/';
+    return location.pathname.startsWith(path);
   };
 
-  const toggleCategory = (categoryName) => {
-    if (activeCategory === categoryName) {
-      setActiveCategory(null);
-    } else {
-      setActiveCategory(categoryName);
-    }
-  };
-
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+  const getColorClasses = (color, isActive = false) => {
+    const colors = {
+      primary: isActive
+        ? 'bg-primary-100 text-primary-700 border-r-2 border-primary-600'
+        : 'text-gray-600 hover:text-primary-700 hover:bg-primary-50',
+      secondary: isActive
+        ? 'bg-secondary-100 text-secondary-700 border-r-2 border-secondary-600'
+        : 'text-gray-600 hover:text-secondary-700 hover:bg-secondary-50',
+      orange: isActive
+        ? 'bg-orange-100 text-orange-700 border-r-2 border-orange-600'
+        : 'text-gray-600 hover:text-orange-700 hover:bg-orange-50',
+      purple: isActive
+        ? 'bg-purple-100 text-purple-700 border-r-2 border-purple-600'
+        : 'text-gray-600 hover:text-purple-700 hover:bg-purple-50'
+    };
+    return colors[color] || colors.primary;
   };
 
   return (
-    <div className="enterprise-layout">
-      {/* HEADER SUPERIOR FIJO */}
-      <header className="enterprise-header">
-        <div className="header-content">
-          {/* Toggle sidebar + Logo */}
-          <div className="header-left">
-            {!isMobile && (
-              <button 
-                className="sidebar-toggle"
-                onClick={toggleSidebar}
-                title={sidebarCollapsed ? "Expandir menú" : "Colapsar menú"}
-              >
-                <Icon name="ChevronRight" size={20} style={{
-                  transform: sidebarCollapsed ? 'rotate(0deg)' : 'rotate(180deg)',
-                  transition: 'transform 0.3s ease'
-                }} />
-              </button>
-            )}
-            
-            <div className="header-brand" onClick={() => handleNavigation('/')}>
-              <Icon name="Shield" size={28} color="#1e40af" />
-              <div className="brand-text">
-                <h1>ReporteSeguro</h1>
-                <span>Sistema SST Minería</span>
+    <div className="flex h-screen bg-gray-50">
+      {/* Sidebar Desktop */}
+      <div className={`hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200 shadow-enterprise ${
+        sidebarCollapsed ? 'lg:w-20' : 'lg:w-80'
+      } transition-all duration-300`}>
+
+        {/* Header del Sidebar */}
+        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
+          {!sidebarCollapsed && (
+            <div className="flex items-center space-x-3">
+              {/* Aquí irá el logotipo cuando lo subas */}
+              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
+                <Icon name="Shield" size={20} color="white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-bold text-gray-900">ReporteSeguro</h1>
+                <p className="text-xs text-gray-500">SST Enterprise</p>
               </div>
             </div>
-          </div>
-
-          {/* User info + Actions */}
-          <div className="header-right">
-            {!isMobile && (
-              <div className="user-info">
-                <div className="user-avatar">
-                  <Icon name="User" size={20} color="#1e40af" />
-                </div>
-                <div className="user-details">
-                  <span className="user-name">
-                    {user.displayName || user.email.split('@')[0]}
-                  </span>
-                  <span className="user-role">Administrador SST</span>
-                </div>
-              </div>
-            )}
-
-            <button className="logout-btn" onClick={onLogout} title="Cerrar Sesión">
-              <Icon name="LogOut" size={18} />
-              {!isMobile && <span>Salir</span>}
-            </button>
-
-            {/* Mobile menu button */}
-            {isMobile && (
-              <button 
-                className={`mobile-menu-btn ${mobileMenuOpen ? 'active' : ''}`}
-                onClick={toggleMobileMenu}
-              >
-                <div className="hamburger">
-                  <span></span>
-                  <span></span>
-                  <span></span>
-                </div>
-              </button>
-            )}
-          </div>
+          )}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+          >
+            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
+          </button>
         </div>
-      </header>
 
-      {/* SIDEBAR ENTERPRISE */}
-      {!isMobile && (
-        <aside className={`enterprise-sidebar ${sidebarCollapsed ? 'collapsed' : ''}`}>
-          <div className="sidebar-content">
+        {/* Navegación */}
+        <div className="flex-1 overflow-y-auto py-4">
+          <nav className="space-y-6">
             {enterpriseModules.map((category) => (
-              <div key={category.category} className="sidebar-category">
-                <button 
-                  className={`category-header ${isActiveCategory(category) ? 'active' : ''}`}
-                  onClick={() => toggleCategory(category.category)}
-                  style={sidebarCollapsed ? { justifyContent: 'center' } : {}}
-                >
-                  <div className="category-indicator" style={{ backgroundColor: category.color }}>
-                    <Icon name={category.modules[0].icon} size={16} color="white" />
-                  </div>
-                  {!sidebarCollapsed && (
-                    <>
-                      <span className="category-title">{category.category}</span>
-                      <Icon name="ChevronRight" size={16} style={{
-                        transform: activeCategory === category.category ? 'rotate(90deg)' : 'rotate(0deg)',
-                        transition: 'transform 0.3s ease'
-                      }} />
-                    </>
-                  )}
-                </button>
-                
-                {!sidebarCollapsed && (activeCategory === category.category || isActiveCategory(category)) && (
-                  <div className="category-modules">
-                    {category.modules.map((module) => (
+              <div key={category.category} className="px-4">
+                {!sidebarCollapsed && (
+                  <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                    {category.category}
+                  </h3>
+                )}
+                <div className="space-y-1">
+                  {category.modules.map((module) => {
+                    const isActive = isActiveRoute(module.path);
+                    return (
                       <button
                         key={module.id}
                         onClick={() => handleNavigation(module.path)}
-                        className={`sidebar-module ${isActiveModule(module) ? 'active' : ''}`}
-                        title={module.description}
+                        className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                          getColorClasses(category.color, isActive)
+                        }`}
+                        title={sidebarCollapsed ? module.label : module.description}
                       >
-                        <Icon name={module.icon} size={18} />
-                        <span className="module-label">{module.label}</span>
-                        {module.isNew && <span className="new-badge">NUEVO</span>}
+                        <Icon name={module.icon} size={18} className="flex-shrink-0" />
+                        {!sidebarCollapsed && (
+                          <span className="ml-3 truncate">{module.label}</span>
+                        )}
                       </button>
-                    ))}
-                  </div>
-                )}
+                    );
+                  })}
+                </div>
               </div>
             ))}
-          </div>
-        </aside>
-      )}
+          </nav>
+        </div>
 
-      {/* MOBILE NAVIGATION */}
-      {isMobile && (
-        <>
-          <div 
-            className={`mobile-overlay ${mobileMenuOpen ? 'visible' : ''}`}
-            onClick={() => setMobileMenuOpen(false)}
-          />
-          
-          <nav className={`mobile-sidebar ${mobileMenuOpen ? 'open' : ''}`}>
-            <div className="mobile-nav-header">
-              <div className="mobile-user-info">
-                <Icon name="User" size={24} color="#1e40af" />
-                <div>
-                  <div className="mobile-user-name">
-                    {user.displayName || user.email.split('@')[0]}
-                  </div>
-                  <div className="mobile-user-role">Administrador SST</div>
-                </div>
+        {/* Usuario - Footer del Sidebar */}
+        <div className="p-4 border-t border-gray-200 bg-gray-50">
+          {!sidebarCollapsed ? (
+            <div className="flex items-center space-x-3">
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </span>
               </div>
-              <button onClick={() => setMobileMenuOpen(false)}>
-                <Icon name="ArrowLeft" size={20} />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900 truncate">
+                  {user?.email || 'Usuario'}
+                </p>
+                <p className="text-xs text-gray-500">Administrador SST</p>
+              </div>
+              <button
+                onClick={onLogout}
+                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Cerrar sesión"
+              >
+                <Icon name="LogOut" size={16} />
               </button>
             </div>
-            
-            <div className="mobile-nav-content">
-              {enterpriseModules.map((category) => (
-                <div key={category.category} className="mobile-category">
-                  <div className="mobile-category-header" style={{ color: category.color }}>
-                    <Icon name={category.modules[0].icon} size={16} />
-                    {category.category}
-                  </div>
-                  <div className="mobile-modules">
-                    {category.modules.map((module) => (
-                      <button
-                        key={module.id}
-                        onClick={() => handleNavigation(module.path)}
-                        className={`mobile-module ${isActiveModule(module) ? 'active' : ''}`}
-                      >
-                        <Icon name={module.icon} size={18} />
-                        <span>{module.label}</span>
-                        {module.isNew && <span className="new-badge">NUEVO</span>}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ))}
+          ) : (
+            <div className="flex flex-col items-center space-y-2">
+              <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                <span className="text-sm font-medium text-white">
+                  {user?.email?.[0]?.toUpperCase() || 'U'}
+                </span>
+              </div>
+              <button
+                onClick={onLogout}
+                className="p-1.5 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                title="Cerrar sesión"
+              >
+                <Icon name="LogOut" size={16} />
+              </button>
             </div>
-          </nav>
-        </>
+          )}
+        </div>
+      </div>
+
+      {/* Mobile Sidebar Overlay */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <div className="fixed inset-0 bg-gray-600 bg-opacity-75" onClick={() => setMobileMenuOpen(false)} />
+          <div className="fixed top-0 left-0 w-80 h-full bg-white shadow-enterprise-lg">
+            {/* Mobile Header */}
+            <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
+              <div className="flex items-center space-x-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
+                  <Icon name="Shield" size={20} color="white" />
+                </div>
+                <div>
+                  <h1 className="text-lg font-bold text-gray-900">ReporteSeguro</h1>
+                  <p className="text-xs text-gray-500">SST Enterprise</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setMobileMenuOpen(false)}
+                className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+              >
+                <Icon name="X" size={20} />
+              </button>
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="flex-1 overflow-y-auto py-4">
+              <nav className="space-y-6">
+                {enterpriseModules.map((category) => (
+                  <div key={category.category} className="px-4">
+                    <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
+                      {category.category}
+                    </h3>
+                    <div className="space-y-1">
+                      {category.modules.map((module) => {
+                        const isActive = isActiveRoute(module.path);
+                        return (
+                          <button
+                            key={module.id}
+                            onClick={() => handleNavigation(module.path)}
+                            className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                              getColorClasses(category.color, isActive)
+                            }`}
+                          >
+                            <Icon name={module.icon} size={18} />
+                            <span className="ml-3">{module.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                ))}
+              </nav>
+            </div>
+          </div>
+        </div>
       )}
 
-      {/* MAIN CONTENT */}
-      <main className={`enterprise-main ${sidebarCollapsed && !isMobile ? 'sidebar-collapsed' : ''}`}>
-        <div className="main-content">
-          {children}
-        </div>
-      </main>
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        {/* Top Bar */}
+        <header className="bg-white border-b border-gray-200 shadow-sm">
+          <div className="flex items-center justify-between h-16 px-6">
+            {/* Mobile Menu Button */}
+            <button
+              onClick={() => setMobileMenuOpen(true)}
+              className="lg:hidden p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+            >
+              <Icon name="Menu" size={20} />
+            </button>
 
-      <style jsx>{`
-        /* ========== LAYOUT PRINCIPAL ENTERPRISE ========== */
-        .enterprise-layout {
-          min-height: 100vh;
-          background: #f8fafc;
-          display: flex;
-          flex-direction: column;
-        }
+            {/* Breadcrumb/Title */}
+            <div className="flex-1 lg:ml-0 ml-4">
+              <h2 className="text-xl font-semibold text-gray-900">
+                {location.pathname === '/' ? 'Dashboard' :
+                 location.pathname.split('/')[1]?.replace('-', ' ').toUpperCase() || 'ReporteSeguro'}
+              </h2>
+            </div>
 
-        /* ========== HEADER ========== */
-        .enterprise-header {
-          background: white;
-          border-bottom: 1px solid #e2e8f0;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          z-index: 1000;
-          height: 64px;
-        }
+            {/* Top Bar Actions */}
+            <div className="flex items-center space-x-4">
+              {/* Notifications */}
+              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg relative">
+                <Icon name="Bell" size={20} />
+                {reportes?.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+                )}
+              </button>
 
-        .header-content {
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 20px;
-          max-width: 100%;
-        }
+              {/* Desktop User Menu */}
+              <div className="hidden lg:flex items-center space-x-3">
+                <div className="text-right">
+                  <p className="text-sm font-medium text-gray-900">{user?.email || 'Usuario'}</p>
+                  <p className="text-xs text-gray-500">Administrador SST</p>
+                </div>
+                <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
+                  <span className="text-sm font-medium text-white">
+                    {user?.email?.[0]?.toUpperCase() || 'U'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </header>
 
-        .header-left {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .sidebar-toggle {
-          background: #f1f5f9;
-          border: none;
-          width: 40px;
-          height: 40px;
-          border-radius: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-
-        .sidebar-toggle:hover {
-          background: #e2e8f0;
-        }
-
-        .header-brand {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          cursor: pointer;
-          transition: transform 0.2s ease;
-        }
-
-        .header-brand:hover {
-          transform: scale(1.02);
-        }
-
-        .brand-text h1 {
-          color: #1e40af;
-          font-size: 1.5rem;
-          font-weight: 700;
-          margin: 0;
-          line-height: 1;
-        }
-
-        .brand-text span {
-          color: #64748b;
-          font-size: 0.75rem;
-          font-weight: 500;
-          display: block;
-          line-height: 1;
-        }
-
-        .header-right {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-        }
-
-        .user-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 8px 12px;
-          border-radius: 8px;
-          background: #f8fafc;
-        }
-
-        .user-avatar {
-          width: 32px;
-          height: 32px;
-          border-radius: 6px;
-          background: #e2e8f0;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-        }
-
-        .user-details {
-          display: flex;
-          flex-direction: column;
-        }
-
-        .user-name {
-          font-weight: 600;
-          font-size: 0.9rem;
-          color: #1e293b;
-          line-height: 1;
-        }
-
-        .user-role {
-          font-size: 0.75rem;
-          color: #64748b;
-          line-height: 1;
-        }
-
-        .logout-btn {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          padding: 8px 12px;
-          background: #dc2626;
-          color: white;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          font-weight: 500;
-          font-size: 0.9rem;
-          transition: all 0.2s ease;
-        }
-
-        .logout-btn:hover {
-          background: #b91c1c;
-          transform: translateY(-1px);
-        }
-
-        .mobile-menu-btn {
-          background: none;
-          border: none;
-          cursor: pointer;
-          padding: 8px;
-        }
-
-        .hamburger {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .hamburger span {
-          width: 24px;
-          height: 2px;
-          background: #374151;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(1) {
-          transform: rotate(45deg) translate(6px, 6px);
-        }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(2) {
-          opacity: 0;
-        }
-
-        .mobile-menu-btn.active .hamburger span:nth-child(3) {
-          transform: rotate(-45deg) translate(6px, -6px);
-        }
-
-        /* ========== SIDEBAR DESKTOP ========== */
-        .enterprise-sidebar {
-          position: fixed;
-          left: 0;
-          top: 64px;
-          width: 280px;
-          height: calc(100vh - 64px);
-          background: white;
-          border-right: 1px solid #e2e8f0;
-          z-index: 900;
-          transition: width 0.3s ease;
-          overflow-y: auto;
-        }
-
-        .enterprise-sidebar.collapsed {
-          width: 72px;
-        }
-
-        .sidebar-content {
-          padding: 16px;
-        }
-
-        .sidebar-category {
-          margin-bottom: 8px;
-        }
-
-        .category-header {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          background: none;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-weight: 600;
-          font-size: 0.85rem;
-          color: #374151;
-        }
-
-        .category-header:hover {
-          background: #f1f5f9;
-        }
-
-        .category-header.active {
-          background: #f1f5f9;
-          color: #1e40af;
-        }
-
-        .category-indicator {
-          width: 24px;
-          height: 24px;
-          border-radius: 4px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .category-title {
-          flex: 1;
-          text-align: left;
-          font-size: 0.75rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .category-modules {
-          margin-left: 36px;
-          margin-top: 8px;
-          border-left: 1px solid #e2e8f0;
-          padding-left: 12px;
-        }
-
-        .sidebar-module {
-          width: 100%;
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 10px 12px;
-          background: none;
-          border: none;
-          border-radius: 6px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-size: 0.9rem;
-          color: #64748b;
-          margin-bottom: 2px;
-          position: relative;
-        }
-
-        .sidebar-module:hover {
-          background: #f8fafc;
-          color: #374151;
-          transform: translateX(4px);
-        }
-
-        .sidebar-module.active {
-          background: #1e40af;
-          color: white;
-        }
-
-        .module-label {
-          flex: 1;
-          text-align: left;
-          font-weight: 500;
-        }
-
-        .new-badge {
-          background: #10b981;
-          color: white;
-          font-size: 0.6rem;
-          font-weight: 700;
-          padding: 2px 6px;
-          border-radius: 4px;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        /* ========== MOBILE NAVIGATION ========== */
-        .mobile-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: rgba(0, 0, 0, 0.5);
-          z-index: 998;
-          opacity: 0;
-          visibility: hidden;
-          transition: all 0.3s ease;
-        }
-
-        .mobile-overlay.visible {
-          opacity: 1;
-          visibility: visible;
-        }
-
-        .mobile-sidebar {
-          position: fixed;
-          top: 0;
-          left: -100%;
-          width: 320px;
-          height: 100vh;
-          background: white;
-          z-index: 999;
-          transition: left 0.3s ease;
-          overflow-y: auto;
-        }
-
-        .mobile-sidebar.open {
-          left: 0;
-        }
-
-        .mobile-nav-header {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 20px;
-          border-bottom: 1px solid #e2e8f0;
-        }
-
-        .mobile-user-info {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-        }
-
-        .mobile-user-name {
-          font-weight: 600;
-          color: #1e293b;
-        }
-
-        .mobile-user-role {
-          font-size: 0.85rem;
-          color: #64748b;
-        }
-
-        .mobile-nav-content {
-          padding: 20px;
-        }
-
-        .mobile-category {
-          margin-bottom: 24px;
-        }
-
-        .mobile-category-header {
-          font-weight: 700;
-          font-size: 0.75rem;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-bottom: 12px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
-
-        .mobile-modules {
-          display: flex;
-          flex-direction: column;
-          gap: 4px;
-        }
-
-        .mobile-module {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 12px 16px;
-          background: none;
-          border: none;
-          border-radius: 8px;
-          cursor: pointer;
-          transition: all 0.2s ease;
-          font-size: 0.9rem;
-          color: #374151;
-          position: relative;
-        }
-
-        .mobile-module:hover {
-          background: #f8fafc;
-        }
-
-        .mobile-module.active {
-          background: #1e40af;
-          color: white;
-        }
-
-        /* ========== MAIN CONTENT ========== */
-        .enterprise-main {
-          margin-left: ${isMobile ? '0' : '280px'};
-          margin-top: 64px;
-          min-height: calc(100vh - 64px);
-          transition: margin-left 0.3s ease;
-        }
-
-        .enterprise-main.sidebar-collapsed {
-          margin-left: 72px;
-        }
-
-        .main-content {
-          padding: 0;
-        }
-
-        /* ========== RESPONSIVE ========== */
-        @media (max-width: 768px) {
-          .enterprise-main {
-            margin-left: 0;
-          }
-          
-          .brand-text span {
-            display: none;
-          }
-          
-          .brand-text h1 {
-            font-size: 1.25rem;
-          }
-
-          .header-content {
-            padding: 0 16px;
-          }
-
-          .user-info {
-            display: none;
-          }
-        }
-      `}</style>
+        {/* Page Content */}
+        <main className="flex-1 overflow-y-auto bg-gray-50">
+          <div className="h-full">
+            {children}
+          </div>
+        </main>
+      </div>
     </div>
   );
 };
