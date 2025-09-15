@@ -1,14 +1,14 @@
 /* ========================================
+   ENTERPRISE DESIGN SYSTEM - IMPORTS
+   ======================================== */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+
+/* ========================================
    TAILWIND CSS BASE
    ======================================== */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* ========================================
-   ENTERPRISE DESIGN SYSTEM
-   ======================================== */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
 
 /* Base Styles */
 @layer base {
