@@ -14,23 +14,20 @@ const Logo = ({ variant = 'main', size = 'md', className = '' }) => {
 
   const currentSize = sizes[size] || sizes.md;
 
-  // Intentar cargar el logo desde assets
-  const tryLoadLogo = () => {
+  // Cargar logos reales
+  const getLogoSrc = () => {
     try {
-      // Cuando subas los archivos, descomenta estas líneas:
-      // const logoMain = require('../../assets/logos/logo-main.png');
-      // const logoWhite = require('../../assets/logos/logo-white.png');
-      // const logoIcon = require('../../assets/logos/logo-icon.png');
-
-      // Por ahora retorna null para usar el fallback
-      return null;
+      if (variant === 'icon') {
+        return require('../../assets/images/Isologo.png');
+      }
+      return require('../../assets/images/Logotipo.png');
     } catch (error) {
       console.log('Logo no encontrado, usando fallback');
       return null;
     }
   };
 
-  const logoSrc = tryLoadLogo();
+  const logoSrc = getLogoSrc();
 
   // Fallback con gradiente empresarial si no hay logo
   if (!logoSrc) {
@@ -54,16 +51,20 @@ const Logo = ({ variant = 'main', size = 'md', className = '' }) => {
     );
   }
 
-  // Logo real cuando esté disponible
+  // Logo real
   return (
     <div className={`flex items-center space-x-3 ${className}`}>
       <img
         src={logoSrc}
         alt="ReporteSeguro"
         className={`object-contain`}
-        style={{ width: currentSize.width, height: currentSize.height }}
+        style={{
+          width: variant === 'icon' ? currentSize.width : 'auto',
+          height: currentSize.height,
+          maxWidth: variant === 'icon' ? currentSize.width : '200px'
+        }}
       />
-      {variant !== 'icon' && (
+      {variant !== 'icon' && variant === 'with-text' && (
         <div>
           <h1 className={`font-bold text-gray-900 ${currentSize.text} leading-tight`}>
             ReporteSeguro

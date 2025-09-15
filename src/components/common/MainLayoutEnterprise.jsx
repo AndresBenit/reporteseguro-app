@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Icon } from './Icons';
+import Logo from './Logo';
 
 const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
   const navigate = useNavigate();
@@ -184,16 +185,10 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
         {/* Header del Sidebar */}
         <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
           {!sidebarCollapsed && (
-            <div className="flex items-center space-x-3">
-              {/* Aquí irá el logotipo cuando lo subas */}
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
-                <Icon name="Shield" size={20} color="white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-bold text-gray-900">ReporteSeguro</h1>
-                <p className="text-xs text-gray-500">SST Enterprise</p>
-              </div>
-            </div>
+            <Logo variant="main" size="md" />
+          )}
+          {sidebarCollapsed && (
+            <Logo variant="icon" size="sm" />
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -287,15 +282,7 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
           <div className="fixed top-0 left-0 w-80 h-full bg-white shadow-enterprise-lg">
             {/* Mobile Header */}
             <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-              <div className="flex items-center space-x-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-primary-600 to-primary-800 rounded-lg flex items-center justify-center">
-                  <Icon name="Shield" size={20} color="white" />
-                </div>
-                <div>
-                  <h1 className="text-lg font-bold text-gray-900">ReporteSeguro</h1>
-                  <p className="text-xs text-gray-500">SST Enterprise</p>
-                </div>
-              </div>
+              <Logo variant="main" size="md" />
               <button
                 onClick={() => setMobileMenuOpen(false)}
                 className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"

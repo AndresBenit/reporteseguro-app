@@ -1,7 +1,6 @@
 import React from 'react';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
-import EnterpriseGraficos from '../common/ui/EnterpriseGraficos';
 
 const AnalisisSupervision = () => {
   // Hook para reportes de seguridad
