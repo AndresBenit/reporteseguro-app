@@ -85,14 +85,14 @@ const ReporteForm = () => {
     if (file) {
       // Validar tipo de archivo
       if (!file.type.startsWith('image/')) {
-        setMensaje("❌ Por favor selecciona solo archivos de imagen");
+        setMensaje("Error: Por favor selecciona solo archivos de imagen");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
 
       // Validar tamaño (max 5MB)
       if (file.size > 5 * 1024 * 1024) {
-        setMensaje("❌ La imagen debe ser menor a 5MB");
+        setMensaje("Error: La imagen debe ser menor a 5MB");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
@@ -112,7 +112,7 @@ const ReporteForm = () => {
         
         // Mostrar info de compresión
         const reduction = Math.round((1 - compressedFile.size / file.size) * 100);
-        setMensaje(`✅ Imagen optimizada (reducida ${reduction}%)`);
+        setMensaje(`Imagen optimizada (reducida ${reduction}%)`);
         setTimeout(() => setMensaje(""), 3000);
         
         // Crear preview
@@ -196,7 +196,7 @@ const ReporteForm = () => {
     e.preventDefault();
     
     if (!form.descripcion.trim() || !form.area.trim()) {
-      setMensaje("❌ Por favor completa todos los campos obligatorios");
+      setMensaje("Error: Por favor completa todos los campos obligatorios");
       setTimeout(() => setMensaje(""), 3000);
       return;
     }
@@ -210,7 +210,7 @@ const ReporteForm = () => {
         try {
           fotoUrl = await uploadImage();
         } catch (imageError) {
-          setMensaje("❌ Error subiendo la imagen. El reporte se guardará sin foto.");
+          setMensaje("Advertencia: Error subiendo la imagen. El reporte se guardará sin foto.");
           setTimeout(() => setMensaje(""), 5000);
           fotoUrl = "";
         }
@@ -228,11 +228,11 @@ const ReporteForm = () => {
       setSelectedImage(null);
       setImagePreview(null);
       
-      setMensaje("✅ ¡Reporte enviado exitosamente!");
+      setMensaje("Éxito: Reporte enviado exitosamente");
       setTimeout(() => setMensaje(""), 3000);
     } catch (error) {
       console.error("Error enviando reporte:", error);
-      setMensaje("❌ Error al enviar el reporte. Intenta nuevamente.");
+      setMensaje("Error: No se pudo enviar el reporte. Intenta nuevamente.");
       setTimeout(() => setMensaje(""), 3000);
     }
     setEnviando(false);
@@ -264,9 +264,9 @@ const ReporteForm = () => {
           right: "0",
           padding: "10px 16px",
           borderRadius: "10px",
-          background: mensaje.includes("✅") ? "#d1fae5" : "#fef2f2",
-          color: mensaje.includes("✅") ? "#059669" : "#dc2626",
-          border: `1px solid ${mensaje.includes("✅") ? "#a7f3d0" : "#fecaca"}`,
+          background: mensaje.includes("Éxito") ? "#d1fae5" : mensaje.includes("Advertencia") ? "#fef3cd" : "#fef2f2",
+          color: mensaje.includes("Éxito") ? "#059669" : mensaje.includes("Advertencia") ? "#92400e" : "#dc2626",
+          border: `1px solid ${mensaje.includes("Éxito") ? "#a7f3d0" : mensaje.includes("Advertencia") ? "#fde68a" : "#fecaca"}`,
           fontWeight: "600",
           textAlign: "center",
           zIndex: 10,
@@ -304,7 +304,7 @@ const ReporteForm = () => {
                 onChange={handleChange}
                 style={{ display: "none" }}
               />
-              <span style={{ fontSize: "1.1rem" }}>💡</span>
+              <span style={{ fontSize: "1.1rem", fontWeight: "600" }}>●</span>
               <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>Condición Insegura</span>
             </label>
             
@@ -327,7 +327,7 @@ const ReporteForm = () => {
                 onChange={handleChange}
                 style={{ display: "none" }}
               />
-              <span style={{ fontSize: "1.1rem" }}>⚠️</span>
+              <span style={{ fontSize: "1.1rem", fontWeight: "600" }}>●</span>
               <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>Acto Inseguro</span>
             </label>
           </div>
@@ -349,7 +349,7 @@ const ReporteForm = () => {
 
         {/* Severidad */}
         <div className="form-group">
-          <label className="form-label">🎯 Nivel de Severidad</label>
+          <label className="form-label">Nivel de Severidad</label>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
             {["baja", "media", "alta", "critica"].map(severity => (
               <label key={severity} style={{ 

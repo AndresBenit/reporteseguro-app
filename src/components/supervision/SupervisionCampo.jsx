@@ -154,19 +154,19 @@ const SupervisionCampo = () => {
     const file = e.target.files[0];
     if (file) {
       if (!file.type.startsWith("image/")) {
-        setMensaje("❌ Por favor selecciona solo archivos de imagen");
+        setMensaje("Error: Por favor selecciona solo archivos de imagen");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
 
       if (file.size > 5 * 1024 * 1024) {
-        setMensaje("❌ La imagen debe ser menor a 5MB");
+        setMensaje("Error: La imagen debe ser menor a 5MB");
         setTimeout(() => setMensaje(""), 3000);
         return;
       }
 
       try {
-        setMensaje("🔄 Optimizando imagen...");
+        setMensaje("Optimizando imagen...");
         const compressedFile = await compressImage(file);
         setSelectedImage(compressedFile);
 
@@ -174,7 +174,7 @@ const SupervisionCampo = () => {
         reader.onload = (e) => setImagePreview(e.target.result);
         reader.readAsDataURL(compressedFile);
 
-        setMensaje("✅ Imagen lista para subir");
+        setMensaje("Imagen lista para subir");
         setTimeout(() => setMensaje(""), 2000);
       } catch (error) {
         console.error("Error procesando imagen:", error);
@@ -282,14 +282,14 @@ const SupervisionCampo = () => {
       !form.hallazgo.trim() ||
       !form.recomendacion.trim()
     ) {
-      setMensaje("❌ Por favor completa todos los campos obligatorios");
+      setMensaje("Error: Por favor completa todos los campos obligatorios");
       setTimeout(() => setMensaje(""), 3000);
       return;
     }
 
     // Validación obligatoria de firma
     if (!signatureData || !form.firma_url) {
-      setMensaje("❌ La firma digital es obligatoria para enviar el reporte");
+      setMensaje("Error: La firma digital es obligatoria para enviar el reporte");
       setTimeout(() => setMensaje(""), 3000);
       return;
     }
@@ -303,7 +303,7 @@ const SupervisionCampo = () => {
         try {
           fotoUrl = await uploadImage();
         } catch (imageError) {
-          setMensaje("❌ Error subiendo la imagen. Se guardará sin foto.");
+          setMensaje("Advertencia: Error subiendo la imagen. Se guardará sin foto.");
           // Continúar sin foto en lugar de fallar
         }
       }
@@ -345,11 +345,11 @@ const SupervisionCampo = () => {
       setSearchTerm("");
       setShowSugerencias(false);
 
-      setMensaje("✅ ¡Recomendación registrada exitosamente!");
+      setMensaje("Éxito: Recomendación registrada exitosamente");
       setTimeout(() => setMensaje(""), 3000);
     } catch (error) {
       console.error("Error guardando recomendación:", error);
-      setMensaje("❌ Error al guardar la recomendación. Intenta nuevamente.");
+      setMensaje("Error: No se pudo guardar la recomendación. Intenta nuevamente.");
       setTimeout(() => setMensaje(""), 3000);
     }
     setLoading(false);
@@ -443,21 +443,21 @@ const SupervisionCampo = () => {
           style={{
             padding: "12px 18px",
             borderRadius: "10px",
-            background: mensaje.includes("✅")
+            background: mensaje.includes("Éxito")
               ? "#d1fae5"
-              : mensaje.includes("🔄")
-              ? "#f0f9ff"
+              : mensaje.includes("Advertencia")
+              ? "#fef3cd"
               : "#fef2f2",
-            color: mensaje.includes("✅")
+            color: mensaje.includes("Éxito")
               ? "#059669"
-              : mensaje.includes("🔄")
-              ? "#0369a1"
+              : mensaje.includes("Advertencia")
+              ? "#92400e"
               : "#dc2626",
             border: `1px solid ${
-              mensaje.includes("✅")
+              mensaje.includes("Éxito")
                 ? "#a7f3d0"
-                : mensaje.includes("🔄")
-                ? "#93c5fd"
+                : mensaje.includes("Advertencia")
+                ? "#fde68a"
                 : "#fecaca"
             }`,
             marginBottom: "20px",
@@ -690,7 +690,7 @@ const SupervisionCampo = () => {
 
           {/* Recomendación */}
           <div className="form-group">
-            <label className="form-label">💡 Recomendación *</label>
+            <label className="form-label">Recomendación *</label>
             <textarea
               name="recomendacion"
               placeholder="Describe la recomendación dada al colaborador"
@@ -854,7 +854,7 @@ const SupervisionCampo = () => {
                         border: "none",
                       }}
                     >
-                      🔄 Cambiar Foto
+                      Cambiar Foto
                     </label>
                     <button
                       type="button"
@@ -896,7 +896,7 @@ const SupervisionCampo = () => {
             label="Firma Digital del Supervisor"
             onError={(error) => {
               console.error('Error en firma:', error);
-              setMensaje("❌ Error al procesar la firma. Intente nuevamente.");
+              setMensaje("Error: No se pudo procesar la firma. Intente nuevamente.");
               setTimeout(() => setMensaje(""), 3000);
             }}
           />

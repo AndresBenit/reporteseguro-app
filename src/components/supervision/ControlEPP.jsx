@@ -66,14 +66,14 @@ const ControlEPP = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('🔄 Cargando datos...');
+        console.log('Cargando datos...');
         
         // Cargar colaboradores
         const colaboradoresData = await dbHelpers.getAll('colaboradores', {
           orderBy: 'nombre',
           ascending: true
         });
-        console.log('✅ Colaboradores cargados:', colaboradoresData.length);
+        console.log('Colaboradores cargados:', colaboradoresData.length);
         setColaboradores(colaboradoresData);
 
         // Cargar productos EPP
@@ -82,12 +82,12 @@ const ControlEPP = () => {
           orderBy: 'nombre',
           ascending: true
         });
-        console.log('✅ Productos EPP cargados:', productosData.length);
+        console.log('Productos EPP cargados:', productosData.length);
         setProductosEPP(productosData);
         setCargandoProductos(false);
         
       } catch (error) {
-        console.error('❌ Error cargando datos:', error);
+        console.error('Error cargando datos:', error);
         setCargandoProductos(false);
       }
     };
@@ -103,7 +103,7 @@ const ControlEPP = () => {
         colaborador.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         colaborador.area.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log('✅ Colaboradores filtrados:', filtrados.length);
+      console.log('Colaboradores filtrados:', filtrados.length);
       setColaboradoresFiltrados(filtrados);
       setShowSugerencias(filtrados.length > 0);
     } else {
@@ -171,7 +171,7 @@ const ControlEPP = () => {
       );
 
       if (!producto) {
-        console.log('🔄 Creando producto nuevo:', nombreProducto);
+        console.log('Creando producto nuevo:', nombreProducto);
         const nuevoProducto = await dbHelpers.create('epp_productos', {
           nombre: nombreProducto,
           stock_actual: 0,
@@ -181,13 +181,13 @@ const ControlEPP = () => {
         
         // Agregar a la lista local
         setProductosEPP([...productosEPP, nuevoProducto]);
-        console.log('✅ Producto creado:', nuevoProducto);
+        console.log('Producto creado:', nuevoProducto);
         return nuevoProducto;
       }
       
       return producto;
     } catch (error) {
-      console.error('❌ Error creando producto:', error);
+      console.error('Error creando producto:', error);
       throw error;
     }
   };
@@ -290,24 +290,24 @@ const ControlEPP = () => {
 
     // Validaciones
     if (!form.nombre.trim()) {
-      setMensaje("❌ El nombre del colaborador es obligatorio");
+      setMensaje("Error: El nombre del colaborador es obligatorio");
       return;
     }
 
     // Validar elementos seleccionados
     const elementosValidos = elementosSeleccionados.filter(el => el.producto.trim() && el.cantidad > 0);
     if (elementosValidos.length === 0) {
-      setMensaje("❌ Debe seleccionar al menos un elemento EPP con cantidad mayor a 0");
+      setMensaje("Error: Debe seleccionar al menos un elemento EPP con cantidad mayor a 0");
       return;
     }
 
     if (!form.area) {
-      setMensaje("❌ Debe seleccionar un área");
+      setMensaje("Error: Debe seleccionar un área");
       return;
     }
 
     if (!signatureData || !form.firma_url) {
-      setMensaje("❌ La firma digital es obligatoria para registrar la entrega");
+      setMensaje("Error: La firma digital es obligatoria para registrar la entrega");
       return;
     }
 
@@ -320,7 +320,7 @@ const ControlEPP = () => {
         try {
           fotoUrl = await uploadImage();
         } catch (imageError) {
-          setMensaje("❌ Error subiendo la imagen. Se guardará sin foto.");
+          setMensaje("Advertencia: Error subiendo la imagen. Se guardará sin foto.");
           // Continúar sin foto en lugar de fallar
         }
       }
@@ -398,11 +398,11 @@ const ControlEPP = () => {
       setImagePreview(null);
       setSignatureData(null);
 
-      setMensaje("✅ ¡Entrega de EPP registrada exitosamente!");
+      setMensaje("Éxito: Entrega de EPP registrada exitosamente");
       setTimeout(() => setMensaje(""), 3000);
     } catch (error) {
       console.error("Error guardando entrega de EPP:", error);
-      setMensaje("❌ Error al registrar la entrega. Intenta nuevamente.");
+      setMensaje("Error: No se pudo registrar la entrega. Intenta nuevamente.");
       setTimeout(() => setMensaje(""), 3000);
     }
     setLoading(false);
@@ -637,7 +637,7 @@ const ControlEPP = () => {
                 </label>
                 {cargandoProductos ? (
                   <div style={{ padding: "12px", textAlign: "center", color: "#6b7280" }}>
-                    🔄 Cargando...
+                    Cargando...
                   </div>
                 ) : (
                   <select
@@ -729,7 +729,7 @@ const ControlEPP = () => {
                     }}
                     title="Eliminar elemento"
                   >
-                    ❌
+                    Eliminar
                   </button>
                 )}
               </div>
@@ -944,9 +944,9 @@ const ControlEPP = () => {
             padding: "12px",
             marginBottom: "20px",
             borderRadius: "8px",
-            backgroundColor: mensaje.includes("❌") ? "#fef2f2" : "#f0fdf4",
-            borderLeft: `4px solid ${mensaje.includes("❌") ? "#ef4444" : "#10b981"}`,
-            color: mensaje.includes("❌") ? "#dc2626" : "#059669",
+            backgroundColor: mensaje.includes("Error") ? "#fef2f2" : mensaje.includes("Advertencia") ? "#fef3cd" : "#f0fdf4",
+            borderLeft: `4px solid ${mensaje.includes("Error") ? "#ef4444" : mensaje.includes("Advertencia") ? "#f59e0b" : "#10b981"}`,
+            color: mensaje.includes("Error") ? "#dc2626" : mensaje.includes("Advertencia") ? "#92400e" : "#059669",
             fontSize: "14px",
             fontWeight: "500"
           }}>

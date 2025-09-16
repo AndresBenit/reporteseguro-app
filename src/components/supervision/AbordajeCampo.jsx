@@ -133,14 +133,14 @@ const AbordajeCampo = () => {
     e.preventDefault();
     
     if (!form.colaboradorId || !form.area || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
-      setMensaje('❌ Por favor completa todos los campos obligatorios');
+      setMensaje('Error: Por favor completa todos los campos obligatorios');
       setTimeout(() => setMensaje(''), 3000);
       return;
     }
 
     // Validación obligatoria de firma
     if (!signatureData || !form.firma_url) {
-      setMensaje('❌ La firma digital es obligatoria para enviar el reporte');
+      setMensaje('Error: La firma digital es obligatoria para enviar el reporte');
       setTimeout(() => setMensaje(''), 3000);
       return;
     }
@@ -181,11 +181,11 @@ const AbordajeCampo = () => {
       setSearchTerm('');
       setShowSugerencias(false);
       
-      setMensaje('✅ ¡Abordaje registrado exitosamente!');
+      setMensaje('Éxito: Abordaje registrado exitosamente');
       setTimeout(() => setMensaje(''), 3000);
     } catch (error) {
       console.error('Error guardando abordaje:', error);
-      setMensaje('❌ Error al guardar el abordaje. Intenta nuevamente.');
+      setMensaje('Error: No se pudo guardar el abordaje. Intenta nuevamente.');
       setTimeout(() => setMensaje(''), 3000);
     }
     setLoading(false);
@@ -261,9 +261,9 @@ const AbordajeCampo = () => {
         <div style={{
           padding: '12px 18px',
           borderRadius: '10px',
-          background: mensaje.includes('✅') ? '#d1fae5' : mensaje.includes('🔄') ? '#f0f9ff' : '#fef2f2',
-          color: mensaje.includes('✅') ? '#059669' : mensaje.includes('🔄') ? '#0369a1' : '#dc2626',
-          border: `1px solid ${mensaje.includes('✅') ? '#a7f3d0' : mensaje.includes('🔄') ? '#93c5fd' : '#fecaca'}`,
+          background: mensaje.includes('Éxito') ? '#d1fae5' : mensaje.includes('Advertencia') ? '#fef3cd' : '#fef2f2',
+          color: mensaje.includes('Éxito') ? '#059669' : mensaje.includes('Advertencia') ? '#92400e' : '#dc2626',
+          border: `1px solid ${mensaje.includes('Éxito') ? '#a7f3d0' : mensaje.includes('Advertencia') ? '#fde68a' : '#fecaca'}`,
           marginBottom: '20px',
           fontWeight: '600',
           textAlign: 'center'
@@ -471,7 +471,7 @@ const AbordajeCampo = () => {
 
           {/* Abordaje */}
           <div className="form-group">
-            <label className="form-label">💡 Abordaje Realizado *</label>
+            <label className="form-label">Abordaje Realizado *</label>
             <textarea
               name="abordaje"
               placeholder="Describe el abordaje realizado con el colaborador"
@@ -490,7 +490,7 @@ const AbordajeCampo = () => {
             label="Firma Digital del Supervisor"
             onError={(error) => {
               console.error('Error en firma:', error);
-              setMensaje('❌ Error al procesar la firma. Intente nuevamente.');
+              setMensaje('Error: No se pudo procesar la firma. Intente nuevamente.');
               setTimeout(() => setMensaje(''), 3000);
             }}
           />
