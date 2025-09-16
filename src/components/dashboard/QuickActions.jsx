@@ -45,143 +45,64 @@ const QuickActions = () => {
   ];
 
   return (
-    <div className="quick-actions-container">
-      <h2 className="section-title">
-        <Icon name="Zap" size={20} />
-        Acciones Rápidas
-      </h2>
-      
-      <div className="actions-grid">
+    <div className="mb-10">
+      {/* Header modernizado */}
+      <div className="text-center mb-8">
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 inline-flex items-center gap-3">
+          <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl">
+            <Icon name="Zap" size={20} color="white" />
+          </div>
+          <h2 className="text-xl font-bold bg-gradient-to-r from-gray-800 to-amber-700 bg-clip-text text-transparent">
+            Acciones Rápidas
+          </h2>
+        </div>
+      </div>
+
+      {/* Grid de acciones modernizado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4 max-w-6xl mx-auto">
         {actions.map((action) => (
           <button
             key={action.id}
             onClick={action.action}
-            className="action-card"
-            style={{
-              '--action-color': action.color,
-              '--action-bg': action.bgColor
-            }}
+            className={`group bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-lg border-2 border-transparent hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 text-left flex items-center gap-4 ${
+              action.color === '#dc2626' ? 'hover:border-red-300 hover:bg-red-50/80' :
+              action.color === '#3b82f6' ? 'hover:border-blue-300 hover:bg-blue-50/80' :
+              action.color === '#059669' ? 'hover:border-emerald-300 hover:bg-emerald-50/80' :
+              'hover:border-purple-300 hover:bg-purple-50/80'
+            }`}
           >
-            <div className="action-icon">
-              <Icon name={action.icon} size={24} color={action.color} />
+            {/* Icono con gradiente */}
+            <div className={`w-12 h-12 rounded-xl shadow-lg flex items-center justify-center ${
+              action.color === '#dc2626' ? 'bg-gradient-to-br from-red-500 to-red-600' :
+              action.color === '#3b82f6' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
+              action.color === '#059669' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
+              'bg-gradient-to-br from-purple-500 to-purple-600'
+            }`}>
+              <Icon name={action.icon} size={24} color="white" />
             </div>
-            <div className="action-content">
-              <h3>{action.title}</h3>
-              <p>{action.subtitle}</p>
+
+            {/* Contenido */}
+            <div className="flex-1">
+              <h3 className="font-semibold text-gray-900 mb-1 group-hover:text-gray-800">
+                {action.title}
+              </h3>
+              <p className="text-sm text-gray-600 group-hover:text-gray-700">
+                {action.subtitle}
+              </p>
             </div>
-            <div className="action-arrow">
-              <Icon name="ChevronRight" size={20} color={action.color} />
+
+            {/* Flecha */}
+            <div className={`opacity-40 group-hover:opacity-100 transition-opacity duration-300 ${
+              action.color === '#dc2626' ? 'text-red-600' :
+              action.color === '#3b82f6' ? 'text-blue-600' :
+              action.color === '#059669' ? 'text-emerald-600' :
+              'text-purple-600'
+            }`}>
+              <Icon name="ChevronRight" size={20} />
             </div>
           </button>
         ))}
       </div>
-
-      <style jsx>{`
-        .quick-actions-container {
-          margin-bottom: 40px;
-        }
-
-        .section-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: var(--color-text-primary);
-          margin-bottom: 20px;
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          text-align: center;
-          justify-content: center;
-        }
-
-        .actions-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-          gap: 16px;
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .action-card {
-          background: var(--action-bg);
-          border: 2px solid transparent;
-          border-radius: 16px;
-          padding: 24px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-align: left;
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .action-card:hover {
-          border-color: var(--action-color);
-          transform: translateY(-2px);
-          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
-        }
-
-        .action-icon {
-          width: 50px;
-          height: 50px;
-          background: white;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .action-content {
-          flex: 1;
-        }
-
-        .action-content h3 {
-          font-size: 1.1rem;
-          font-weight: 600;
-          color: var(--color-text-primary);
-          margin-bottom: 4px;
-        }
-
-        .action-content p {
-          font-size: 0.9rem;
-          color: var(--color-text-secondary);
-          margin: 0;
-        }
-
-        .action-arrow {
-          opacity: 0.5;
-          transition: opacity 0.3s ease;
-        }
-
-        .action-card:hover .action-arrow {
-          opacity: 1;
-        }
-
-        @media (max-width: 768px) {
-          .actions-grid {
-            grid-template-columns: 1fr;
-            gap: 16px;
-          }
-          
-          .action-card {
-            padding: 20px;
-          }
-          
-          .action-icon {
-            width: 45px;
-            height: 45px;
-          }
-          
-          .action-content h3 {
-            font-size: 1rem;
-          }
-          
-          .action-content p {
-            font-size: 0.85rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };

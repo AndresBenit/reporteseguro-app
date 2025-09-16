@@ -94,39 +94,53 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   };
 
   return (
-    <div className="stats-overview">
-      <div className="stats-header">
-        <h2>
-          <Icon name="Analytics" size={24} color="var(--color-primary)" />
-          Resumen Ejecutivo
-        </h2>
-        <p>Métricas clave del sistema</p>
+    <div className="space-y-8">
+      {/* Header mejorado */}
+      <div className="text-center">
+        <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
+          <div className="flex items-center justify-center gap-3 mb-2">
+            <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
+              <Icon name="Analytics" size={24} color="white" />
+            </div>
+            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent">
+              Resumen Ejecutivo
+            </h2>
+          </div>
+          <p className="text-slate-600 font-medium">Métricas clave del sistema</p>
+        </div>
       </div>
 
-      <div className="stats-grid">
+      {/* Stats Grid con diseño empresarial */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
         {stats.map((stat) => (
-          <div key={stat.id} className="stat-card" style={{ background: stat.bgColor }}>
-            <div className="stat-header">
-              <div className="stat-icon" style={{ 
-                background: stat.color === 'blue' ? '#3b82f6' : 
-                          stat.color === 'green' ? '#059669' : 
-                          stat.color === 'red' ? '#dc2626' : '#6b7280',
-                color: 'white'
-              }}>
-                <Icon name={stat.icon} size={20} />
+          <div
+            key={stat.id}
+            className={`bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ${
+              stat.color === 'blue' ? 'hover:border-blue-200' :
+              stat.color === 'green' ? 'hover:border-green-200' :
+              stat.color === 'red' ? 'hover:border-red-200' : 'hover:border-gray-200'
+            }`}
+          >
+            <div className="flex items-center gap-4 mb-4">
+              <div className={`p-3 rounded-xl shadow-lg ${
+                stat.color === 'blue' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
+                stat.color === 'green' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
+                stat.color === 'red' ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-gray-500 to-gray-600'
+              }`}>
+                <Icon name={stat.icon} size={20} color="white" />
               </div>
-              <div className="stat-content">
-                <div className="stat-value">{stat.value}</div>
-                <div className="stat-title">{stat.title}</div>
+              <div className="flex-1">
+                <div className="text-3xl font-black text-gray-900 leading-none">{stat.value}</div>
+                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{stat.title}</div>
               </div>
             </div>
-            
-            <div className="stat-footer">
-              <span className="stat-subtitle">{stat.subtitle}</span>
-              <span 
-                className="stat-change" 
-                style={{ color: getChangeColor(stat.changeType) }}
-              >
+
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">{stat.subtitle}</span>
+              <span className={`text-sm font-semibold ${
+                stat.changeType === 'positive' ? 'text-emerald-600' :
+                stat.changeType === 'negative' ? 'text-red-600' : 'text-gray-600'
+              }`}>
                 {stat.change}
               </span>
             </div>
@@ -134,332 +148,82 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
         ))}
       </div>
 
-      {/* Indicadores de rendimiento en tiempo real */}
-      <div className="performance-indicators">
-        <div className="performance-header">
-          <h3>
-            <Icon name="TrendingUp" size={20} />
-            Indicadores de Rendimiento en Tiempo Real
-            <span className="live-indicator">
-              <span className="live-dot"></span>
+      {/* Indicadores de rendimiento en tiempo real modernizados */}
+      <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/20">
+        <div className="text-center mb-8">
+          <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
+            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+              <Icon name="TrendingUp" size={20} color="white" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900">
+              Indicadores de Rendimiento en Tiempo Real
+            </h3>
+            <div className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded-full text-xs font-bold uppercase tracking-wide">
+              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
               EN VIVO
-            </span>
-          </h3>
-          <p>Estado actual del sistema de reportes • Última actualización: {lastUpdate.toLocaleTimeString()}</p>
+            </div>
+          </div>
+          <p className="text-gray-600 text-sm">
+            Estado actual del sistema de reportes • Última actualización: {lastUpdate.toLocaleTimeString()}
+          </p>
         </div>
 
-        <div className="indicators-row">
-          <div className="indicator">
-            <div className="indicator-icon" style={{ background: '#f59e0b', color: 'white' }}>
-              <Icon name="Clock" size={16} />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
+            <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
+              <Icon name="Clock" size={16} color="white" />
             </div>
-            <div className="indicator-content">
-              <div className="indicator-value">
+            <div>
+              <div className="text-2xl font-black text-gray-900">
                 {reportesPendientes}
-                <span className="indicator-label">Pendientes</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Pendientes</span>
               </div>
-              <div className="indicator-description">Requieren atención</div>
+              <div className="text-xs text-gray-500">Requieren atención</div>
             </div>
           </div>
 
-          <div className="indicator">
-            <div className="indicator-icon" style={{ background: '#06b6d4', color: 'white' }}>
-              <Icon name="Settings" size={16} />
+          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
+            <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
+              <Icon name="Settings" size={16} color="white" />
             </div>
-            <div className="indicator-content">
-              <div className="indicator-value">
+            <div>
+              <div className="text-2xl font-black text-gray-900">
                 {reportesEnProceso}
-                <span className="indicator-label">En Proceso</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">En Proceso</span>
               </div>
-              <div className="indicator-description">En seguimiento</div>
+              <div className="text-xs text-gray-500">En seguimiento</div>
             </div>
           </div>
 
-          <div className="indicator">
-            <div className="indicator-icon" style={{ background: '#ef4444', color: 'white' }}>
-              <Icon name="AlertCircle" size={16} />
+          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
+            <div className="p-3 bg-gradient-to-br from-red-500 to-rose-500 rounded-lg">
+              <Icon name="AlertCircle" size={16} color="white" />
             </div>
-            <div className="indicator-content">
-              <div className="indicator-value">
+            <div>
+              <div className="text-2xl font-black text-gray-900">
                 {reportesCriticos}
-                <span className="indicator-label">Críticos</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Críticos</span>
               </div>
-              <div className="indicator-description">
+              <div className="text-xs text-gray-500">
                 {reportesCriticos === 0 ? 'Sin críticos' : 'Atención urgente'}
               </div>
             </div>
           </div>
 
-          <div className="indicator">
-            <div className="indicator-icon" style={{ background: '#059669', color: 'white' }}>
-              <Icon name="CheckCircle" size={16} />
+          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
+            <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg">
+              <Icon name="CheckCircle" size={16} color="white" />
             </div>
-            <div className="indicator-content">
-              <div className="indicator-value">
+            <div>
+              <div className="text-2xl font-black text-gray-900">
                 {reportesResueltos}
-                <span className="indicator-label">Resueltos</span>
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Resueltos</span>
               </div>
-              <div className="indicator-description">Completados exitosamente</div>
+              <div className="text-xs text-gray-500">Completados exitosamente</div>
             </div>
           </div>
         </div>
       </div>
-
-      <style jsx>{`
-        .stats-overview {
-          margin-bottom: 32px;
-          position: relative;
-          z-index: 1;
-        }
-
-        .stats-header {
-          text-align: center;
-          margin-bottom: 24px;
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .stats-header h2 {
-          font-size: 1.5rem;
-          font-weight: 700;
-          color: var(--color-primary);
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-        }
-
-        .stats-header p {
-          color: #6b7280;
-          font-size: 1rem;
-          margin: 0;
-        }
-
-        .stats-grid {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-          gap: 20px;
-          margin-bottom: 32px;
-        }
-
-        .stat-card {
-          border-radius: 16px;
-          padding: 20px;
-          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          backdrop-filter: blur(10px);
-          transition: transform 0.2s ease, box-shadow 0.2s ease;
-        }
-
-        .stat-card:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
-        }
-
-        .stat-header {
-          display: flex;
-          align-items: center;
-          gap: 16px;
-          margin-bottom: 16px;
-        }
-
-        .stat-icon {
-          width: 48px;
-          height: 48px;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .stat-content {
-          flex: 1;
-        }
-
-        .stat-value {
-          font-size: 2rem;
-          font-weight: 800;
-          color: #1f2937;
-          line-height: 1;
-          margin-bottom: 4px;
-        }
-
-        .stat-title {
-          font-size: 0.875rem;
-          font-weight: 600;
-          color: #4b5563;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-        }
-
-        .stat-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .stat-subtitle {
-          font-size: 0.875rem;
-          color: #6b7280;
-        }
-
-        .stat-change {
-          font-size: 0.875rem;
-          font-weight: 600;
-        }
-
-        .performance-indicators {
-          background: rgba(255, 255, 255, 0.95);
-          backdrop-filter: blur(10px);
-          border-radius: 20px;
-          padding: 24px;
-          box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .performance-header {
-          text-align: center;
-          margin-bottom: 24px;
-        }
-
-        .performance-header h3 {
-          font-size: 1.25rem;
-          font-weight: 700;
-          color: #1f2937;
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-        
-        .live-indicator {
-          display: flex;
-          align-items: center;
-          gap: 4px;
-          padding: 4px 8px;
-          background: #ef4444;
-          color: white;
-          border-radius: 12px;
-          font-size: 0.6rem;
-          font-weight: 700;
-          letter-spacing: 0.5px;
-        }
-        
-        .live-dot {
-          width: 6px;
-          height: 6px;
-          background: white;
-          border-radius: 50%;
-          animation: pulse-dot 2s infinite;
-        }
-        
-        @keyframes pulse-dot {
-          0%, 100% { opacity: 1; }
-          50% { opacity: 0.3; }
-        }
-
-        .performance-header p {
-          color: #6b7280;
-          font-size: 0.875rem;
-          margin: 0;
-        }
-
-        .indicators-row {
-          display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-          gap: 16px;
-        }
-
-        .indicator {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          padding: 16px;
-          background: rgba(255, 255, 255, 0.6);
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .indicator-icon {
-          width: 40px;
-          height: 40px;
-          border-radius: 10px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          flex-shrink: 0;
-        }
-
-        .indicator-content {
-          flex: 1;
-        }
-
-        .indicator-value {
-          font-size: 1.5rem;
-          font-weight: 800;
-          color: #1f2937;
-          line-height: 1;
-          margin-bottom: 4px;
-        }
-
-        .indicator-label {
-          font-size: 0.75rem;
-          font-weight: 600;
-          color: #6b7280;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          margin-left: 8px;
-        }
-
-        .indicator-description {
-          font-size: 0.75rem;
-          color: #9ca3af;
-        }
-
-        @media (max-width: 768px) {
-          .stats-grid {
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-          }
-
-          .stat-card {
-            padding: 16px;
-          }
-
-          .stat-value {
-            font-size: 1.75rem;
-          }
-
-          .indicators-row {
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-          }
-
-          .indicator {
-            padding: 12px;
-            flex-direction: column;
-            text-align: center;
-            gap: 8px;
-          }
-        }
-
-        @media (max-width: 480px) {
-          .stats-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .indicators-row {
-            grid-template-columns: 1fr;
-          }
-        }
-      `}</style>
     </div>
   );
 };

@@ -6,118 +6,66 @@ import ActividadReciente from './RecentActivity';
 
 const MainDashboard = ({ user, reportes, colaboradoresStats }) => {
   return (
-    <div className="dashboard-container">
-      {/* Header profesional */}
-      <div className="dashboard-header">
-        <div className="welcome-section">
-          <h1>
-            <Icon name="Shield" size={28} color="#1e293b" />
-            Bienvenido, {user.displayName || user.email.split('@')[0]}
-          </h1>
-          <p className="dashboard-subtitle">
-            Panel de control ejecutivo • Sistema de gestión de seguridad industrial
-          </p>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-blue-50 relative">
+      {/* Patrón de fondo moderno */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-5 pointer-events-none"></div>
+
+      {/* Gradiente sutil de overlay */}
+      <div className="absolute inset-0 bg-gradient-to-br from-transparent via-blue-50/20 to-transparent pointer-events-none"></div>
+
+      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Header Empresarial Mejorado */}
+        <div className="text-center mb-12">
+          <div className="bg-white/80 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 relative overflow-hidden">
+            {/* Decoración de fondo */}
+            <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full blur-3xl opacity-60"></div>
+            <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-br from-orange-100 to-amber-100 rounded-full blur-3xl opacity-60"></div>
+
+            <div className="relative">
+              <div className="flex items-center justify-center gap-4 mb-4">
+                <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-2xl shadow-lg">
+                  <Icon name="Shield" size={32} color="white" />
+                </div>
+                <h1 className="text-3xl md:text-4xl lg:text-5xl font-black bg-gradient-to-r from-gray-900 via-blue-800 to-indigo-900 bg-clip-text text-transparent">
+                  Bienvenido, {user.displayName || user.email.split('@')[0]}
+                </h1>
+              </div>
+              <p className="text-slate-600 text-lg font-medium tracking-wide">
+                PANEL DE CONTROL EJECUTIVO • SISTEMA DE GESTIÓN DE SEGURIDAD INDUSTRIAL
+              </p>
+              <div className="mt-4 flex items-center justify-center gap-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-sm text-slate-500 font-medium">Sistema Activo</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Acciones rápidas */}
+        <div className="mb-10">
+          <QuickActions />
+        </div>
+
+        {/* Resumen ejecutivo */}
+        <div className="mb-10">
+          <StatsOverview
+            reportes={reportes}
+            colaboradoresStats={colaboradoresStats}
+          />
+        </div>
+
+        {/* Actividad reciente */}
+        <div className="mb-8">
+          <ActividadReciente reportes={reportes} />
         </div>
       </div>
 
-      {/* Acciones rápidas */}
-      <QuickActions />
-
-      {/* Resumen ejecutivo */}
-      <StatsOverview 
-        reportes={reportes} 
-        colaboradoresStats={colaboradoresStats} 
-      />
-
-      {/* Actividad reciente */}
-      <ActividadReciente reportes={reportes} />
-
-
       <style jsx>{`
-        .dashboard-container {
-          max-width: 1400px;
-          margin: 0 auto;
-          padding: 24px;
-          background: #f8fafc;
-          min-height: 100vh;
-          position: relative;
-        }
-        
-        .dashboard-container::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-image: 
-            linear-gradient(90deg, rgba(226, 232, 240, 0.3) 1px, transparent 1px),
-            linear-gradient(rgba(226, 232, 240, 0.3) 1px, transparent 1px);
+        .bg-grid-pattern {
+          background-image:
+            linear-gradient(90deg, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+            linear-gradient(rgba(0, 0, 0, 0.03) 1px, transparent 1px);
           background-size: 20px 20px;
-          pointer-events: none;
-          opacity: 0.5;
-        }
-        
-        .dashboard-header {
-          text-align: center;
-          margin-bottom: 40px;
-          position: relative;
-          z-index: 1;
-        }
-        
-        .welcome-section {
-          background: white;
-          border-radius: 12px;
-          padding: 40px 20px;
-          box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-          border: 1px solid #e2e8f0;
-        }
-        
-        .welcome-section h1 {
-          font-size: 2.5rem;
-          font-weight: 700;
-          color: #1e293b;
-          margin-bottom: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 16px;
-        }
-        
-        .dashboard-subtitle {
-          color: #64748b;
-          font-size: 1rem;
-          font-weight: 500;
-          margin: 0;
-          text-transform: uppercase;
-          letter-spacing: 0.5px;
-          font-size: 0.875rem;
-        }
-        
-        @media (max-width: 768px) {
-          .dashboard-container {
-            padding: 16px;
-          }
-          
-          .welcome-section {
-            padding: 30px 16px;
-          }
-          
-          .welcome-section h1 {
-            font-size: 2rem;
-            flex-direction: column;
-            gap: 8px;
-          }
-          
-          .dashboard-subtitle {
-            font-size: 0.8rem;
-          }
-        }
-        
-        @media (max-width: 480px) {
-          .welcome-section h1 {
-            font-size: 1.8rem;
-          }
         }
       `}</style>
     </div>
