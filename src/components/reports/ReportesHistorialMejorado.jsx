@@ -211,49 +211,20 @@ const ReportesHistorialMejorado = () => {
     if (!showEstadoModal || !reporteAEditar) return null;
 
     return (
-      <div style={{
-        position: 'fixed',
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: 'rgba(0, 0, 0, 0.5)',
-        zIndex: 1002,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: '20px'
-      }}>
-        <div style={{
-          background: 'white',
-          borderRadius: '16px',
-          padding: '24px',
-          maxWidth: '500px',
-          width: '100%'
-        }}>
-          <h3 style={{ marginBottom: '20px', color: '#1f2937' }}>
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl p-6 max-w-lg w-full">
+          <h3 className="text-xl font-bold text-gray-900 mb-6">
             Cambiar Estado del Reporte
           </h3>
-          
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontWeight: '600', 
-              color: '#374151' 
-            }}>
+
+          <div className="mb-4">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Nuevo Estado:
             </label>
             <select
               value={nuevoEstado}
               onChange={(e) => setNuevoEstado(e.target.value)}
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem'
-              }}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="pendiente">⏳ Pendiente</option>
               <option value="proceso">🔄 En Proceso</option>
@@ -262,62 +233,33 @@ const ReportesHistorialMejorado = () => {
             </select>
           </div>
 
-          <div style={{ marginBottom: '20px' }}>
-            <label style={{ 
-              display: 'block', 
-              marginBottom: '8px', 
-              fontWeight: '600', 
-              color: '#374151' 
-            }}>
+          <div className="mb-6">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
               Comentario (opcional):
             </label>
             <textarea
               value={comentario}
               onChange={(e) => setComentario(e.target.value)}
               placeholder="Agregar comentario sobre el cambio de estado..."
-              style={{
-                width: '100%',
-                padding: '12px',
-                border: '2px solid #e5e7eb',
-                borderRadius: '8px',
-                fontSize: '1rem',
-                minHeight: '80px',
-                resize: 'vertical'
-              }}
+              className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-20 resize-vertical"
             />
           </div>
 
-          <div style={{
-            display: 'flex',
-            gap: '12px',
-            justifyContent: 'flex-end'
-          }}>
+          <div className="flex gap-3 justify-end">
             <button
               onClick={() => setShowEstadoModal(false)}
-              style={{
-                padding: '10px 20px',
-                border: '2px solid #d1d5db',
-                background: 'white',
-                borderRadius: '8px',
-                cursor: 'pointer',
-                fontWeight: '600'
-              }}
+              className="px-6 py-2 border-2 border-gray-300 bg-white rounded-lg hover:bg-gray-50 font-semibold transition-colors"
             >
               Cancelar
             </button>
             <button
               onClick={() => actualizarEstadoConHistorial(reporteAEditar.id, nuevoEstado, comentario)}
               disabled={updating === reporteAEditar.id}
-              style={{
-                padding: '10px 20px',
-                background: '#3b82f6',
-                color: 'white',
-                border: 'none',
-                borderRadius: '8px',
-                cursor: updating === reporteAEditar.id ? 'not-allowed' : 'pointer',
-                fontWeight: '600',
-                opacity: updating === reporteAEditar.id ? 0.7 : 1
-              }}
+              className={`px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-colors ${
+                updating === reporteAEditar.id
+                  ? 'opacity-50 cursor-not-allowed'
+                  : 'hover:bg-blue-700'
+              }`}
             >
               {updating === reporteAEditar.id ? 'Actualizando...' : 'Actualizar Estado'}
             </button>
@@ -534,15 +476,10 @@ const ReportesHistorialMejorado = () => {
 
   if (loading) {
     return (
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '400px'
-      }}>
-        <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '2rem', marginBottom: '16px' }}>📊</div>
-          <p>Cargando historial...</p>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Icon name="BarChart3" size={48} color="#6b7280" className="mx-auto mb-4" />
+          <p className="text-lg text-gray-600">Cargando historial...</p>
         </div>
       </div>
     );
@@ -736,301 +673,147 @@ const ReportesHistorialMejorado = () => {
       {/* Modal de Estados */}
       <EstadosModal />
 
-      {/* Modal de Detalles */}
-      {showModal && selectedReporte && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          zIndex: 1000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px'
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '16px',
-            padding: '24px',
-            maxWidth: '600px',
-            width: '100%',
-            maxHeight: '80vh',
-            overflow: 'auto'
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '20px'
-            }}>
-              <h3 style={{ margin: 0, color: '#1f2937' }}>Detalles del Reporte</h3>
+        {/* Modal de Detalles */}
+        {showModal && selectedReporte && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-center justify-center p-4">
+            <div className="bg-white rounded-xl p-6 max-w-2xl w-full max-h-[80vh] overflow-auto">
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-900">Detalles del Reporte</h3>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-400 hover:text-gray-600 text-2xl font-bold"
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <span className="font-semibold text-gray-900">Fecha:</span> {formatearFecha(selectedReporte.fecha)}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900">Tipo:</span> {selectedReporte.tipo || selectedReporte.tipoReporte}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900">Descripción:</span> {selectedReporte.descripcion || selectedReporte.hallazgo || 'N/A'}
+                </div>
+                <div>
+                  <span className="font-semibold text-gray-900">Área:</span> {selectedReporte.area || selectedReporte.lugarLabor || 'N/A'}
+                </div>
+                {selectedReporte.supervisorReporta && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Supervisor que Reporta:</span> {selectedReporte.supervisorReporta}
+                  </div>
+                )}
+                {selectedReporte.colaborador && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Colaborador Involucrado:</span> {selectedReporte.colaborador.nombre} ({selectedReporte.colaborador.area})
+                  </div>
+                )}
+                {!selectedReporte.supervisorReporta && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Reportante:</span> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
+                  </div>
+                )}
+                {selectedReporte.severidad && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Severidad:</span>
+                    <span
+                      className="ml-2 px-2 py-1 rounded-full text-xs font-semibold text-white capitalize"
+                      style={{ backgroundColor: getSeverityColor(selectedReporte.severidad) }}
+                    >
+                      {selectedReporte.severidad}
+                    </span>
+                  </div>
+                )}
+                <div>
+                  <span className="font-semibold text-gray-900">Estado:</span>
+                  <span
+                    className="ml-2 px-2 py-1 rounded-full text-xs font-semibold text-white capitalize"
+                    style={{ backgroundColor: getStatusColor(selectedReporte.estado) }}
+                  >
+                    {selectedReporte.estado || 'Pendiente'}
+                  </span>
+                </div>
+
+                {/* Historial de Estados */}
+                {selectedReporte.historialEstados && selectedReporte.historialEstados.length > 0 && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Historial de Estados:</span>
+                    <div className="mt-2 border border-gray-200 rounded-lg max-h-48 overflow-auto">
+                      {selectedReporte.historialEstados.map((historia, index) => (
+                        <div
+                          key={index}
+                          className={`p-3 ${index < selectedReporte.historialEstados.length - 1 ? 'border-b border-gray-100' : ''}`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span
+                              className="px-2 py-1 rounded text-xs font-semibold text-white capitalize"
+                              style={{ backgroundColor: getStatusColor(historia.estado) }}
+                            >
+                              {historia.estado}
+                            </span>
+                            <span className="text-xs text-gray-500">
+                              {formatearFecha(new Date(historia.fecha))}
+                            </span>
+                          </div>
+                          {historia.comentario && (
+                            <p className="text-sm text-gray-700 italic mt-1">
+                              "{historia.comentario}"
+                            </p>
+                          )}
+                          {historia.usuario && (
+                            <div className="text-xs text-gray-400 mt-1">
+                              Por: {historia.usuario}
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {selectedReporte.abordaje && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Abordaje:</span> {selectedReporte.abordaje}
+                  </div>
+                )}
+                {selectedReporte.fotoUrl && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Evidencia:</span>
+                    <button
+                      onClick={() => verImagen(selectedReporte.fotoUrl)}
+                      className="ml-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm transition-colors"
+                    >
+                      <Icon name="Camera" size={16} className="inline mr-1" />
+                      Ver imagen
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Modal de Imagen */}
+        {showImageModal && selectedImage && (
+          <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex items-center justify-center p-4">
+            <div className="relative max-w-[90vw] max-h-[90vh]">
+              <img
+                src={selectedImage}
+                alt="Evidencia"
+                className="max-w-full max-h-full rounded-lg"
+              />
               <button
-                onClick={() => setShowModal(false)}
-                style={{
-                  background: 'none',
-                  border: 'none',
-                  fontSize: '1.5rem',
-                  cursor: 'pointer',
-                  color: '#6b7280'
-                }}
+                onClick={() => setShowImageModal(false)}
+                className="absolute top-2 right-2 bg-black bg-opacity-70 text-white border-0 rounded-full w-10 h-10 cursor-pointer text-xl hover:bg-opacity-90 transition-all"
               >
                 ×
               </button>
             </div>
-            
-            <div style={{ display: 'grid', gap: '16px' }}>
-              <div>
-                <strong>Fecha:</strong> {formatearFecha(selectedReporte.fecha)}
-              </div>
-              <div>
-                <strong>Tipo:</strong> {selectedReporte.tipo || selectedReporte.tipoReporte}
-              </div>
-              <div>
-                <strong>Descripción:</strong> {selectedReporte.descripcion || selectedReporte.hallazgo || 'N/A'}
-              </div>
-              <div>
-                <strong>Área:</strong> {selectedReporte.area || selectedReporte.lugarLabor || 'N/A'}
-              </div>
-              {selectedReporte.supervisorReporta && (
-                <div>
-                  <strong>Supervisor que Reporta:</strong> {selectedReporte.supervisorReporta}
-                </div>
-              )}
-              {selectedReporte.colaborador && (
-                <div>
-                  <strong>Colaborador Involucrado:</strong> {selectedReporte.colaborador.nombre} ({selectedReporte.colaborador.area})
-                </div>
-              )}
-              {!selectedReporte.supervisorReporta && (
-                <div>
-                  <strong>Reportante:</strong> {selectedReporte.reportante || selectedReporte.colaboradorNombre || 'Anónimo'}
-                </div>
-              )}
-              {selectedReporte.severidad && (
-                <div>
-                  <strong>Severidad:</strong> 
-                  <span style={{
-                    marginLeft: '8px',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '0.75rem',
-                    fontWeight: '600',
-                    color: 'white',
-                    background: getSeverityColor(selectedReporte.severidad),
-                    textTransform: 'capitalize'
-                  }}>
-                    {selectedReporte.severidad}
-                  </span>
-                </div>
-              )}
-              <div>
-                <strong>Estado:</strong> 
-                <span style={{
-                  marginLeft: '8px',
-                  padding: '4px 8px',
-                  borderRadius: '12px',
-                  fontSize: '0.75rem',
-                  fontWeight: '600',
-                  color: 'white',
-                  background: getStatusColor(selectedReporte.estado),
-                  textTransform: 'capitalize'
-                }}>
-                  {selectedReporte.estado || 'Pendiente'}
-                </span>
-              </div>
-
-              {/* Historial de Estados */}
-              {selectedReporte.historialEstados && selectedReporte.historialEstados.length > 0 && (
-                <div>
-                  <strong>Historial de Estados:</strong>
-                  <div style={{
-                    marginTop: '8px',
-                    border: '1px solid #e5e7eb',
-                    borderRadius: '8px',
-                    maxHeight: '200px',
-                    overflow: 'auto'
-                  }}>
-                    {selectedReporte.historialEstados.map((historia, index) => (
-                      <div key={index} style={{
-                        padding: '12px',
-                        borderBottom: index < selectedReporte.historialEstados.length - 1 ? '1px solid #f1f5f9' : 'none'
-                      }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '4px' }}>
-                          <span style={{
-                            padding: '2px 6px',
-                            borderRadius: '6px',
-                            fontSize: '0.7rem',
-                            fontWeight: '600',
-                            color: 'white',
-                            background: getStatusColor(historia.estado),
-                            textTransform: 'capitalize'
-                          }}>
-                            {historia.estado}
-                          </span>
-                          <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-                            {formatearFecha(new Date(historia.fecha))}
-                          </span>
-                        </div>
-                        {historia.comentario && (
-                          <p style={{ 
-                            fontSize: '0.8rem', 
-                            color: '#374151', 
-                            margin: '4px 0 0 0',
-                            fontStyle: 'italic'
-                          }}>
-                            "{historia.comentario}"
-                          </p>
-                        )}
-                        {historia.usuario && (
-                          <div style={{ fontSize: '0.7rem', color: '#9ca3af', marginTop: '2px' }}>
-                            Por: {historia.usuario}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {selectedReporte.abordaje && (
-                <div>
-                  <strong>Abordaje:</strong> {selectedReporte.abordaje}
-                </div>
-              )}
-              {selectedReporte.fotoUrl && (
-                <div>
-                  <strong>Evidencia:</strong>
-                  <button
-                    onClick={() => verImagen(selectedReporte.fotoUrl)}
-                    style={{
-                      marginLeft: '8px',
-                      padding: '4px 8px',
-                      background: '#10b981',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                      fontSize: '0.8rem'
-                    }}
-                  >
-                    📸 Ver imagen
-                  </button>
-                </div>
-              )}
-            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Modal de Imagen */}
-      {showImageModal && selectedImage && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
-          zIndex: 1001,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '20px'
-        }}>
-          <div style={{
-            position: 'relative',
-            maxWidth: '90vw',
-            maxHeight: '90vh'
-          }}>
-            <img
-              src={selectedImage}
-              alt="Evidencia"
-              style={{
-                maxWidth: '100%',
-                maxHeight: '100%',
-                borderRadius: '8px'
-              }}
-            />
-            <button
-              onClick={() => setShowImageModal(false)}
-              style={{
-                position: 'absolute',
-                top: '10px',
-                right: '10px',
-                background: 'rgba(0, 0, 0, 0.7)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '50%',
-                width: '40px',
-                height: '40px',
-                cursor: 'pointer',
-                fontSize: '1.2rem'
-              }}
-            >
-              ×
-            </button>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        .tabla-seccion {
-          background: white;
-          border-radius: 16px;
-          padding: 24px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-          border: 1px solid #e5e7eb;
-        }
-
-        .tabla-container {
-          overflow-x: auto;
-          border-radius: 12px;
-          border: 1px solid #e5e7eb;
-        }
-
-        .reportes-tabla {
-          width: 100%;
-          border-collapse: collapse;
-          background: white;
-        }
-
-        .reportes-tabla th {
-          background: #f8fafc;
-          padding: 12px;
-          text-align: left;
-          font-weight: 600;
-          color: #374151;
-          border-bottom: 2px solid #e5e7eb;
-          font-size: 0.9rem;
-          white-space: nowrap;
-        }
-
-        .reportes-tabla td {
-          padding: 12px;
-          border-bottom: 1px solid #f1f5f9;
-          font-size: 0.85rem;
-          vertical-align: top;
-        }
-
-        .reportes-tabla tr:hover {
-          background: #f8fafc;
-        }
-
-        @media (max-width: 768px) {
-          .tabla-container {
-            font-size: 0.75rem;
-          }
-          
-          .reportes-tabla th,
-          .reportes-tabla td {
-            padding: 8px 4px;
-            font-size: 0.7rem;
-          }
-        }
-      `}</style>
     </div>
   );
 };

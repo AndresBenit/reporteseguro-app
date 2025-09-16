@@ -74,330 +74,125 @@ const ReportTypeSelector = () => {
   };
 
   return (
-    <div className="report-type-selector">
-      <div className="selector-header">
-        <h1>
-          <Icon name="FileText" size={28} color="var(--color-primary)" />
-          Centro de Reportes
-        </h1>
-        <p className="selector-subtitle">
-          Selecciona el tipo de reporte que necesitas crear
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Icon name="FileText" size={32} color="#1f2937" />
+            <h1 className="text-4xl font-bold text-gray-900">
+              Centro de Reportes
+            </h1>
+          </div>
+          <p className="text-lg text-gray-600 font-medium">
+            Selecciona el tipo de reporte que necesitas crear
+          </p>
+        </div>
 
-      <div className="types-grid">
-        {reportTypes.map((type) => (
+        {/* Report Type Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mb-16">
+          {reportTypes.map((type) => (
+            <button
+              key={type.id}
+              onClick={() => handleTypeSelect(type.id)}
+              className="group relative bg-white rounded-2xl p-6 border-2 border-transparent hover:border-current transition-all duration-300 hover:-translate-y-2 hover:shadow-2xl shadow-lg"
+              style={{ color: type.color }}
+            >
+              {/* Card Background */}
+              <div
+                className="absolute inset-0 rounded-2xl opacity-5"
+                style={{ backgroundColor: type.color }}
+              />
+
+              {/* Header */}
+              <div className="relative flex justify-between items-start mb-4">
+                <div
+                  className="w-14 h-14 rounded-xl flex items-center justify-center shadow-md bg-white"
+                  style={{ borderColor: type.color }}
+                >
+                  <Icon name={type.icon} size={28} color={type.color} />
+                </div>
+                <span
+                  className="px-3 py-1 rounded-full text-xs font-bold text-white tracking-wider"
+                  style={{ backgroundColor: type.color }}
+                >
+                  {type.priority}
+                </span>
+              </div>
+
+              {/* Content */}
+              <div className="relative mb-4">
+                <h3 className="text-xl font-bold text-gray-900 mb-2">
+                  {type.title}
+                </h3>
+                <p className="text-gray-600 text-sm leading-relaxed">
+                  {type.description}
+                </p>
+              </div>
+
+              {/* Examples */}
+              <div className="relative bg-gray-50 rounded-xl p-4 mb-4 border">
+                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wide block mb-2">
+                  Ejemplos:
+                </span>
+                <div className="flex flex-wrap gap-2">
+                  {type.examples.slice(0, 2).map((example, index) => (
+                    <span
+                      key={index}
+                      className="inline-block px-2 py-1 bg-white rounded-md text-xs font-medium text-gray-700 border"
+                    >
+                      {example}
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Footer */}
+              <div className="relative flex items-center justify-between pt-3 border-t border-gray-100">
+                <span className="text-sm font-semibold" style={{ color: type.color }}>
+                  Crear reporte
+                </span>
+                <Icon name="ChevronRight" size={18} color={type.color} className="group-hover:translate-x-1 transition-transform" />
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* History Section */}
+        <div className="text-center py-12 border-t-2 border-gray-200">
           <button
-            key={type.id}
-            onClick={() => handleTypeSelect(type.id)}
-            className="type-card"
-            style={{
-              '--type-color': type.color,
-              '--type-bg': type.bgColor
-            }}
+            onClick={() => navigate('/reportes/historial')}
+            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-gray-600 to-gray-700 text-white font-bold text-lg rounded-xl shadow-lg hover:shadow-xl hover:-translate-y-1 transition-all duration-300 mx-auto"
           >
-            <div className="type-header">
-              <div className="type-icon">
-                <Icon name={type.icon} size={24} color={type.color} />
-              </div>
-              <span 
-                className="type-priority"
-                style={{ 
-                  background: type.color,
-                  color: 'white'
-                }}
-              >
-                {type.priority}
-              </span>
-            </div>
-
-            <div className="type-content">
-              <h3 className="type-title">{type.title}</h3>
-              <p className="type-description">{type.description}</p>
-            </div>
-
-            <div className="type-examples">
-              <span className="examples-label">Ejemplos:</span>
-              <div className="examples-list">
-                {type.examples.slice(0, 2).map((example, index) => (
-                  <span key={index} className="example-tag">
-                    {example}
-                  </span>
-                ))}
-              </div>
-            </div>
-
-            <div className="type-footer">
-              <span className="action-text">Crear reporte</span>
-              <Icon name="ChevronRight" size={16} color={type.color} />
-            </div>
+            <Icon name="BarChart3" size={24} color="white" />
+            Ver Historial de Reportes
           </button>
-        ))}
-      </div>
+          <p className="mt-4 text-gray-600">
+            Consulta todos los reportes registrados con filtros y búsqueda
+          </p>
+        </div>
 
-      {/* Botón para ver historial */}
-      <div style={{ 
-        textAlign: 'center', 
-        marginTop: '30px',
-        paddingTop: '30px',
-        borderTop: '2px solid #f3f4f6'
-      }}>
-        <button
-          onClick={() => navigate('/reportes/historial')}
-          style={{
-            padding: '16px 32px',
-            background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '12px',
-            fontWeight: '700',
-            fontSize: '1rem',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            boxShadow: '0 4px 12px rgba(107, 114, 128, 0.25)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            margin: '0 auto'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-2px)';
-            e.target.style.boxShadow = '0 8px 20px rgba(107, 114, 128, 0.35)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = '0 4px 12px rgba(107, 114, 128, 0.25)';
-          }}
-        >
-          📊 Ver Historial de Reportes
-        </button>
-        <p style={{ 
-          marginTop: '12px', 
-          color: '#6b7280', 
-          fontSize: '0.9rem' 
-        }}>
-          Consulta todos los reportes registrados con filtros y búsqueda
-        </p>
-      </div>
-
-      <div className="help-section">
-        <div className="help-card">
-          <Icon name="HelpCircle" size={20} color="#6b7280" />
-          <div>
-            <h4>¿No sabes qué tipo elegir?</h4>
-            <p>
-              Si tienes dudas, usa <strong>Reporte de Incidencia</strong> para situaciones críticas 
-              o <strong>Reporte de Observación</strong> para condiciones que podrían mejorarse.
-            </p>
+        {/* Help Section */}
+        <div className="flex justify-center mt-12">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm max-w-lg">
+            <div className="flex items-start gap-4">
+              <div className="flex-shrink-0 mt-1">
+                <Icon name="HelpCircle" size={24} color="#6b7280" />
+              </div>
+              <div>
+                <h4 className="text-lg font-semibold text-gray-900 mb-2">
+                  ¿No sabes qué tipo elegir?
+                </h4>
+                <p className="text-gray-600 leading-relaxed">
+                  Si tienes dudas, usa <strong className="text-gray-900">Reporte de Incidencia</strong> para situaciones críticas
+                  o <strong className="text-gray-900">Nueva Recomendación</strong> para condiciones que podrían mejorarse.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>
 
-      <style jsx>{`
-        .report-type-selector {
-          max-width: 1000px;
-          margin: 0 auto;
-          padding: 20px;
-        }
-
-        .selector-header {
-          text-align: center;
-          margin-bottom: 40px;
-        }
-
-        .selector-header h1 {
-          font-size: 2.25rem;
-          font-weight: 700;
-          color: var(--color-text-primary);
-          margin-bottom: 8px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 12px;
-        }
-
-        .selector-subtitle {
-          color: var(--color-text-secondary);
-          font-size: 1.1rem;
-          font-weight: 500;
-        }
-
-        .types-grid {
-          display: grid;
-          grid-template-columns: repeat(4, 1fr);
-          gap: 16px;
-          margin-bottom: 40px;
-          max-width: 1200px;
-          margin: 0 auto 40px auto;
-        }
-        
-        @media (max-width: 1024px) {
-          .types-grid {
-            grid-template-columns: repeat(2, 1fr);
-          }
-        }
-
-        .type-card {
-          background: var(--type-bg);
-          border: 2px solid transparent;
-          border-radius: 20px;
-          padding: 24px;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          text-align: left;
-          display: flex;
-          flex-direction: column;
-          gap: 16px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-        }
-
-        .type-card:hover {
-          border-color: var(--type-color);
-          transform: translateY(-4px);
-          box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-        }
-
-        .type-header {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-        }
-
-        .type-icon {
-          width: 50px;
-          height: 50px;
-          background: white;
-          border-radius: 12px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .type-priority {
-          font-size: 0.7rem;
-          font-weight: 700;
-          padding: 4px 8px;
-          border-radius: 6px;
-          letter-spacing: 0.5px;
-        }
-
-        .type-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: var(--color-text-primary);
-          margin: 0 0 8px 0;
-        }
-
-        .type-description {
-          color: var(--color-text-secondary);
-          font-size: 0.95rem;
-          line-height: 1.5;
-          margin: 0;
-        }
-
-        .type-examples {
-          padding: 12px;
-          background: rgba(255, 255, 255, 0.7);
-          border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .examples-label {
-          font-size: 0.8rem;
-          font-weight: 600;
-          color: var(--color-text-secondary);
-          display: block;
-          margin-bottom: 8px;
-        }
-
-        .examples-list {
-          display: flex;
-          gap: 8px;
-          flex-wrap: wrap;
-        }
-
-        .example-tag {
-          font-size: 0.75rem;
-          padding: 4px 8px;
-          background: white;
-          border-radius: 6px;
-          color: var(--color-text-primary);
-          border: 1px solid var(--color-border-light);
-        }
-
-        .type-footer {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          padding-top: 12px;
-          border-top: 1px solid rgba(255, 255, 255, 0.5);
-        }
-
-        .action-text {
-          font-weight: 600;
-          color: var(--type-color);
-          font-size: 0.9rem;
-        }
-
-        .help-section {
-          display: flex;
-          justify-content: center;
-        }
-
-        .help-card {
-          background: white;
-          border: 1px solid var(--color-border);
-          border-radius: 12px;
-          padding: 20px;
-          display: flex;
-          align-items: flex-start;
-          gap: 12px;
-          max-width: 500px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        }
-
-        .help-card h4 {
-          color: var(--color-text-primary);
-          font-size: 0.95rem;
-          font-weight: 600;
-          margin: 0 0 4px 0;
-        }
-
-        .help-card p {
-          color: var(--color-text-secondary);
-          font-size: 0.85rem;
-          line-height: 1.5;
-          margin: 0;
-        }
-
-        @media (max-width: 768px) {
-          .report-type-selector {
-            padding: 16px;
-          }
-
-          .selector-header h1 {
-            font-size: 1.75rem;
-          }
-
-          .selector-subtitle {
-            font-size: 1rem;
-          }
-
-          .types-grid {
-            grid-template-columns: 1fr;
-            gap: 20px;
-          }
-
-          .type-card {
-            padding: 20px;
-          }
-
-          .help-card {
-            padding: 16px;
-          }
-        }
-      `}</style>
     </div>
   );
 };
