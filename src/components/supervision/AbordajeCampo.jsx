@@ -1,18 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { supabase, dbHelpers } from '../../services/supabase';
+import { useNavigate } from 'react-router-dom';
+import { dbHelpers, storageHelpers } from '../../services/supabase';
 import SignaturePad from '../common/SignaturePad';
+import {
+  FormContainer,
+  FormHeader,
+  FormSection,
+  FormRow,
+  FormField,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormButton,
+  FormButtonGroup,
+  FormMessage
+} from '../common/FormComponents';
 
 const areasDisponibles = [
   "Central de mezclas", "Central de cribado", "Laboratorio",
-  "Caseta de procesamiento de muestras", "Cárcamo", 
+  "Caseta de procesamiento de muestras", "Cárcamo",
   "Almacenamiento de combustible", "Taller de mantenimiento",
   "Patio de almacenamiento 7", "Patio de almacenamiento de la pluma",
   "Centro industrial 2", "Hornos solera", "Almacén centro industrial",
-  "Ambiental", "Oficinas administrativas", "Comedor", 
+  "Ambiental", "Oficinas administrativas", "Comedor",
   "Estacionamiento", "Acceso principal", "Área de carga y descarga"
 ];
 
 const AbordajeCampo = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     colaboradorId: '',
     colaboradorNombre: '',
@@ -26,12 +41,12 @@ const AbordajeCampo = () => {
     firmado_por: '',
     fecha_firma: ''
   });
-  
+
   const [colaboradores, setColaboradores] = useState([]);
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [signatureData, setSignatureData] = useState(null);
-  
+
   // Estados para autocompletado
   const [searchTerm, setSearchTerm] = useState('');
   const [showSugerencias, setShowSugerencias] = useState(false);
@@ -50,21 +65,20 @@ const AbordajeCampo = () => {
     loadColaboradores();
   }, []);
 
-  // Filtrar colaboradores para autocompletado
+  // Filtrar colaboradores
   useEffect(() => {
     if (searchTerm.trim() === '') {
       setColaboradoresFiltrados([]);
       setShowSugerencias(false);
     } else {
-      // Validar que colaboradores sea un array válido antes de filtrar
       const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
       const filtrados = colaboradoresValidos
-        .filter(col => 
+        .filter((col) =>
           col && col.nombre && col.cedula &&
           (col.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
           col.cedula.includes(searchTerm))
         )
-        .slice(0, 8); // Mostrar máximo 8 sugerencias
+        .slice(0, 8);
       setColaboradoresFiltrados(filtrados);
       setShowSugerencias(filtrados.length > 0);
     }
@@ -75,416 +89,243 @@ const AbordajeCampo = () => {
     setForm({ ...form, [name]: value });
   };
 
-  // Manejar cambios en la firma
   const handleSignatureChange = (signature) => {
     setSignatureData(signature);
-    if (signature && signature.url) {
-      setForm(prev => ({
-        ...prev,
-        firma_url: signature.url,
-        fecha_firma: signature.timestamp,
-        firmado_por: "Usuario actual"
-      }));
-    } else {
-      setForm(prev => ({
-        ...prev,
-        firma_url: "",
-        fecha_firma: "",
-        firmado_por: ""
-      }));
-    }
   };
 
-  // Manejar búsqueda de colaborador
-  const handleSearchChange = (e) => {
-    const value = e.target.value;
-    setSearchTerm(value);
-    
-    // Si borra el texto, limpiar selección
-    if (value === '') {
-      setForm({
-        ...form,
-        colaboradorId: '',
-        colaboradorNombre: '',
-        colaboradorArea: ''
-      });
-    }
-  };
-
-  // Seleccionar colaborador de sugerencias
-  const seleccionarColaborador = (colaborador) => {
+  const handleSelectColaborador = (colaborador) => {
     setForm({
       ...form,
       colaboradorId: colaborador.id,
       colaboradorNombre: colaborador.nombre,
-      colaboradorArea: colaborador.area
+      colaboradorArea: colaborador.area || ''
     });
     setSearchTerm(colaborador.nombre);
     setShowSugerencias(false);
   };
 
-  // Cerrar sugerencias al hacer click fuera
-  const handleBlurColaborador = () => {
-    setTimeout(() => setShowSugerencias(false), 200);
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setForm({
+      ...form,
+      colaboradorNombre: value,
+      colaboradorId: '',
+      colaboradorArea: ''
+    });
   };
 
-  // Enviar formulario
-  const handleSubmit = async (e) => {
+  const enviarAbordaje = async (e) => {
     e.preventDefault();
-    
-    if (!form.colaboradorId || !form.area || !form.supervisorReporta.trim() || !form.lugarLabor.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
-      setMensaje('Error: Por favor completa todos los campos obligatorios');
-      setTimeout(() => setMensaje(''), 3000);
-      return;
-    }
 
-    // Validación obligatoria de firma
-    if (!signatureData || !form.firma_url) {
-      setMensaje('Error: La firma digital es obligatoria para enviar el reporte');
-      setTimeout(() => setMensaje(''), 3000);
+    if (!form.colaboradorNombre.trim() || !form.hallazgo.trim() || !form.abordaje.trim()) {
+      setMensaje('Por favor completa todos los campos obligatorios');
+      setTimeout(() => setMensaje(''), 5000);
       return;
     }
 
     setLoading(true);
+
     try {
-      // Guardar abordaje
+      let firmaUrl = null;
+
+      // Subir firma si existe
+      if (signatureData) {
+        setMensaje('Guardando firma...');
+        const blob = await fetch(signatureData).then(r => r.blob());
+        const fileName = `firma_abordaje_${Date.now()}.png`;
+        const uploadResult = await storageHelpers.upload('firmas', fileName, blob);
+        firmaUrl = uploadResult.publicUrl || uploadResult.fullPath;
+      }
+
+      setMensaje('Registrando abordaje...');
+
       const abordajeData = {
-        tipo: "abordaje",
-        subtipo: "Abordaje de Seguridad",
-        descripcion: `Colaborador: ${form.colaboradorNombre}\nLugar: ${form.lugarLabor}\nHallazgo: ${form.hallazgo}\nAbordaje: ${form.abordaje}`,
-        severidad: "media",
-        area: form.area,
-        reportante: form.supervisorReporta.trim(),
-        estado: "pendiente",
-        tipo_reporte: "abordaje",
-        prioridad: "normal",
-        colaboradorinvolucrado: form.colaboradorNombre,
-        accionrecomendada: form.abordaje.trim(),
-        // Campos de firma digital
-        firma_url: form.firma_url,
+        colaborador_id: form.colaboradorId,
+        colaborador_nombre: form.colaboradorNombre,
+        colaborador_area: form.colaboradorArea,
+        supervisor_reporta: form.supervisorReporta,
+        lugar_labor: form.lugarLabor,
+        hallazgo: form.hallazgo,
+        abordaje: form.abordaje,
+        firma_url: firmaUrl,
         firmado_por: form.firmado_por,
-        fecha_firma: form.fecha_firma
+        fecha_firma: firmaUrl ? new Date().toISOString() : null,
+        fecha_creacion: new Date().toISOString(),
+        estado: 'completado'
       };
 
-      await dbHelpers.create('reportes', abordajeData);
-      
+      await dbHelpers.create('abordajes_campo', abordajeData);
+
+      setMensaje('Abordaje registrado exitosamente!');
+
       // Limpiar formulario
-      setForm({
-        colaboradorId: '',
-        colaboradorNombre: '',
-        colaboradorArea: '',
-        supervisorReporta: '',
-        lugarLabor: '',
-        hallazgo: '',
-        abordaje: ''
-      });
-      setSearchTerm('');
-      setShowSugerencias(false);
-      
-      setMensaje('Éxito: Abordaje registrado exitosamente');
-      setTimeout(() => setMensaje(''), 3000);
+      setTimeout(() => {
+        setForm({
+          colaboradorId: '',
+          colaboradorNombre: '',
+          colaboradorArea: '',
+          area: '',
+          supervisorReporta: '',
+          lugarLabor: '',
+          hallazgo: '',
+          abordaje: '',
+          firma_url: '',
+          firmado_por: '',
+          fecha_firma: ''
+        });
+        setSearchTerm('');
+        setSignatureData(null);
+        setMensaje('');
+      }, 2000);
+
     } catch (error) {
-      console.error('Error guardando abordaje:', error);
-      setMensaje('Error: No se pudo guardar el abordaje. Intenta nuevamente.');
-      setTimeout(() => setMensaje(''), 3000);
+      console.error('Error enviando abordaje:', error);
+      setMensaje('Error al registrar el abordaje. Intenta nuevamente.');
+      setTimeout(() => setMensaje(''), 5000);
     }
+
     setLoading(false);
   };
 
-  const lugaresComunes = [
-    'Hornos',
-    'Oficina administrativa',
-    'Patio de almacenamiento',
-    'Laboratorio',
-    'Taller de mantenimiento',
-    'Central de mezclas',
-    'Central de cribado',
-    'Área de carga y descarga',
-    'Comedor',
-    'Estacionamiento'
-  ];
-
   return (
-    <div className="min-h-screen p-4 md:p-6 max-w-4xl mx-auto">
-      {/* Botón de volver */}
-      <button
-        onClick={() => window.history.back()}
-        className="flex items-center gap-2 px-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold mb-6 transition-all duration-200 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-md"
-      >
-        ← Volver
-      </button>
-      {/* Header */}
-      <div className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Abordaje en Campo
-        </h1>
-        <p className="text-gray-600 text-lg">
-          Registro de abordajes y seguimiento de seguridad
-        </p>
-      </div>
+    <FormContainer>
+      <FormHeader
+        title="Abordaje de Campo"
+        subtitle="Registro directo de conversaciones y abordajes con colaboradores"
+        onBack={() => navigate('/dashboard')}
+        icon=""
+      />
 
-      {/* Mensaje */}
-      {mensaje && (
-        <div className={`mb-6 p-4 rounded-lg border font-medium text-center ${
-          mensaje.includes('Éxito') ? "bg-green-50 text-green-800 border-green-200" :
-          mensaje.includes('Advertencia') ? "bg-yellow-50 text-yellow-800 border-yellow-200" :
-          "bg-red-50 text-red-800 border-red-200"
-        }`}>
-          {mensaje}
-        </div>
-      )}
+      <form onSubmit={enviarAbordaje}>
+        <FormMessage
+          type={mensaje.includes('exitosamente') ? 'success' : 'error'}
+          message={mensaje}
+          onClose={() => setMensaje('')}
+        />
 
-      {/* Formulario */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl mx-auto">
-        <div className="mb-6 pb-4 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Nuevo Abordaje en Campo</h2>
-          <p className="text-gray-600">Complete la información del abordaje en campo</p>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Fecha */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Fecha</label>
-            <input
-              type="text"
-              value={new Date().toLocaleDateString('es-ES', {
-                weekday: 'long',
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-              })}
-              disabled
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
-            />
-          </div>
-
-          {/* Colaborador con Autocompletado */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Colaborador *</label>
+        <FormSection title="Información del Colaborador">
+          <FormField label="Buscar colaborador" required>
             <div className="relative">
-              <input
+              <FormInput
                 type="text"
-                placeholder="Escribe el nombre del colaborador..."
+                placeholder="Nombre o cédula del colaborador..."
                 value={searchTerm}
                 onChange={handleSearchChange}
-                onFocus={() => searchTerm && setShowSugerencias(colaboradoresFiltrados.length > 0)}
-                onBlur={handleBlurColaborador}
-                className="form-input"
                 required
-                style={{
-                  width: '100%',
-                  borderColor: form.colaboradorId ? '#10b981' : '#d1d5db',
-                  backgroundColor: form.colaboradorId ? '#f0fdf4' : 'white'
-                }}
               />
-              
-              {/* Indicador de selección */}
-              {form.colaboradorId && (
-                <div style={{
-                  position: 'absolute',
-                  right: '12px',
-                  top: '50%',
-                  transform: 'translateY(-50%)',
-                  color: '#10b981',
-                  fontSize: '1.2rem'
-                }}>
-                  ✓
-                </div>
-              )}
-              
-              {/* Lista de sugerencias */}
               {showSugerencias && (
-                <div style={{
-                  position: 'absolute',
-                  top: '100%',
-                  left: 0,
-                  right: 0,
-                  zIndex: 1000,
-                  background: 'white',
-                  border: '1px solid #e5e7eb',
-                  borderTop: 'none',
-                  borderRadius: '0 0 8px 8px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
-                  maxHeight: '200px',
-                  overflowY: 'auto'
-                }}>
-                  {colaboradoresFiltrados.map(colaborador => (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {colaboradoresFiltrados.map((colaborador) => (
                     <div
                       key={colaborador.id}
-                      onClick={() => seleccionarColaborador(colaborador)}
-                      style={{
-                        padding: '12px 16px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid #f3f4f6',
-                        display: 'flex',
-                        justifyContent: 'space-between',
-                        alignItems: 'center',
-                        transition: 'background-color 0.2s ease',
-                        ':hover': { backgroundColor: '#f9fafb' }
-                      }}
-                      onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                      onMouseLeave={(e) => e.target.style.backgroundColor = 'white'}
+                      className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b border-gray-100"
+                      onClick={() => handleSelectColaborador(colaborador)}
                     >
-                      <div>
-                        <div style={{ fontWeight: '600', color: '#1f2937' }}>
-                          {colaborador.nombre}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
-                          {colaborador.cedula} • {colaborador.area}
-                        </div>
-                      </div>
-                      <div style={{
-                        padding: '2px 6px',
-                        borderRadius: '4px',
-                        fontSize: '0.7rem',
-                        fontWeight: '600',
-                        backgroundColor: colaborador.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
-                        color: colaborador.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
-                      }}>
-                        {colaborador.area === 'Centro Industrial' ? 'CI' : 'HS'}
+                      <div className="font-medium text-gray-900">{colaborador.nombre}</div>
+                      <div className="text-sm text-gray-600">
+                        Cédula: {colaborador.cedula} | Área: {colaborador.area || 'No especificada'}
                       </div>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-            
-            {/* Información del colaborador seleccionado */}
-            {form.colaboradorId && (
-              <div style={{
-                marginTop: '8px',
-                padding: '8px 12px',
-                backgroundColor: '#f0fdf4',
-                border: '1px solid #bbf7d0',
-                borderRadius: '6px',
-                fontSize: '0.85rem'
-              }}>
-                <strong>{form.colaboradorNombre}</strong> - {form.colaboradorArea}
-              </div>
-            )}
-          </div>
+          </FormField>
 
-          {/* Supervisor que Reporta */}
-          <div className="form-group">
-            <label className="form-label">👨‍💼 Supervisor que Reporta *</label>
-            <input
+          <FormRow columns={2}>
+            <FormField label="Área del colaborador">
+              <FormInput
+                type="text"
+                name="colaboradorArea"
+                placeholder="Área automática"
+                value={form.colaboradorArea}
+                onChange={handleChange}
+                readOnly
+                className="bg-gray-50"
+              />
+            </FormField>
+
+            <FormField label="Lugar de labor" required>
+              <FormSelect
+                name="lugarLabor"
+                value={form.lugarLabor}
+                onChange={handleChange}
+                options={areasDisponibles}
+                placeholder="Selecciona el lugar..."
+                required
+              />
+            </FormField>
+          </FormRow>
+
+          <FormField label="Supervisor que reporta" required>
+            <FormInput
               type="text"
               name="supervisorReporta"
-              placeholder="Nombre del supervisor que realizó el abordaje"
+              placeholder="Nombre del supervisor"
               value={form.supervisorReporta}
               onChange={handleChange}
-              className="form-input"
               required
-              style={{ width: '100%' }}
             />
-          </div>
+          </FormField>
+        </FormSection>
 
-          {/* Área de Trabajo */}
-          <div className="form-group">
-            <label className="form-label">🏭 Área de Trabajo *</label>
-            <select
-              name="area"
-              value={form.area}
-              onChange={handleChange}
-              className="form-input"
-              required
-              style={{ width: '100%' }}
-            >
-              <option value="">Selecciona un área</option>
-              {areasDisponibles.map(area => (
-                <option key={area} value={area}>{area}</option>
-              ))}
-            </select>
-          </div>
-
-          {/* Lugar de Labor */}
-          <div className="form-group">
-            <label className="form-label">📍 Lugar de Labor *</label>
-            <input
-              type="text"
-              name="lugarLabor"
-              placeholder="Ej: Hornos, Oficina, Patio..."
-              value={form.lugarLabor}
-              onChange={handleChange}
-              className="form-input"
-              required
-              list="lugares-comunes"
-            />
-            <datalist id="lugares-comunes">
-              {lugaresComunes.map(lugar => (
-                <option key={lugar} value={lugar} />
-              ))}
-            </datalist>
-          </div>
-
-          {/* Hallazgo */}
-          <div className="form-group">
-            <label className="form-label">🔍 Hallazgo *</label>
-            <textarea
+        <FormSection title="Detalles del Abordaje">
+          <FormField label="Situación observada" required>
+            <FormTextarea
               name="hallazgo"
-              placeholder="Describe detalladamente lo observado (condición insegura, acto inseguro, etc.)"
+              placeholder="Describe la situación o comportamiento que motivó el abordaje..."
               value={form.hallazgo}
               onChange={handleChange}
-              className="form-textarea"
+              rows={4}
               required
-              style={{ minHeight: '100px' }}
             />
-          </div>
+          </FormField>
 
-          {/* Abordaje */}
-          <div className="form-group">
-            <label className="form-label">Abordaje Realizado *</label>
-            <textarea
+          <FormField label="Abordaje realizado" required>
+            <FormTextarea
               name="abordaje"
-              placeholder="Describe el abordaje realizado con el colaborador"
+              placeholder="Describe la conversación, orientación o corrección realizada con el colaborador..."
               value={form.abordaje}
               onChange={handleChange}
-              className="form-textarea"
+              rows={4}
               required
-              style={{ minHeight: '100px' }}
             />
-          </div>
+          </FormField>
+        </FormSection>
 
-          {/* Firma Digital - OBLIGATORIA */}
-          <SignaturePad
-            onSignatureChange={handleSignatureChange}
-            required={true}
-            label="Firma Digital del Supervisor"
-            onError={(error) => {
-              console.error('Error en firma:', error);
-              setMensaje('Error: No se pudo procesar la firma. Intente nuevamente.');
-              setTimeout(() => setMensaje(''), 3000);
-            }}
-          />
+        <FormSection title="Firma del Supervisor">
+          <FormField label="Firma digital">
+            <div className="border border-gray-300 rounded-lg p-4 bg-gray-50">
+              <SignaturePad onSignatureChange={handleSignatureChange} />
+              {signatureData && (
+                <div className="mt-4">
+                  <FormField label="Nombre del firmante">
+                    <FormInput
+                      type="text"
+                      name="firmado_por"
+                      placeholder="Nombre completo del supervisor"
+                      value={form.firmado_por}
+                      onChange={handleChange}
+                    />
+                  </FormField>
+                </div>
+              )}
+            </div>
+          </FormField>
+        </FormSection>
 
-          {/* Botón Submit */}
-          <button
+        <FormButtonGroup>
+          <FormButton
+            variant="primary"
             type="submit"
-            disabled={loading}
-            className="btn btn-primary"
-            style={{
-              width: '100%',
-              fontSize: '1rem',
-              padding: '14px 24px',
-              opacity: loading ? 0.7 : 1,
-              cursor: loading ? 'not-allowed' : 'pointer',
-              background: loading ? '#9ca3af' : '#3b82f6'
-            }}
+            loading={loading}
           >
-            {loading ? (
-              <>
-                <span className="pulse">⏳</span>
-                Guardando abordaje...
-              </>
-            ) : (
-              <>
-                💾 Registrar Abordaje
-              </>
-            )}
-          </button>
-        </form>
-      </div>
-    </div>
+            {loading ? 'Registrando abordaje...' : 'Registrar Abordaje'}
+          </FormButton>
+        </FormButtonGroup>
+      </form>
+    </FormContainer>
   );
 };
 

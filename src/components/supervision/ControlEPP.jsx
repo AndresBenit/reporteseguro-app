@@ -97,7 +97,7 @@ const ControlEPP = () => {
 
   // Filtrar colaboradores cuando cambia el término de búsqueda
   useEffect(() => {
-    console.log('🔍 Filtrando colaboradores:', { searchTerm, colaboradores: colaboradores.length });
+    console.log('Filtrando colaboradores:', { searchTerm, colaboradores: colaboradores.length });
     if (searchTerm.length >= 2) {
       const filtrados = colaboradores.filter((colaborador) =>
         colaborador.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -115,7 +115,7 @@ const ControlEPP = () => {
   // Manejar búsqueda de colaborador
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    console.log('📝 Search term cambiado:', value);
+    console.log('Search term cambiado:', value);
     setSearchTerm(value);
 
     // Si borra el texto, limpiar selección
@@ -853,7 +853,7 @@ const ControlEPP = () => {
                     opacity: uploadingImage ? 0.7 : 1
                   }}
                 >
-                  📸 {uploadingImage ? "Subiendo..." : "Tomar Foto"}
+                  {uploadingImage ? "Subiendo..." : "Tomar Foto"}
                 </label>
                 <p style={{ color: "#6b7280", marginTop: "8px", fontSize: "14px" }}>
                   Toma una foto del elemento EPP que estás entregando
@@ -886,7 +886,7 @@ const ControlEPP = () => {
                       fontWeight: "600"
                     }}
                   >
-                    🗑️ Eliminar
+                    Eliminar
                   </button>
                 </div>
               </div>

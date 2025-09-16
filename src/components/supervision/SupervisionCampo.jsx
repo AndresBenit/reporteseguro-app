@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { dbHelpers, storageHelpers, supabase } from "../../services/supabase";
 import SignaturePad from "../common/SignaturePad";
 import {
@@ -26,6 +27,7 @@ const areasDisponibles = [
 ];
 
 const SupervisionCampo = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
     colaboradorId: "",
     colaboradorNombre: "",
@@ -340,6 +342,7 @@ const SupervisionCampo = () => {
       <FormHeader
         title="Supervisión de Campo"
         subtitle="Registro de observaciones y recomendaciones para colaboradores"
+        onBack={() => navigate('/dashboard')}
         icon=""
       />
 
