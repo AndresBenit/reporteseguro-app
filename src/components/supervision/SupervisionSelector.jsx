@@ -42,4 +42,4 @@ const SupervisionSelector = ({ onFormSelect }) => {
         {forms.map((form) => (
           <div
             key={form.id}
-            onClick={() => onForm
+            onClick={() => onFormSelect(form.id)}

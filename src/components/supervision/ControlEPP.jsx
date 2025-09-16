@@ -166,7 +166,7 @@ const ControlEPP = () => {
   const crearProductoSiNoExiste = async (nombreProducto) => {
     try {
       // Buscar si ya existe
-      let producto = productosEPP.find(p => 
+      const producto = productosEPP.find(p => 
         p.nombre.toLowerCase() === nombreProducto.toLowerCase()
       );
 
@@ -498,15 +498,9 @@ const ControlEPP = () => {
         </div>
 
         {/* Colaborador con Autocompletado */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            👤 Colaborador *
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">
+            Colaborador *
           </label>
           <div style={{ position: "relative" }}>
             <input
