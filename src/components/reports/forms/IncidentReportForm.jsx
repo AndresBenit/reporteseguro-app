@@ -178,8 +178,8 @@ const IncidentReportForm = () => {
         setMensaje("Guardando firma...");
         const blob = await fetch(signatureData).then(r => r.blob());
         const fileName = `signature-${Date.now()}.png`;
-        const uploadResult = await storageHelpers.upload('firmas', fileName, blob);
-        firma_url = storageHelpers.getPublicUrl('firmas', uploadResult.path);
+        const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, blob);
+        firma_url = storageHelpers.getPublicUrl('reportes-firmas', uploadResult.path);
       }
 
       setMensaje("Creando reporte...");

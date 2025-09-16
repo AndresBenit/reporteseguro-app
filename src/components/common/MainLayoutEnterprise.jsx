@@ -364,14 +364,6 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
 
             {/* Top Bar Actions */}
             <div className="flex items-center space-x-4">
-              {/* Notifications */}
-              <button className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg relative">
-                <Icon name="Bell" size={20} />
-                {reportes?.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
-                )}
-              </button>
-
               {/* Desktop User Menu */}
               <div className="hidden lg:flex items-center space-x-3">
                 <div className="text-right">

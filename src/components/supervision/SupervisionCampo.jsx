@@ -279,7 +279,7 @@ const SupervisionCampo = () => {
         setMensaje("Guardando firma...");
         const blob = await fetch(signatureData).then(r => r.blob());
         const fileName = `firma_supervision_${Date.now()}.png`;
-        const uploadResult = await storageHelpers.upload('firmas', fileName, blob);
+        const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, blob);
         firmaUrl = uploadResult.publicUrl || uploadResult.fullPath;
       }
 

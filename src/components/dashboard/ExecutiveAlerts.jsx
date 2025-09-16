@@ -115,7 +115,6 @@ const ExecutiveAlerts = ({ reportes = [] }) => {
     <div className="executive-alerts">
       <div className="alerts-header">
         <h2 className="alerts-title">
-          <Icon name="Bell" size={22} />
           Alertas Ejecutivas
         </h2>
         <p className="alerts-subtitle">
