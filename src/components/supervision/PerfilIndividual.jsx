@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { dbHelpers } from '../../services/supabase';
+import { Icon } from '../common/Icons';
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell } from 'recharts';
 
 const PerfilIndividual = () => {
@@ -9,7 +10,7 @@ const PerfilIndividual = () => {
   const [reportes, setReportes] = useState([]);
   const [selectedColaborador, setSelectedColaborador] = useState(null);
   const [loading, setLoading] = useState(true);
-  
+
   // Estados para búsqueda
   const [searchTerm, setSearchTerm] = useState('');
   const [showSugerencias, setShowSugerencias] = useState(false);
@@ -66,7 +67,7 @@ const PerfilIndividual = () => {
       setShowSugerencias(false);
     } else {
       const filtrados = colaboradores
-        .filter(col => 
+        .filter(col =>
           col.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
           col.cedula.includes(searchTerm)
         )
@@ -100,61 +101,49 @@ const PerfilIndividual = () => {
     setTimeout(() => setShowSugerencias(false), 200);
   };
 
-  // Obtener todas las intervenciones del colaborador seleccionado (recomendaciones, abordajes y reportes)
+  // Obtener todas las intervenciones del colaborador seleccionado
   const getIntervencionesColaborador = () => {
     if (!selectedColaborador) return [];
-    
+
     const recsColaborador = recomendaciones
       .filter(rec => rec.colaborador?.id === selectedColaborador.id)
       .map(rec => ({ ...rec, tipo: 'recomendacion' }));
-    
+
     const abordajesColaborador = abordajes
       .filter(abordaje => abordaje.colaborador?.id === selectedColaborador.id)
       .map(abordaje => ({ ...abordaje, tipo: 'abordaje' }));
-    
+
     // Reportes del colaborador (EPP, incidencias, etc.)
     const reportesValidos = Array.isArray(reportes) ? reportes : [];
     const reportesColaborador = reportesValidos
-      .filter(reporte => 
+      .filter(reporte =>
         reporte.reportante === selectedColaborador.nombre ||
         reporte.reportante === selectedColaborador.cedula ||
-        (reporte.descripcion && 
+        (reporte.descripcion &&
          reporte.descripcion.toLowerCase().includes(selectedColaborador.nombre.toLowerCase()))
       )
-      .map(reporte => ({ 
-        ...reporte, 
+      .map(reporte => ({
+        ...reporte,
         tipo: reporte.tipo || 'incidencia',
         hallazgo: reporte.descripcion || reporte.observaciones || 'Sin descripción',
         recomendacion: reporte.accionesTomadas || reporte.medidas || 'Sin acciones específicas',
         lugarLabor: reporte.ubicacion || reporte.lugar || 'No especificado'
       }));
-    
+
     // Combinar y ordenar por fecha
     const todasIntervenciones = [...recsColaborador, ...abordajesColaborador, ...reportesColaborador]
       .sort((a, b) => {
         if (!a.fecha || !b.fecha) return 0;
         return new Date(b.fecha) - new Date(a.fecha);
       });
-    
-    return todasIntervenciones;
-  };
 
-  // Obtener solo recomendaciones del colaborador (para compatibilidad)
-  const getRecomendacionesColaborador = () => {
-    if (!selectedColaborador) return [];
-    
-    return recomendaciones
-      .filter(rec => rec.colaborador?.id === selectedColaborador.id)
-      .sort((a, b) => {
-        if (!a.fecha || !b.fecha) return 0;
-        return new Date(b.fecha) - new Date(a.fecha);
-      });
+    return todasIntervenciones;
   };
 
   // Estadísticas del colaborador
   const getEstadisticasColaborador = () => {
     const todasIntervenciones = getIntervencionesColaborador();
-    
+
     if (todasIntervenciones.length === 0) {
       return {
         totalRecomendaciones: 0,
@@ -187,7 +176,7 @@ const PerfilIndividual = () => {
     // Tendencia mensual (últimos 6 meses)
     const meses = [];
     const ahora = new Date();
-    
+
     for (let i = 5; i >= 0; i--) {
       const fecha = new Date(ahora.getFullYear(), ahora.getMonth() - i, 1);
       meses.push({
@@ -204,11 +193,11 @@ const PerfilIndividual = () => {
     todasIntervenciones.forEach(intervencion => {
       if (intervencion.fecha) {
         const fechaInt = new Date(intervencion.fecha);
-        const mesIndex = meses.findIndex(m => 
-          m.fecha.getMonth() === fechaInt.getMonth() && 
+        const mesIndex = meses.findIndex(m =>
+          m.fecha.getMonth() === fechaInt.getMonth() &&
           m.fecha.getFullYear() === fechaInt.getFullYear()
         );
-        
+
         if (mesIndex !== -1) {
           if (intervencion.tipo === 'recomendacion') {
             meses[mesIndex].recomendaciones++;
@@ -257,7 +246,6 @@ const PerfilIndividual = () => {
 
   // Datos para gráficas
   const stats = getEstadisticasColaborador();
-  const recsColaborador = getRecomendacionesColaborador();
 
   // Top 3 lugares
   const topLugares = Object.entries(stats.lugares)
@@ -273,78 +261,43 @@ const PerfilIndividual = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ fontSize: '3rem', marginBottom: '20px' }}>👤</div>
-        <h2>Cargando perfiles...</h2>
+      <div className="min-h-96 flex items-center justify-center">
+        <div className="text-center p-8">
+          <Icon name="User" size={48} color="#6b7280" className="mx-auto mb-4 animate-pulse" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Cargando perfiles...</h2>
+          <p className="text-gray-500">Conectando con la base de datos...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header Premium */}
-      <div style={{
-        background: "linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)",
-        borderRadius: "16px",
-        padding: "24px",
-        marginBottom: "24px",
-        color: "white",
-        boxShadow: "0 4px 20px rgba(124, 58, 237, 0.15)"
-      }}>
-        <div style={{
-          display: "flex",
-          flexDirection: window.innerWidth <= 768 ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: window.innerWidth <= 768 ? "flex-start" : "center",
-          gap: "20px"
-        }}>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-6 text-white shadow-lg">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h1 style={{ 
-              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.2rem", 
-              fontWeight: "700", 
-              color: "white",
-              marginBottom: "8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px"
-            }}>
-              👤 Perfil Individual
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem", margin: 0 }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-white bg-opacity-20 rounded-lg">
+                <Icon name="User" size={28} color="white" />
+              </div>
+              <h1 className="text-3xl font-bold">
+                Perfil Individual
+              </h1>
+            </div>
+            <p className="text-purple-100 text-lg">
               Análisis detallado de seguridad por colaborador • {colaboradores.length} colaboradores disponibles
             </p>
           </div>
-          
+
           {selectedColaborador && (
-            <div style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "16px",
-              background: "rgba(255,255,255,0.15)",
-              padding: "16px",
-              borderRadius: "12px",
-              backdropFilter: "blur(10px)"
-            }}>
-              <div style={{
-                width: "56px",
-                height: "56px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #ffffff 0%, #f3f4f6 100%)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#7c3aed",
-                fontWeight: "800",
-                fontSize: "1.5rem",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-              }}>
+            <div className="flex items-center gap-4 bg-white bg-opacity-15 p-4 rounded-xl backdrop-blur-sm">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-r from-white to-gray-100 flex items-center justify-center text-purple-600 font-bold text-xl shadow-md">
                 {selectedColaborador.nombre.charAt(0).toUpperCase()}
               </div>
               <div>
-                <div style={{ fontWeight: "700", fontSize: "1.1rem" }}>
-                  {selectedColaborador.nombre}
-                </div>
-                <div style={{ opacity: 0.9, fontSize: "0.9rem" }}>
+                <div className="font-bold text-lg">{selectedColaborador.nombre}</div>
+                <div className="text-purple-100 text-sm">
                   {selectedColaborador.area} • {stats.totalIntervenciones} intervenciones
                 </div>
               </div>
@@ -353,29 +306,16 @@ const PerfilIndividual = () => {
         </div>
       </div>
 
-      {/* Buscador Premium */}
-      <div style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "24px",
-        marginBottom: "24px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        border: "1px solid #e5e7eb"
-      }}>
-        <h3 style={{ 
-          marginBottom: "20px", 
-          color: "#1f2937",
-          fontWeight: "600",
-          fontSize: "1.2rem",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px"
-        }}>
-          🔍 Buscar Colaborador
-        </h3>
-        
-        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-          <div style={{ position: 'relative', flex: 1, maxWidth: '600px' }}>
+      {/* Buscador */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <Icon name="Search" size={20} color="#374151" />
+          <h3 className="text-lg font-semibold text-gray-900">Buscar Colaborador</h3>
+        </div>
+
+        <div className="flex gap-3 items-center">
+          <div className="relative flex-1 max-w-2xl">
+            <Icon name="Search" size={16} className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400" />
             <input
               type="text"
               placeholder="Escribe el nombre o cédula del colaborador..."
@@ -383,126 +323,74 @@ const PerfilIndividual = () => {
               onChange={handleSearchChange}
               onFocus={() => searchTerm && setShowSugerencias(colaboradoresFiltrados.length > 0)}
               onBlur={handleBlur}
-              style={{
-                width: '100%',
-                fontSize: '1rem',
-                padding: '16px 20px',
-                border: `2px solid ${selectedColaborador ? '#10b981' : '#e5e7eb'}`,
-                borderRadius: '12px',
-                backgroundColor: selectedColaborador ? '#f0fdf4' : 'white',
-                transition: 'all 0.2s ease',
-                boxShadow: selectedColaborador ? '0 0 0 3px rgba(16, 185, 129, 0.1)' : 'none'
-              }}
+              className={`w-full pl-12 pr-4 py-4 text-base border-2 rounded-xl transition-all ${
+                selectedColaborador
+                  ? 'border-green-300 bg-green-50 ring-green-100'
+                  : 'border-gray-300 bg-white focus:border-purple-500 focus:ring-purple-100'
+              } focus:ring-4`}
             />
-            
+
             {/* Indicador de selección */}
             {selectedColaborador && (
-              <div style={{
-                position: 'absolute',
-                right: '12px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                color: '#10b981',
-                fontSize: '1.2rem'
-              }}>
-                ✓
+              <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-500 text-xl">
+                <Icon name="CheckCircle" size={20} />
               </div>
             )}
-            
-            {/* Lista de sugerencias Premium */}
+
+            {/* Lista de sugerencias */}
             {showSugerencias && (
-              <div style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                zIndex: 1000,
-                background: 'white',
-                border: '1px solid #e5e7eb',
-                borderTop: 'none',
-                borderRadius: '0 0 12px 12px',
-                boxShadow: '0 8px 25px rgba(0, 0, 0, 0.15)',
-                maxHeight: '300px',
-                overflowY: 'auto'
-              }}>
+              <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 rounded-b-xl shadow-lg max-h-80 overflow-y-auto">
                 {colaboradoresFiltrados.map(colaborador => {
                   const recsColaborador = recomendaciones.filter(r => r.colaborador?.id === colaborador.id);
                   const abordajesColaborador = abordajes.filter(a => a.colaborador?.id === colaborador.id);
                   const reportesValidos = Array.isArray(reportes) ? reportes : [];
-                  const reportesColaborador = reportesValidos.filter(reporte => 
+                  const reportesColaborador = reportesValidos.filter(reporte =>
                     reporte.reportante === colaborador.nombre ||
                     reporte.reportante === colaborador.cedula ||
-                    (reporte.descripcion && 
+                    (reporte.descripcion &&
                      reporte.descripcion.toLowerCase().includes(colaborador.nombre.toLowerCase()))
                   );
                   const totalIntervenciones = recsColaborador.length + abordajesColaborador.length + reportesColaborador.length;
+
                   return (
                     <div
                       key={colaborador.id}
                       onClick={() => seleccionarColaborador(colaborador)}
-                      style={{
-                        padding: '16px 20px',
-                        cursor: 'pointer',
-                        borderBottom: '1px solid #f3f4f6',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.closest('div').style.backgroundColor = '#f8fafc';
-                        e.target.closest('div').style.transform = 'translateX(4px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.closest('div').style.backgroundColor = 'white';
-                        e.target.closest('div').style.transform = 'translateX(0)';
-                      }}
+                      className="p-4 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-all hover:translate-x-1 flex items-center gap-3"
                     >
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        borderRadius: '50%',
-                        background: 'linear-gradient(135deg, #7c3aed, #5b21b6)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        color: 'white',
-                        fontWeight: '700',
-                        fontSize: '0.9rem',
-                        flexShrink: 0
-                      }}>
+                      <div className="w-10 h-10 rounded-full bg-gradient-to-r from-purple-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm flex-shrink-0">
                         {colaborador.nombre.charAt(0).toUpperCase()}
                       </div>
-                      
-                      <div style={{ flex: 1 }}>
-                        <div style={{ fontWeight: '600', color: '#1f2937', marginBottom: '2px' }}>
-                          {colaborador.nombre}
-                        </div>
-                        <div style={{ fontSize: '0.8rem', color: '#6b7280' }}>
-                          📧 {colaborador.cedula} • 🏢 {colaborador.area}
+
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 mb-1">{colaborador.nombre}</div>
+                        <div className="text-sm text-gray-500 flex items-center gap-2">
+                          <Icon name="FileText" size={12} />
+                          <span>{colaborador.cedula}</span>
+                          <Icon name="Building" size={12} />
+                          <span>{colaborador.area}</span>
                         </div>
                       </div>
-                      
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: '8px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          backgroundColor: totalIntervenciones > 0 ? '#fef3c7' : '#f3f4f6',
-                          color: totalIntervenciones > 0 ? '#92400e' : '#6b7280'
-                        }}>
+
+                      <div className="flex items-center gap-2">
+                        <span className={`px-2 py-1 rounded-md text-xs font-semibold ${
+                          totalIntervenciones > 0
+                            ? 'bg-yellow-100 text-yellow-800'
+                            : 'bg-gray-100 text-gray-600'
+                        }`}>
                           {totalIntervenciones} intervenciones
                         </span>
-                        <span style={{
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '0.75rem',
-                          fontWeight: '600',
-                          backgroundColor: colaborador.area === 'Centro Industrial' ? '#dbeafe' : '#fee2e2',
-                          color: colaborador.area === 'Centro Industrial' ? '#1e40af' : '#991b1b'
-                        }}>
-                          {colaborador.area === 'Centro Industrial' ? '🏭 CI' : '🔥 HS'}
+                        <span className={`px-2 py-1 rounded-md text-xs font-semibold ${
+                          colaborador.area === 'Centro Industrial'
+                            ? 'bg-blue-100 text-blue-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
+                          <Icon
+                            name={colaborador.area === 'Centro Industrial' ? 'Building' : 'Flame'}
+                            size={10}
+                            className="inline mr-1"
+                          />
+                          {colaborador.area === 'Centro Industrial' ? 'CI' : 'HS'}
                         </span>
                       </div>
                     </div>
@@ -511,36 +399,15 @@ const PerfilIndividual = () => {
               </div>
             )}
           </div>
-          
-          {/* Botón limpiar Premium */}
+
+          {/* Botón limpiar */}
           {selectedColaborador && (
             <button
               onClick={limpiarSeleccion}
-              style={{
-                padding: '16px 20px',
-                background: 'linear-gradient(135deg, #ef4444, #dc2626)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                cursor: 'pointer',
-                fontWeight: '600',
-                fontSize: '0.9rem',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 12px rgba(239, 68, 68, 0.25)'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 6px 16px rgba(239, 68, 68, 0.35)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
-              }}
+              className="px-6 py-4 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:-translate-y-1 hover:shadow-lg transition-all flex items-center gap-2"
             >
-              🗑️ Limpiar
+              <Icon name="Trash2" size={16} />
+              Limpiar
             </button>
           )}
         </div>
@@ -548,209 +415,101 @@ const PerfilIndividual = () => {
 
       {/* Dashboard del Colaborador Seleccionado */}
       {selectedColaborador ? (
-        <div>
-          {/* Estadísticas Premium del Colaborador con EPP */}
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: window.innerWidth <= 768 
-              ? "repeat(2, 1fr)" 
-              : window.innerWidth <= 1024
-                ? "repeat(3, 1fr)"
-                : "repeat(5, 1fr)",
-            gap: "16px",
-            marginBottom: "24px"
-          }}>
-            <div style={{
-              background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.totalRecomendaciones}
-              </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                💡 Recomendaciones
+        <div className="space-y-6">
+          {/* Estadísticas */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-5 text-white text-center shadow-sm">
+              <div className="text-3xl font-bold mb-2">{stats.totalRecomendaciones}</div>
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="Lightbulb" size={14} />
+                Recomendaciones
               </div>
             </div>
-            
-            <div style={{
-              background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.totalAbordajes}
-              </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                🔄 Abordajes
+
+            <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-xl p-5 text-white text-center shadow-sm">
+              <div className="text-3xl font-bold mb-2">{stats.totalAbordajes}</div>
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="RotateCcw" size={14} />
+                Abordajes
               </div>
             </div>
-            
-            {/* Card EPP */}
-            <div style={{
-              background: "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(139, 92, 246, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.totalEPP}
-              </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+
+            <div className="bg-gradient-to-r from-purple-600 to-purple-700 rounded-xl p-5 text-white text-center shadow-sm">
+              <div className="text-3xl font-bold mb-2">{stats.totalEPP}</div>
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="Shield" size={14} />
                 Control EPP
               </div>
             </div>
-            
-            {/* Card Incidencias */}
-            <div style={{
-              background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(239, 68, 68, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.totalIncidencias}
-              </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
+
+            <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-xl p-5 text-white text-center shadow-sm">
+              <div className="text-3xl font-bold mb-2">{stats.totalIncidencias}</div>
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="AlertTriangle" size={14} />
                 Incidencias
               </div>
             </div>
-            
-            <div style={{
-              background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: "0 4px 12px rgba(245, 158, 11, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.totalIntervenciones}
-              </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                📊 Total
+
+            <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-xl p-5 text-white text-center shadow-sm">
+              <div className="text-3xl font-bold mb-2">{stats.totalIntervenciones}</div>
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="BarChart3" size={14} />
+                Total
               </div>
             </div>
-            
-            <div style={{
-              background: stats.ultimaIntervencion ? 
-                "linear-gradient(135deg, #7c3aed 0%, #5b21b6 100%)" :
-                "linear-gradient(135deg, #6b7280 0%, #4b5563 100%)",
-              borderRadius: "12px",
-              padding: "20px",
-              color: "white",
-              textAlign: "center",
-              boxShadow: stats.ultimaIntervencion ? 
-                "0 4px 12px rgba(124, 58, 237, 0.15)" :
-                "0 4px 12px rgba(107, 114, 128, 0.15)",
-              border: "1px solid rgba(255,255,255,0.1)"
-            }}>
-              <div style={{ fontSize: "1.4rem", fontWeight: "800", marginBottom: "4px" }}>
-                {stats.ultimaIntervencion ? 
+
+            <div className={`rounded-xl p-5 text-white text-center shadow-sm ${
+              stats.ultimaIntervencion
+                ? 'bg-gradient-to-r from-purple-600 to-purple-700'
+                : 'bg-gradient-to-r from-gray-600 to-gray-700'
+            }`}>
+              <div className="text-2xl font-bold mb-2">
+                {stats.ultimaIntervencion ?
                   (() => {
                     const diasDiferencia = Math.floor((new Date() - new Date(stats.ultimaIntervencion)) / (1000 * 60 * 60 * 24));
                     return diasDiferencia === 0 ? 'Hoy' : `${diasDiferencia}d`;
-                  })() : 
+                  })() :
                   'N/A'
                 }
               </div>
-              <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                🕒 Última Actividad
+              <div className="text-sm font-medium opacity-90 flex items-center justify-center gap-1">
+                <Icon name="Clock" size={14} />
+                Última Actividad
               </div>
             </div>
           </div>
-          
-          {/* Info Detallada del Colaborador */}
-          <div style={{
-            background: "white",
-            borderRadius: "12px",
-            padding: "24px",
-            marginBottom: "24px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-            border: "1px solid #e5e7eb"
-          }}>
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center',
-              gap: '20px',
-              marginBottom: '16px'
-            }}>
-              <div style={{
-                width: "80px",
-                height: "80px",
-                borderRadius: "50%",
-                background: "linear-gradient(135deg, #7c3aed, #5b21b6)",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "white",
-                fontWeight: "800",
-                fontSize: "2rem",
-                boxShadow: "0 8px 20px rgba(124, 58, 237, 0.25)"
-              }}>
+
+          {/* Info del Colaborador */}
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+            <div className="flex items-center gap-5 mb-4">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-r from-purple-600 to-purple-700 flex items-center justify-center text-white font-bold text-2xl shadow-lg">
                 {selectedColaborador.nombre.charAt(0).toUpperCase()}
               </div>
-              
-              <div style={{ flex: 1 }}>
-                <h2 style={{ 
-                  fontSize: '1.8rem', 
-                  fontWeight: '700', 
-                  color: '#1f2937',
-                  marginBottom: '8px'
-                }}>
-                  {selectedColaborador.nombre}
-                </h2>
-                <div style={{ 
-                  fontSize: '1rem', 
-                  color: '#6b7280',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '16px',
-                  flexWrap: 'wrap'
-                }}>
-                  <span>📧 {selectedColaborador.cedula}</span>
-                  <span>🏢 {selectedColaborador.area}</span>
+
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-gray-900 mb-2">{selectedColaborador.nombre}</h2>
+                <div className="text-gray-600 flex items-center gap-4 flex-wrap">
+                  <span className="flex items-center gap-1">
+                    <Icon name="FileText" size={16} />
+                    {selectedColaborador.cedula}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Icon name="Building" size={16} />
+                    {selectedColaborador.area}
+                  </span>
                   {selectedColaborador.activo !== false && (
-                    <span style={{
-                      padding: '4px 8px',
-                      background: '#d1fae5',
-                      color: '#065f46',
-                      borderRadius: '6px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600'
-                    }}>
-                      ✅ Activo
+                    <span className="px-2 py-1 bg-green-100 text-green-800 rounded-md text-sm font-semibold flex items-center gap-1">
+                      <Icon name="CheckCircle" size={14} />
+                      Activo
                     </span>
                   )}
                 </div>
               </div>
-              
+
               {stats.ultimaIntervencion && (
-                <div style={{ 
-                  textAlign: 'right',
-                  background: '#f8fafc',
-                  padding: '12px',
-                  borderRadius: '8px'
-                }}>
-                  <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '4px' }}>
-                    Última intervención:
-                  </div>
-                  <div style={{ fontSize: '0.9rem', fontWeight: '600', color: '#1f2937' }}>
+                <div className="text-right bg-gray-50 p-3 rounded-lg">
+                  <div className="text-sm text-gray-500 mb-1">Última intervención:</div>
+                  <div className="font-semibold text-gray-900">
                     {new Date(stats.ultimaIntervencion).toLocaleDateString('es-ES')}
                   </div>
                 </div>
@@ -760,64 +519,34 @@ const PerfilIndividual = () => {
 
           {stats.totalIntervenciones > 0 ? (
             <>
-              {/* Gráficas Premium */}
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
-                gap: '20px',
-                marginBottom: '24px'
-              }}>
-                {/* Tendencia Mensual Premium */}
-                <div style={{
-                  background: "white",
-                  borderRadius: "12px",
-                  padding: "24px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  border: "1px solid #e5e7eb"
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '20px'
-                  }}>
-                    <h3 style={{ 
-                      margin: 0,
-                      color: '#1f2937',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      📈 Tendencia Mensual
+              {/* Gráficas */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Tendencia Mensual */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Icon name="TrendingUp" size={20} />
+                      Tendencia Mensual
                     </h3>
-                    <div style={{
-                      background: '#f8fafc',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      color: '#6b7280'
-                    }}>
+                    <span className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-medium text-gray-600">
                       Últimos 6 meses
-                    </div>
+                    </span>
                   </div>
                   <ResponsiveContainer width="100%" height={280}>
                     <LineChart data={stats.tendenciaMensual} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                      <XAxis 
-                        dataKey="mes" 
+                      <XAxis
+                        dataKey="mes"
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                         axisLine={{ stroke: '#e5e7eb' }}
                         tickLine={{ stroke: '#e5e7eb' }}
                       />
-                      <YAxis 
+                      <YAxis
                         tick={{ fontSize: 12, fill: '#6b7280' }}
                         axisLine={{ stroke: '#e5e7eb' }}
                         tickLine={{ stroke: '#e5e7eb' }}
                         gridLine={{ stroke: '#f3f4f6' }}
                       />
-                      <Tooltip 
+                      <Tooltip
                         contentStyle={{
                           background: 'white',
                           border: '1px solid #e5e7eb',
@@ -825,37 +554,37 @@ const PerfilIndividual = () => {
                           boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                         }}
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="recomendaciones" 
-                        stroke="#3b82f6" 
+                      <Line
+                        type="monotone"
+                        dataKey="recomendaciones"
+                        stroke="#3b82f6"
                         strokeWidth={3}
                         dot={{ fill: '#3b82f6', strokeWidth: 2, r: 5 }}
                         activeDot={{ r: 7, stroke: '#3b82f6', strokeWidth: 2, fill: 'white' }}
                         name="Recomendaciones"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="abordajes" 
-                        stroke="#10b981" 
+                      <Line
+                        type="monotone"
+                        dataKey="abordajes"
+                        stroke="#10b981"
                         strokeWidth={3}
                         dot={{ fill: '#10b981', strokeWidth: 2, r: 5 }}
                         activeDot={{ r: 7, stroke: '#10b981', strokeWidth: 2, fill: 'white' }}
                         name="Abordajes"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="epp" 
-                        stroke="#8b5cf6" 
+                      <Line
+                        type="monotone"
+                        dataKey="epp"
+                        stroke="#8b5cf6"
                         strokeWidth={2}
                         dot={{ fill: '#8b5cf6', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6, stroke: '#8b5cf6', strokeWidth: 2, fill: 'white' }}
                         name="Control EPP"
                       />
-                      <Line 
-                        type="monotone" 
-                        dataKey="incidencias" 
-                        stroke="#ef4444" 
+                      <Line
+                        type="monotone"
+                        dataKey="incidencias"
+                        stroke="#ef4444"
                         strokeWidth={2}
                         dot={{ fill: '#ef4444', strokeWidth: 2, r: 4 }}
                         activeDot={{ r: 6, stroke: '#ef4444', strokeWidth: 2, fill: 'white' }}
@@ -865,58 +594,33 @@ const PerfilIndividual = () => {
                   </ResponsiveContainer>
                 </div>
 
-                {/* Top Lugares Premium */}
-                <div style={{
-                  background: "white",
-                  borderRadius: "12px",
-                  padding: "24px",
-                  boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                  border: "1px solid #e5e7eb"
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '20px'
-                  }}>
-                    <h3 style={{ 
-                      margin: 0,
-                      color: '#1f2937',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      📍 Lugares Más Frecuentes
+                {/* Top Lugares */}
+                <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Icon name="MapPin" size={20} />
+                      Lugares Más Frecuentes
                     </h3>
-                    <div style={{
-                      background: '#fef3c7',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600',
-                      color: '#92400e'
-                    }}>
+                    <span className="bg-yellow-100 px-3 py-1 rounded-lg text-sm font-medium text-yellow-800">
                       Top {Math.min(topLugares.length, 3)}
-                    </div>
+                    </span>
                   </div>
                   {topLugares.length > 0 ? (
                     <ResponsiveContainer width="100%" height={280}>
                       <BarChart data={topLugares} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                        <XAxis 
-                          dataKey="lugar" 
+                        <XAxis
+                          dataKey="lugar"
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#e5e7eb' }}
                           tickLine={{ stroke: '#e5e7eb' }}
                         />
-                        <YAxis 
+                        <YAxis
                           tick={{ fontSize: 12, fill: '#6b7280' }}
                           axisLine={{ stroke: '#e5e7eb' }}
                           tickLine={{ stroke: '#e5e7eb' }}
                           gridLine={{ stroke: '#f3f4f6' }}
                         />
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{
                             background: 'white',
                             border: '1px solid #e5e7eb',
@@ -924,9 +628,9 @@ const PerfilIndividual = () => {
                             boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
                           }}
                         />
-                        <Bar 
-                          dataKey="cantidad" 
-                          fill="url(#colorGradient)" 
+                        <Bar
+                          dataKey="cantidad"
+                          fill="url(#colorGradient)"
                           radius={[6, 6, 0, 0]}
                         />
                         <defs>
@@ -938,50 +642,25 @@ const PerfilIndividual = () => {
                       </BarChart>
                     </ResponsiveContainer>
                   ) : (
-                    <div style={{ textAlign: 'center', color: '#6b7280', padding: '60px' }}>
-                      <div style={{ fontSize: '3rem', marginBottom: '15px', opacity: 0.3 }}>📍</div>
-                      <h4 style={{ marginBottom: '8px' }}>No hay datos de lugares</h4>
-                      <p style={{ margin: 0, fontSize: '0.9rem' }}>Las intervenciones aparecerán aquí cuando se registren</p>
+                    <div className="text-center text-gray-500 py-16">
+                      <Icon name="MapPin" size={48} color="#d1d5db" className="mx-auto mb-4" />
+                      <h4 className="font-medium mb-2">No hay datos de lugares</h4>
+                      <p className="text-sm">Las intervenciones aparecerán aquí cuando se registren</p>
                     </div>
                   )}
                 </div>
 
-                {/* Tipos de Hallazgos Premium */}
+                {/* Tipos de Hallazgos */}
                 {tiposHallazgosPie.length > 0 && (
-                  <div style={{
-                    background: "white",
-                    borderRadius: "12px",
-                    padding: "24px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                    border: "1px solid #e5e7eb"
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '20px'
-                    }}>
-                      <h3 style={{ 
-                        margin: 0,
-                        color: '#1f2937',
-                        fontSize: '1.2rem',
-                        fontWeight: '600',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '8px'
-                      }}>
-                        🔍 Tipos de Hallazgos
+                  <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm lg:col-span-2">
+                    <div className="flex items-center justify-between mb-6">
+                      <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                        <Icon name="PieChart" size={20} />
+                        Tipos de Hallazgos
                       </h3>
-                      <div style={{
-                        background: '#f0f9ff',
-                        padding: '6px 12px',
-                        borderRadius: '8px',
-                        fontSize: '0.8rem',
-                        fontWeight: '600',
-                        color: '#0369a1'
-                      }}>
+                      <span className="bg-blue-100 px-3 py-1 rounded-lg text-sm font-medium text-blue-800">
                         Distribución
-                      </div>
+                      </span>
                     </div>
                     <ResponsiveContainer width="100%" height={280}>
                       <PieChart>
@@ -1000,7 +679,7 @@ const PerfilIndividual = () => {
                             <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
                           ))}
                         </Pie>
-                        <Tooltip 
+                        <Tooltip
                           contentStyle={{
                             background: 'white',
                             border: '1px solid #e5e7eb',
@@ -1014,196 +693,94 @@ const PerfilIndividual = () => {
                 )}
               </div>
 
-              {/* Historial Detallado Premium */}
-              <div style={{
-                background: "white",
-                borderRadius: "12px",
-                overflow: "hidden",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-                border: "1px solid #e5e7eb"
-              }}>
-                <div style={{
-                  padding: '24px',
-                  borderBottom: '1px solid #e5e7eb',
-                  background: '#f8fafc'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    <h3 style={{ 
-                      margin: 0, 
-                      color: '#1f2937',
-                      fontSize: '1.2rem',
-                      fontWeight: '600',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      📋 Historial Completo
+              {/* Historial Detallado */}
+              <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+                <div className="p-6 border-b border-gray-200 bg-gray-50">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                      <Icon name="FileText" size={20} />
+                      Historial Completo
                     </h3>
-                    <div style={{
-                      background: '#7c3aed',
-                      color: 'white',
-                      padding: '6px 12px',
-                      borderRadius: '8px',
-                      fontSize: '0.8rem',
-                      fontWeight: '600'
-                    }}>
+                    <span className="bg-purple-600 text-white px-3 py-1 rounded-lg text-sm font-medium">
                       {stats.totalIntervenciones} registros
-                    </div>
+                    </span>
                   </div>
                 </div>
-                
-                <div style={{ padding: '24px' }}>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+
+                <div className="p-6">
+                  <div className="space-y-4">
                     {getIntervencionesColaborador().slice(0, 10).map((intervencion, index) => (
-                      <div key={intervencion.id || index} style={{
-                        padding: '20px',
-                        border: '1px solid #e5e7eb',
-                        borderRadius: '12px',
-                        background: 'white',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.04)',
-                        borderLeft: `4px solid ${intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981'}`,
-                        transition: 'all 0.2s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.boxShadow = '0 8px 20px rgba(0,0,0,0.1)';
-                        e.target.style.transform = 'translateY(-2px)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.boxShadow = '0 2px 4px rgba(0,0,0,0.04)';
-                        e.target.style.transform = 'translateY(0)';
-                      }}
+                      <div
+                        key={intervencion.id || index}
+                        className="p-5 border border-gray-200 rounded-xl bg-white shadow-sm hover:shadow-md hover:-translate-y-1 transition-all border-l-4"
+                        style={{ borderLeftColor: intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981' }}
                       >
-                        <div style={{ 
-                          display: 'flex', 
-                          justifyContent: 'space-between', 
-                          alignItems: 'start',
-                          marginBottom: '16px'
-                        }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                            <span style={{
-                              padding: '6px 12px',
-                              borderRadius: '8px',
-                              fontSize: '0.75rem',
-                              fontWeight: '700',
-                              backgroundColor: intervencion.tipo === 'recomendacion' ? '#f59e0b' : '#10b981',
-                              color: 'white',
-                              textTransform: 'uppercase',
-                              letterSpacing: '0.5px'
-                            }}>
-                              {intervencion.tipo === 'recomendacion' ? '💡 Recomendación' : '🔄 Abordaje'}
+                        <div className="flex justify-between items-start mb-4">
+                          <div className="flex items-center gap-3">
+                            <span className={`px-3 py-1 rounded-lg text-xs font-bold text-white uppercase tracking-wide ${
+                              intervencion.tipo === 'recomendacion' ? 'bg-orange-500' : 'bg-green-500'
+                            }`}>
+                              <Icon
+                                name={intervencion.tipo === 'recomendacion' ? 'Lightbulb' : 'RotateCcw'}
+                                size={12}
+                                className="inline mr-1"
+                              />
+                              {intervencion.tipo === 'recomendacion' ? 'Recomendación' : 'Abordaje'}
                             </span>
-                            <div style={{
-                              background: '#f8fafc',
-                              padding: '6px 12px',
-                              borderRadius: '8px',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                              color: '#6b7280'
-                            }}>
-                              📅 {new Date(intervencion.fecha).toLocaleDateString('es-ES')}
+                            <div className="bg-gray-100 px-3 py-1 rounded-lg text-sm font-medium text-gray-600 flex items-center gap-1">
+                              <Icon name="Calendar" size={12} />
+                              {new Date(intervencion.fecha).toLocaleDateString('es-ES')}
                             </div>
-                            <div style={{
-                              background: '#fef3c7',
-                              padding: '6px 12px',
-                              borderRadius: '8px',
-                              fontSize: '0.8rem',
-                              fontWeight: '600',
-                              color: '#92400e'
-                            }}>
-                              📍 {intervencion.lugarLabor}
+                            <div className="bg-yellow-100 px-3 py-1 rounded-lg text-sm font-medium text-yellow-800 flex items-center gap-1">
+                              <Icon name="MapPin" size={12} />
+                              {intervencion.lugarLabor}
                             </div>
                           </div>
                           {intervencion.fotoFirmada && (
                             <button
                               onClick={() => window.open(intervencion.fotoFirmada, '_blank')}
-                              style={{
-                                padding: '8px 12px',
-                                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
-                                color: 'white',
-                                border: 'none',
-                                borderRadius: '8px',
-                                fontSize: '0.8rem',
-                                fontWeight: '600',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                boxShadow: '0 2px 8px rgba(59, 130, 246, 0.25)'
-                              }}
-                              onMouseEnter={(e) => {
-                                e.target.style.transform = 'scale(1.05)';
-                              }}
-                              onMouseLeave={(e) => {
-                                e.target.style.transform = 'scale(1)';
-                              }}
+                              className="px-3 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg text-sm font-medium hover:scale-105 transition-transform shadow-md flex items-center gap-1"
                             >
-                              📸 Ver Evidencia
+                              <Icon name="Camera" size={12} />
+                              Ver Evidencia
                             </button>
                           )}
                         </div>
-                        
-                        <div style={{ 
-                          marginBottom: '16px',
-                          padding: '16px',
-                          background: '#f8fafc',
-                          borderRadius: '8px',
-                          border: '1px solid #e5e7eb'
-                        }}>
-                          <div style={{ 
-                            fontSize: '0.9rem',
-                            fontWeight: '700',
-                            color: '#374151',
-                            marginBottom: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}>
-                            🔍 Hallazgo Identificado
+
+                        <div className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                          <div className="text-sm font-bold text-gray-700 mb-2 flex items-center gap-1">
+                            <Icon name="Search" size={14} />
+                            Hallazgo Identificado
                           </div>
-                          <p style={{ 
-                            margin: 0, 
-                            color: '#1f2937', 
-                            fontSize: '0.95rem',
-                            lineHeight: '1.5'
-                          }}>
+                          <p className="text-gray-900 leading-relaxed">
                             {intervencion.hallazgo}
                           </p>
                         </div>
-                        
-                        <div style={{
-                          padding: '16px',
-                          background: intervencion.tipo === 'recomendacion' ? '#fefcf3' : '#f0fdf4',
-                          borderRadius: '8px',
-                          border: `1px solid ${intervencion.tipo === 'recomendacion' ? '#fef3c7' : '#d1fae5'}`
-                        }}>
-                          <div style={{ 
-                            fontSize: '0.9rem',
-                            fontWeight: '700',
-                            color: intervencion.tipo === 'recomendacion' ? '#92400e' : '#065f46',
-                            marginBottom: '8px',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '6px'
-                          }}>
-                            {intervencion.tipo === 'recomendacion' ? '💡 Recomendación Aplicada' : '🔄 Abordaje Realizado'}
+
+                        <div className={`p-4 rounded-lg border ${
+                          intervencion.tipo === 'recomendacion'
+                            ? 'bg-orange-50 border-orange-200'
+                            : 'bg-green-50 border-green-200'
+                        }`}>
+                          <div className={`text-sm font-bold mb-2 flex items-center gap-1 ${
+                            intervencion.tipo === 'recomendacion' ? 'text-orange-800' : 'text-green-800'
+                          }`}>
+                            <Icon
+                              name={intervencion.tipo === 'recomendacion' ? 'Lightbulb' : 'RotateCcw'}
+                              size={14}
+                            />
+                            {intervencion.tipo === 'recomendacion' ? 'Recomendación Aplicada' : 'Abordaje Realizado'}
                           </div>
-                          <p style={{ 
-                            margin: 0, 
-                            color: '#1f2937', 
-                            fontSize: '0.95rem',
-                            lineHeight: '1.5'
-                          }}>
+                          <p className="text-gray-900 leading-relaxed">
                             {intervencion.tipo === 'recomendacion' ? intervencion.recomendacion : intervencion.abordaje}
                           </p>
                         </div>
                       </div>
                     ))}
                   </div>
-                  
+
                   {stats.totalIntervenciones > 10 && (
-                    <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280' }}>
+                    <p className="text-center mt-6 text-gray-500">
                       Mostrando 10 de {stats.totalIntervenciones} intervenciones
                     </p>
                   )}
@@ -1211,24 +788,24 @@ const PerfilIndividual = () => {
               </div>
             </>
           ) : (
-            <div className="card" style={{ padding: '60px', textAlign: 'center' }}>
-              <div style={{ fontSize: '4rem', marginBottom: '20px', opacity: 0.3 }}>🎉</div>
-              <h3 style={{ color: '#10b981', marginBottom: '10px' }}>
-                ¡Excelente Desempeño!
+            <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+              <Icon name="Award" size={64} color="#d1d5db" className="mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-green-600 mb-2">
+                Excelente Desempeño
               </h3>
-              <p style={{ color: '#6b7280' }}>
+              <p className="text-gray-600">
                 Este colaborador no tiene recomendaciones registradas
               </p>
             </div>
           )}
         </div>
       ) : (
-        <div className="card" style={{ padding: '60px', textAlign: 'center' }}>
-          <div style={{ fontSize: '4rem', marginBottom: '20px', opacity: 0.3 }}>🔍</div>
-          <h3 style={{ color: '#6b7280', marginBottom: '10px' }}>
+        <div className="bg-white rounded-xl border border-gray-200 p-12 text-center shadow-sm">
+          <Icon name="Search" size={64} color="#d1d5db" className="mx-auto mb-4" />
+          <h3 className="text-xl font-semibold text-gray-600 mb-2">
             Selecciona un Colaborador
           </h3>
-          <p style={{ color: '#9ca3af' }}>
+          <p className="text-gray-500">
             Usa el buscador para encontrar y analizar el perfil de un colaborador
           </p>
         </div>
