@@ -98,7 +98,7 @@ const PersonnelReportForm = ({ onBack }) => {
         title="Reporte de Personal"
         subtitle="Documenta comportamientos y necesidades de capacitación del personal"
         onBack={onBack}
-        icon="👥"
+        icon=""
       />
 
       <form onSubmit={crearReporte}>
