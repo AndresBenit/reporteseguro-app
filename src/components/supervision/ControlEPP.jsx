@@ -453,17 +453,8 @@ const ControlEPP = () => {
 
       {/* Header */}
       <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        <h1 style={{
-          fontSize: "1.8rem",
-          fontWeight: "700",
-          color: "#1f2937",
-          marginBottom: "8px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "12px"
-        }}>
-          🦺 Control de EPP
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Control de EPP
         </h1>
         <p style={{ color: "#6b7280", fontSize: "1rem" }}>
           Registro de entrega de Elementos de Protección Personal

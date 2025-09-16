@@ -470,15 +470,16 @@ const SupervisionCampo = () => {
       )}
 
       {/* Formulario */}
-      <div className="card" style={{ padding: window.innerWidth <= 768 ? "20px" : "30px" }}>
-        <h2 style={{ marginBottom: "25px", color: "#1f2937" }}>
-          📝 Nueva Recomendación en Campo
-        </h2>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl mx-auto">
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Nueva Recomendación en Campo</h2>
+          <p className="text-gray-600">Complete la información de la supervisión en campo</p>
+        </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Fecha */}
-          <div className="form-group">
-            <label className="form-label">📅 Fecha</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Fecha</label>
             <input
               type="text"
               value={new Date().toLocaleDateString("es-ES", {
@@ -488,15 +489,14 @@ const SupervisionCampo = () => {
                 day: "numeric",
               })}
               disabled
-              className="form-input"
-              style={{ background: "#f3f4f6", color: "#6b7280" }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
             />
           </div>
 
           {/* Colaborador con Autocompletado */}
-          <div className="form-group">
-            <label className="form-label">👤 Colaborador *</label>
-            <div style={{ position: "relative" }}>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Colaborador *</label>
+            <div className="relative">
               <input
                 type="text"
                 placeholder="Escribe el nombre del colaborador..."
@@ -507,94 +507,43 @@ const SupervisionCampo = () => {
                   setShowSugerencias(colaboradoresFiltrados.length > 0)
                 }
                 onBlur={handleBlurColaborador}
-                className="form-input"
+                className={`w-full px-4 py-3 border rounded-lg outline-none transition-colors ${
+                  form.colaboradorId
+                    ? "border-green-500 bg-green-50 focus:ring-2 focus:ring-green-200"
+                    : "border-gray-300 bg-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                }`}
                 required
-                style={{
-                  width: "100%",
-                  borderColor: form.colaboradorId ? "#10b981" : "#d1d5db",
-                  backgroundColor: form.colaboradorId ? "#f0fdf4" : "white",
-                }}
               />
 
               {/* Indicador de selección */}
               {form.colaboradorId && (
-                <div
-                  style={{
-                    position: "absolute",
-                    right: "12px",
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                    color: "#10b981",
-                    fontSize: "1.2rem",
-                  }}
-                >
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2 text-green-600 text-lg">
                   ✓
                 </div>
               )}
 
               {/* Lista de sugerencias */}
               {showSugerencias && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: "100%",
-                    left: 0,
-                    right: 0,
-                    zIndex: 1000,
-                    background: "white",
-                    border: "1px solid #e5e7eb",
-                    borderTop: "none",
-                    borderRadius: "0 0 8px 8px",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                    maxHeight: "200px",
-                    overflowY: "auto",
-                  }}
-                >
+                <div className="absolute top-full left-0 right-0 z-50 bg-white border border-gray-200 border-t-0 rounded-b-lg shadow-lg max-h-48 overflow-y-auto">
                   {colaboradoresFiltrados.map((colaborador) => (
                     <div
                       key={colaborador.id}
                       onClick={() => seleccionarColaborador(colaborador)}
-                      style={{
-                        padding: "12px 16px",
-                        cursor: "pointer",
-                        borderBottom: "1px solid #f3f4f6",
-                        display: "flex",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        transition: "background-color 0.2s ease",
-                        ":hover": { backgroundColor: "#f9fafb" },
-                      }}
-                      onMouseEnter={(e) =>
-                        (e.target.style.backgroundColor = "#f9fafb")
-                      }
-                      onMouseLeave={(e) =>
-                        (e.target.style.backgroundColor = "white")
-                      }
+                      className="flex justify-between items-center p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 transition-colors"
                     >
                       <div>
-                        <div style={{ fontWeight: "600", color: "#1f2937" }}>
+                        <div className="font-semibold text-gray-900">
                           {colaborador.nombre}
                         </div>
-                        <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
+                        <div className="text-sm text-gray-500">
                           {colaborador.cedula} • {colaborador.area}
                         </div>
                       </div>
-                      <div
-                        style={{
-                          padding: "2px 6px",
-                          borderRadius: "4px",
-                          fontSize: "0.7rem",
-                          fontWeight: "600",
-                          backgroundColor:
-                            colaborador.area === "Centro Industrial"
-                              ? "#fef3c7"
-                              : "#fee2e2",
-                          color:
-                            colaborador.area === "Centro Industrial"
-                              ? "#92400e"
-                              : "#991b1b",
-                        }}
-                      >
+                      <div className={`px-2 py-1 rounded text-xs font-semibold ${
+                        colaborador.area === "Centro Industrial"
+                          ? "bg-yellow-100 text-yellow-800"
+                          : "bg-red-100 text-red-800"
+                      }`}>
                         {colaborador.area === "Centro Industrial" ? "CI" : "HS"}
                       </div>
                     </div>
@@ -605,47 +554,35 @@ const SupervisionCampo = () => {
 
             {/* Información del colaborador seleccionado */}
             {form.colaboradorId && (
-              <div
-                style={{
-                  marginTop: "8px",
-                  padding: "8px 12px",
-                  backgroundColor: "#f0fdf4",
-                  border: "1px solid #bbf7d0",
-                  borderRadius: "6px",
-                  fontSize: "0.85rem",
-                }}
-              >
-                <strong>{form.colaboradorNombre}</strong> -{" "}
-                {form.colaboradorArea}
+              <div className="mt-2 p-3 bg-green-50 border border-green-200 rounded-lg text-sm">
+                <strong>{form.colaboradorNombre}</strong> - {form.colaboradorArea}
               </div>
             )}
           </div>
 
           {/* Supervisor que Reporta */}
-          <div className="form-group">
-            <label className="form-label">👨‍💼 Supervisor que Reporta *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Supervisor que Reporta *</label>
             <input
               type="text"
               name="supervisorReporta"
               placeholder="Nombre del supervisor que realizó la supervisión"
               value={form.supervisorReporta}
               onChange={handleChange}
-              className="form-input"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               required
-              style={{ width: "100%" }}
             />
           </div>
 
           {/* Área de Trabajo */}
-          <div className="form-group">
-            <label className="form-label">🏭 Área de Trabajo *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Área de Trabajo *</label>
             <select
               name="area"
               value={form.area}
               onChange={handleChange}
-              className="form-input"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
               required
-              style={{ width: "100%" }}
             >
               <option value="">Selecciona un área</option>
               {areasDisponibles.map(area => (
@@ -655,15 +592,15 @@ const SupervisionCampo = () => {
           </div>
 
           {/* Lugar de Labor */}
-          <div className="form-group">
-            <label className="form-label">📍 Lugar de Labor *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Lugar de Labor *</label>
             <input
               type="text"
               name="lugarLabor"
               placeholder="Ej: Hornos, Oficina, Patio..."
               value={form.lugarLabor}
               onChange={handleChange}
-              className="form-input"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               required
               list="lugares-comunes"
             />
@@ -675,102 +612,60 @@ const SupervisionCampo = () => {
           </div>
 
           {/* Hallazgo */}
-          <div className="form-group">
-            <label className="form-label">🔍 Hallazgo *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Hallazgo *</label>
             <textarea
               name="hallazgo"
               placeholder="Describe detalladamente lo observado (condición insegura, acto inseguro, etc.)"
               value={form.hallazgo}
               onChange={handleChange}
-              className="form-textarea"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               required
-              style={{ minHeight: "100px" }}
+              rows={4}
             />
           </div>
 
           {/* Recomendación */}
-          <div className="form-group">
-            <label className="form-label">Recomendación *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Recomendación *</label>
             <textarea
               name="recomendacion"
               placeholder="Describe la recomendación dada al colaborador"
               value={form.recomendacion}
               onChange={handleChange}
-              className="form-textarea"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
               required
-              style={{ minHeight: "100px" }}
+              rows={4}
             />
           </div>
 
           {/* Foto del Documento Firmado */}
-          <div className="form-group">
-            <label className="form-label">
-              📸 Foto del Documento Firmado (Opcional)
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-3">
+              Foto del Documento Firmado (Opcional)
             </label>
 
             {/* Progress Bar */}
             {uploadingImage && (
-              <div
-                style={{
-                  marginBottom: "15px",
-                  padding: "12px 16px",
-                  background: "#f0f9ff",
-                  borderRadius: "8px",
-                  border: "1px solid #0ea5e9",
-                }}
-              >
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    marginBottom: "8px",
-                  }}
-                >
-                  <span
-                    style={{
-                      fontSize: "0.9rem",
-                      fontWeight: "600",
-                      color: "#0369a1",
-                    }}
-                  >
-                    📄 Subiendo evidencia...
+              <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-sm font-semibold text-blue-700">
+                    Subiendo evidencia...
                   </span>
-                  <span style={{ fontSize: "0.8rem", color: "#0369a1" }}>
+                  <span className="text-sm text-blue-600">
                     {uploadProgress}%
                   </span>
                 </div>
-                <div
-                  style={{
-                    width: "100%",
-                    height: "6px",
-                    background: "#e0f2fe",
-                    borderRadius: "3px",
-                    overflow: "hidden",
-                  }}
-                >
+                <div className="w-full h-2 bg-blue-100 rounded-full overflow-hidden">
                   <div
-                    style={{
-                      width: `${uploadProgress}%`,
-                      height: "100%",
-                      background: "linear-gradient(90deg, #0ea5e9, #0284c7)",
-                      borderRadius: "3px",
-                      transition: "width 0.3s ease",
-                    }}
+                    className="h-full bg-gradient-to-r from-blue-500 to-blue-600 rounded-full transition-all duration-300 ease-out"
+                    style={{ width: `${uploadProgress}%` }}
                   />
                 </div>
               </div>
             )}
 
-            <div
-              style={{
-                border: "2px dashed #d1d5db",
-                borderRadius: "12px",
-                padding: "20px",
-                textAlign: "center",
-                background: "#f9fafb",
-              }}
-            >
+            <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50 transition-all duration-300 hover:border-gray-400">
               {!imagePreview ? (
                 <div>
                   <input
