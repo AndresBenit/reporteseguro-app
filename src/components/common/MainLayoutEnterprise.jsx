@@ -178,30 +178,41 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Sidebar Desktop */}
-      <div className={`hidden lg:flex lg:flex-col lg:w-80 bg-white border-r border-gray-200 shadow-enterprise ${
-        sidebarCollapsed ? 'lg:w-20' : 'lg:w-80'
-      } transition-all duration-300`}>
+      <div
+        className="hidden lg:flex lg:flex-col bg-white border-r border-gray-200 shadow-enterprise transition-all duration-300"
+        style={{ width: sidebarCollapsed ? '80px' : '320px' }}
+      >
 
         {/* Header del Sidebar */}
-        <div className={`flex items-center justify-between h-16 border-b border-gray-200 bg-white ${
-          sidebarCollapsed ? 'px-3' : 'px-6'
-        } transition-all duration-300`}>
+        <div className={`flex items-center h-16 border-b border-gray-200 bg-white transition-all duration-300 ${
+          sidebarCollapsed ? 'justify-center px-2' : 'justify-between px-6'
+        }`}>
           {!sidebarCollapsed && (
             <Logo variant="main" size="md" />
           )}
-          {sidebarCollapsed && (
-            <Logo variant="icon" size="sm" />
+          {sidebarCollapsed ? (
+            <button
+              onClick={() => {
+                console.log('Toggling sidebar:', !sidebarCollapsed);
+                setSidebarCollapsed(!sidebarCollapsed);
+              }}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Expandir menú"
+            >
+              <Icon name="ChevronRight" size={16} />
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                console.log('Toggling sidebar:', !sidebarCollapsed);
+                setSidebarCollapsed(!sidebarCollapsed);
+              }}
+              className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+              title="Contraer menú"
+            >
+              <Icon name="ChevronLeft" size={16} />
+            </button>
           )}
-          <button
-            onClick={() => {
-              console.log('Toggling sidebar:', !sidebarCollapsed);
-              setSidebarCollapsed(!sidebarCollapsed);
-            }}
-            className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-            title={sidebarCollapsed ? "Expandir menú" : "Contraer menú"}
-          >
-            <Icon name={sidebarCollapsed ? "ChevronRight" : "ChevronLeft"} size={16} />
-          </button>
         </div>
 
         {/* Navegación */}
