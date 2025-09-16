@@ -68,11 +68,11 @@ const ReportesHistorialMejorado = () => {
     setUpdating(reporteId);
     try {
       const ahora = new Date().toISOString();
-      
+
       // Buscar el reporte actual para mantener el historial
       const reporteActual = reportes.find(r => r.id === reporteId);
       const historialExistente = reporteActual?.historialEstados || [];
-      
+
       const nuevoHistorial = [
         ...historialExistente,
         {
@@ -102,13 +102,13 @@ const ReportesHistorialMejorado = () => {
 
   // Filtrar reportes
   const reportesFiltrados = reportes.filter(reporte => {
-    const cumpleTipo = filtroTipo === 'todos' || 
-      reporte.tipoReporte === filtroTipo || 
+    const cumpleTipo = filtroTipo === 'todos' ||
+      reporte.tipoReporte === filtroTipo ||
       reporte.tipo?.toLowerCase().includes(filtroTipo.toLowerCase());
-    
-    const cumpleEstado = filtroEstado === 'todos' || 
+
+    const cumpleEstado = filtroEstado === 'todos' ||
       reporte.estado === filtroEstado;
-    
+
     let cumpleFecha = true;
     if (filtroFecha.desde && reporte.fecha) {
       cumpleFecha = cumpleFecha && reporte.fecha >= new Date(filtroFecha.desde);
@@ -116,24 +116,24 @@ const ReportesHistorialMejorado = () => {
     if (filtroFecha.hasta && reporte.fecha) {
       cumpleFecha = cumpleFecha && reporte.fecha <= new Date(filtroFecha.hasta + 'T23:59:59');
     }
-    
+
     return cumpleTipo && cumpleEstado && cumpleFecha;
   });
 
   // Agrupar reportes por tipo
   const reportesPorTipo = {
-    incidencia: reportesFiltrados.filter(r => 
-      r.tipoReporte === 'incidencia' || 
-      r.tipo === 'Incidencia' || 
-      r.tipo === 'Acto Inseguro' || 
+    incidencia: reportesFiltrados.filter(r =>
+      r.tipoReporte === 'incidencia' ||
+      r.tipo === 'Incidencia' ||
+      r.tipo === 'Acto Inseguro' ||
       r.tipo === 'Condición Insegura'
     ),
-    recomendacion: reportesFiltrados.filter(r => 
-      r.tipoReporte === 'recomendacion' || 
+    recomendacion: reportesFiltrados.filter(r =>
+      r.tipoReporte === 'recomendacion' ||
       r.tipo === 'Recomendación'
     ),
-    abordaje: reportesFiltrados.filter(r => 
-      r.tipoReporte === 'abordaje' || 
+    abordaje: reportesFiltrados.filter(r =>
+      r.tipoReporte === 'abordaje' ||
       r.tipo === 'Abordaje'
     )
   };
@@ -226,10 +226,10 @@ const ReportesHistorialMejorado = () => {
               onChange={(e) => setNuevoEstado(e.target.value)}
               className="w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
-              <option value="pendiente">⏳ Pendiente</option>
-              <option value="proceso">🔄 En Proceso</option>
-              <option value="resuelto">✅ Resuelto</option>
-              <option value="cerrado">🔒 Cerrado</option>
+              <option value="pendiente">Pendiente</option>
+              <option value="proceso">En Proceso</option>
+              <option value="resuelto">Resuelto</option>
+              <option value="cerrado">Cerrado</option>
             </select>
           </div>
 
@@ -276,72 +276,51 @@ const ReportesHistorialMejorado = () => {
 
     if (datos.length === 0) {
       return (
-        <div className="tabla-seccion">
-          <h3 style={{ color, marginBottom: '16px' }}>
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+          <h3 className="text-xl font-bold mb-4" style={{ color }}>
             {titulo} ({reportesPorTipo[tipo]?.length || 0})
           </h3>
-          <div style={{
-            padding: '40px',
-            textAlign: 'center',
-            background: '#f9fafb',
-            borderRadius: '12px',
-            border: '1px solid #e5e7eb'
-          }}>
-            <p style={{ color: '#6b7280' }}>No hay reportes de este tipo</p>
+          <div className="bg-gray-50 rounded-xl p-10 text-center border border-gray-100">
+            <Icon name="FileX" size={48} color="#9ca3af" className="mx-auto mb-4" />
+            <p className="text-gray-500 text-lg mb-2">No hay reportes de este tipo</p>
+            <p className="text-gray-400 text-sm">Los reportes aparecerán aquí cuando se registren</p>
           </div>
         </div>
       );
     }
 
     return (
-      <div className="tabla-seccion">
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: '16px'
-        }}>
-          <h3 style={{ color, margin: 0 }}>
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="flex justify-between items-center p-6 border-b border-gray-100">
+          <h3 className="text-xl font-bold" style={{ color }}>
             {titulo} ({reportesPorTipo[tipo]?.length || 0})
           </h3>
-          
+
           {/* Paginación */}
           {totalPaginas > 1 && (
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
+            <div className="flex items-center gap-2">
               <button
                 onClick={() => cambiarPagina(tipo, paginaActualTipo - 1)}
                 disabled={paginaActualTipo === 1}
-                style={{
-                  padding: '6px 8px',
-                  border: '1px solid #d1d5db',
-                  background: paginaActualTipo === 1 ? '#f3f4f6' : 'white',
-                  borderRadius: '6px',
-                  cursor: paginaActualTipo === 1 ? 'not-allowed' : 'pointer'
-                }}
+                className={`px-3 py-1 border border-gray-300 rounded-md text-sm ${
+                  paginaActualTipo === 1
+                    ? 'bg-gray-100 cursor-not-allowed'
+                    : 'bg-white hover:bg-gray-50 cursor-pointer'
+                }`}
               >
                 ←
               </button>
-              <span style={{
-                fontSize: '0.9rem',
-                color: '#374151',
-                fontWeight: '500'
-              }}>
+              <span className="text-sm text-gray-700 font-medium px-2">
                 {paginaActualTipo} de {totalPaginas}
               </span>
               <button
                 onClick={() => cambiarPagina(tipo, paginaActualTipo + 1)}
                 disabled={paginaActualTipo === totalPaginas}
-                style={{
-                  padding: '6px 8px',
-                  border: '1px solid #d1d5db',
-                  background: paginaActualTipo === totalPaginas ? '#f3f4f6' : 'white',
-                  borderRadius: '6px',
-                  cursor: paginaActualTipo === totalPaginas ? 'not-allowed' : 'pointer'
-                }}
+                className={`px-3 py-1 border border-gray-300 rounded-md text-sm ${
+                  paginaActualTipo === totalPaginas
+                    ? 'bg-gray-100 cursor-not-allowed'
+                    : 'bg-white hover:bg-gray-50 cursor-pointer'
+                }`}
               >
                 →
               </button>
@@ -349,118 +328,89 @@ const ReportesHistorialMejorado = () => {
           )}
         </div>
 
-        <div className="tabla-container">
-          <table className="reportes-tabla">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
             <thead>
-              <tr>
-                <th>Fecha</th>
-                <th>Descripción</th>
-                <th>Área</th>
-                <th>Supervisor</th>
-                <th>Severidad</th>
-                <th>Estado</th>
-                <th>Acciones</th>
+              <tr className="bg-gray-50 border-b border-gray-200">
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Fecha</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Descripción</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Área</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Reportante</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Severidad</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Estado</th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Acciones</th>
               </tr>
             </thead>
             <tbody>
               {datos.map((reporte) => (
-                <tr key={reporte.id}>
-                  <td style={{ fontSize: '0.8rem' }}>
+                <tr key={reporte.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                  <td className="px-6 py-4 text-sm text-gray-600">
                     {formatearFecha(reporte.fecha)}
                   </td>
-                  <td>
-                    <div style={{
-                      maxWidth: '200px',
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap'
-                    }}>
-                      {reporte.descripcion || reporte.hallazgo || 'N/A'}
+                  <td className="px-6 py-4">
+                    <div className="max-w-xs overflow-hidden text-ellipsis">
+                      <div className="text-sm font-medium text-gray-900 truncate">
+                        {reporte.descripcion || reporte.hallazgo || 'N/A'}
+                      </div>
+                      {reporte.tipo && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          {reporte.tipo}
+                        </div>
+                      )}
                     </div>
                   </td>
-                  <td>{reporte.area || reporte.lugarLabor || 'N/A'}</td>
-                  <td>{reporte.supervisorReporta || reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}</td>
-                  <td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {reporte.area || reporte.lugarLabor || 'N/A'}
+                  </td>
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {reporte.supervisorReporta || reporte.reportante || reporte.colaboradorNombre || 'Anónimo'}
+                  </td>
+                  <td className="px-6 py-4">
                     {reporte.severidad && (
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        color: 'white',
-                        background: getSeverityColor(reporte.severidad),
-                        textTransform: 'capitalize'
-                      }}>
+                      <span
+                        className="px-3 py-1 rounded-full text-xs font-semibold text-white capitalize"
+                        style={{ backgroundColor: getSeverityColor(reporte.severidad) }}
+                      >
                         {reporte.severidad}
                       </span>
                     )}
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                      <span style={{
-                        padding: '4px 8px',
-                        borderRadius: '12px',
-                        fontSize: '0.75rem',
-                        fontWeight: '600',
-                        color: 'white',
-                        background: getStatusColor(reporte.estado),
-                        textTransform: 'capitalize'
-                      }}>
+                  <td className="px-6 py-4">
+                    <div className="flex items-center gap-2">
+                      <span
+                        className="px-3 py-1 rounded-full text-xs font-semibold text-white capitalize"
+                        style={{ backgroundColor: getStatusColor(reporte.estado) }}
+                      >
                         {reporte.estado || 'Pendiente'}
                       </span>
                       <button
                         onClick={() => abrirModalEstado(reporte)}
                         disabled={updating === reporte.id}
-                        style={{
-                          padding: '4px 6px',
-                          background: '#6366f1',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: updating === reporte.id ? 'not-allowed' : 'pointer',
-                          fontSize: '0.7rem',
-                          opacity: updating === reporte.id ? 0.7 : 1
-                        }}
+                        className={`p-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors ${
+                          updating === reporte.id ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
                         title="Cambiar estado"
                       >
-                        {updating === reporte.id ? '⏳' : '✏️'}
+                        <Icon name="Edit3" size={12} />
                       </button>
                     </div>
                   </td>
-                  <td>
-                    <div style={{ display: 'flex', gap: '4px' }}>
+                  <td className="px-6 py-4">
+                    <div className="flex gap-2">
                       <button
                         onClick={() => verDetalles(reporte)}
-                        style={{
-                          padding: '4px 8px',
-                          background: '#3b82f6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '4px',
-                          cursor: 'pointer',
-                          fontSize: '0.75rem',
-                          fontWeight: '600'
-                        }}
+                        className="p-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors"
                         title="Ver detalles"
                       >
-                        👁️
+                        <Icon name="Eye" size={14} />
                       </button>
                       {reporte.fotoUrl && (
                         <button
                           onClick={() => verImagen(reporte.fotoUrl)}
-                          style={{
-                            padding: '4px 8px',
-                            background: '#10b981',
-                            color: 'white',
-                            border: 'none',
-                            borderRadius: '4px',
-                            cursor: 'pointer',
-                            fontSize: '0.75rem',
-                            fontWeight: '600'
-                          }}
+                          className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                           title="Ver imagen"
                         >
-                          📸
+                          <Icon name="Camera" size={14} />
                         </button>
                       )}
                     </div>
@@ -478,200 +428,187 @@ const ReportesHistorialMejorado = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <Icon name="BarChart3" size={48} color="#6b7280" className="mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Cargando historial...</p>
+          <Icon name="BarChart3" size={48} color="#6b7280" className="mx-auto mb-4 animate-pulse" />
+          <p className="text-lg text-gray-600">Cargando historial de reportes...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{
-          fontSize: '2rem',
-          fontWeight: '700',
-          color: '#1f2937',
-          marginBottom: '8px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
-        }}>
-          📊 Historial de Reportes Mejorado
-        </h1>
-        <p style={{ color: '#6b7280' }}>
-          Visualiza y gestiona todos los reportes con funcionalidad completa de cambio de estados
-        </p>
-      </div>
-
-      {/* Filtros */}
-      <div style={{
-        background: 'white',
-        padding: '20px',
-        borderRadius: '12px',
-        marginBottom: '20px',
-        border: '1px solid #e5e7eb',
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px'
-      }}>
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#374151' }}>
-            Tipo de Reporte
-          </label>
-          <select
-            value={filtroTipo}
-            onChange={(e) => setFiltroTipo(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px'
-            }}
-          >
-            <option value="todos">Todos los tipos</option>
-            <option value="incidencia">Incidencias</option>
-            <option value="recomendacion">Recomendaciones</option>
-            <option value="abordaje">Abordajes</option>
-          </select>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header mejorado */}
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Icon name="BarChart3" size={32} color="#1f2937" />
+            </div>
+            <div>
+              <h1 className="text-4xl font-bold text-gray-900">
+                Historial de Reportes
+              </h1>
+              <p className="text-lg text-gray-600 mt-1">
+                Visualiza, gestiona y filtra todos los reportes del sistema con seguimiento completo de estados
+              </p>
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#374151' }}>
-            Estado
-          </label>
-          <select
-            value={filtroEstado}
-            onChange={(e) => setFiltroEstado(e.target.value)}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px'
-            }}
-          >
-            <option value="todos">Todos los estados</option>
-            <option value="pendiente">Pendiente</option>
-            <option value="proceso">En Proceso</option>
-            <option value="resuelto">Resuelto</option>
-            <option value="cerrado">Cerrado</option>
-          </select>
+        {/* Filtros mejorados */}
+        <div className="bg-white rounded-xl border border-gray-200 p-6 mb-8 shadow-sm">
+          <div className="flex items-center gap-2 mb-4">
+            <Icon name="Filter" size={20} color="#374151" />
+            <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Tipo de Reporte
+              </label>
+              <select
+                value={filtroTipo}
+                onChange={(e) => setFiltroTipo(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos los tipos</option>
+                <option value="incidencia">Incidencias</option>
+                <option value="recomendacion">Recomendaciones</option>
+                <option value="abordaje">Abordajes</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Estado
+              </label>
+              <select
+                value={filtroEstado}
+                onChange={(e) => setFiltroEstado(e.target.value)}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              >
+                <option value="todos">Todos los estados</option>
+                <option value="pendiente">Pendiente</option>
+                <option value="proceso">En Proceso</option>
+                <option value="resuelto">Resuelto</option>
+                <option value="cerrado">Cerrado</option>
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Fecha Desde
+              </label>
+              <input
+                type="date"
+                value={filtroFecha.desde}
+                onChange={(e) => setFiltroFecha(prev => ({ ...prev, desde: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2">
+                Fecha Hasta
+              </label>
+              <input
+                type="date"
+                value={filtroFecha.hasta}
+                onChange={(e) => setFiltroFecha(prev => ({ ...prev, hasta: e.target.value }))}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+          </div>
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#374151' }}>
-            Desde
-          </label>
-          <input
-            type="date"
-            value={filtroFecha.desde}
-            onChange={(e) => setFiltroFecha(prev => ({ ...prev, desde: e.target.value }))}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px'
-            }}
+        {/* Estadísticas mejoradas */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-red-100 rounded-lg">
+                <Icon name="AlertTriangle" size={24} color="#dc2626" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-red-600">
+                  {reportesPorTipo.incidencia?.length || 0}
+                </div>
+                <div className="text-sm text-gray-500">Total</div>
+              </div>
+            </div>
+            <div className="text-gray-700 font-semibold">Reportes de Incidencia</div>
+            <div className="text-xs text-gray-500 mt-1">Condiciones y actos inseguros</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100 rounded-lg">
+                <Icon name="Lightbulb" size={24} color="#3b82f6" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-blue-600">
+                  {reportesPorTipo.recomendacion?.length || 0}
+                </div>
+                <div className="text-sm text-gray-500">Total</div>
+              </div>
+            </div>
+            <div className="text-gray-700 font-semibold">Recomendaciones</div>
+            <div className="text-xs text-gray-500 mt-1">Mejoras y capacitaciones</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-100 rounded-lg">
+                <Icon name="Users" size={24} color="#059669" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-green-600">
+                  {reportesPorTipo.abordaje?.length || 0}
+                </div>
+                <div className="text-sm text-gray-500">Total</div>
+              </div>
+            </div>
+            <div className="text-gray-700 font-semibold">Abordajes en Campo</div>
+            <div className="text-xs text-gray-500 mt-1">Conversaciones directas</div>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-gray-100 rounded-lg">
+                <Icon name="Filter" size={24} color="#6b7280" />
+              </div>
+              <div className="text-right">
+                <div className="text-3xl font-bold text-gray-600">
+                  {reportesFiltrados.length}
+                </div>
+                <div className="text-sm text-gray-500">Mostrados</div>
+              </div>
+            </div>
+            <div className="text-gray-700 font-semibold">Resultados Filtrados</div>
+            <div className="text-xs text-gray-500 mt-1">Según criterios actuales</div>
+          </div>
+        </div>
+
+        {/* Tablas por tipo */}
+        <div className="space-y-8">
+          <TablaReportes
+            tipo="incidencia"
+            titulo="Reportes de Incidencia"
+            color="#dc2626"
+          />
+          <TablaReportes
+            tipo="recomendacion"
+            titulo="Recomendaciones"
+            color="#3b82f6"
+          />
+          <TablaReportes
+            tipo="abordaje"
+            titulo="Abordajes en Campo"
+            color="#059669"
           />
         </div>
 
-        <div>
-          <label style={{ display: 'block', marginBottom: '6px', fontWeight: '600', color: '#374151' }}>
-            Hasta
-          </label>
-          <input
-            type="date"
-            value={filtroFecha.hasta}
-            onChange={(e) => setFiltroFecha(prev => ({ ...prev, hasta: e.target.value }))}
-            style={{
-              width: '100%',
-              padding: '8px 12px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '6px'
-            }}
-          />
-        </div>
-      </div>
-
-      {/* Estadísticas rápidas */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '16px',
-        marginBottom: '30px'
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#dc2626' }}>
-            {reportesPorTipo.incidencia?.length || 0}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Incidencias</div>
-        </div>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#3b82f6' }}>
-            {reportesPorTipo.recomendacion?.length || 0}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Recomendaciones</div>
-        </div>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
-            {reportesPorTipo.abordaje?.length || 0}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Abordajes</div>
-        </div>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e5e7eb',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b7280' }}>
-            {reportesFiltrados.length}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Filtrados</div>
-        </div>
-      </div>
-
-      {/* Tablas por tipo */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
-        <TablaReportes 
-          tipo="incidencia" 
-          titulo="Reportes de Incidencia" 
-          color="#dc2626" 
-        />
-        <TablaReportes 
-          tipo="recomendacion" 
-          titulo="💡 Recomendaciones" 
-          color="#3b82f6" 
-        />
-        <TablaReportes 
-          tipo="abordaje" 
-          titulo="👥 Abordajes en Campo" 
-          color="#059669" 
-        />
-      </div>
-
-      {/* Modal de Estados */}
-      <EstadosModal />
+        {/* Modal de Estados */}
+        <EstadosModal />
 
         {/* Modal de Detalles */}
         {showModal && selectedReporte && (
@@ -813,7 +750,7 @@ const ReportesHistorialMejorado = () => {
             </div>
           </div>
         )}
-
+      </div>
     </div>
   );
 };
