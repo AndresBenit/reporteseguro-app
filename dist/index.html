@@ -66,9 +66,11 @@
         }
         
         #loading .icon {
-            font-size: 4rem;
             margin-bottom: 1rem;
             animation: pulse 2s infinite;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         
         #loading .text {
@@ -108,7 +110,9 @@
     <!-- Loading Screen -->
     <div id="loading">
         <div class="spinner">
-            <div class="icon">🛡️</div>
+            <div class="icon">
+                <img src="/assets/Isologo-DDgK_oga.png" alt="ReporteSeguro" style="width: 64px; height: 64px; object-fit: contain;">
+            </div>
             <div class="text">Cargando ReporteSeguro...</div>
         </div>
     </div>
