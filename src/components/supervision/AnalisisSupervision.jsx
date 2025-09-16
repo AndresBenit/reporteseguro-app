@@ -59,7 +59,10 @@ const AnalisisSupervision = () => {
           <h3 style={{ marginTop: '20px' }}>Cargando datos de reportes...</h3>
         </div>
       ) : (
-        <EnterpriseGraficos reportes={Array.isArray(reportes) ? reportes : []} />
+        <div className="p-6 bg-white rounded-lg shadow-enterprise">
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Gráficos de Análisis</h3>
+          <p className="text-gray-600">Gráficos de supervisión disponibles próximamente.</p>
+        </div>
       )}
 
     </div>

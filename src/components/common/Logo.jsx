@@ -1,5 +1,7 @@
 import React from 'react';
 import { Icon } from './Icons';
+import IsoLogo from '../../assets/images/Isologo.png';
+import Logotipo from '../../assets/images/Logotipo.png';
 
 // Componente Logo con fallback
 const Logo = ({ variant = 'main', size = 'md', className = '' }) => {
@@ -14,20 +16,7 @@ const Logo = ({ variant = 'main', size = 'md', className = '' }) => {
 
   const currentSize = sizes[size] || sizes.md;
 
-  // Cargar logos reales
-  const getLogoSrc = () => {
-    try {
-      if (variant === 'icon') {
-        return require('../../assets/images/Isologo.png');
-      }
-      return require('../../assets/images/Logotipo.png');
-    } catch (error) {
-      console.log('Logo no encontrado, usando fallback');
-      return null;
-    }
-  };
-
-  const logoSrc = getLogoSrc();
+  const logoSrc = variant === 'icon' ? IsoLogo : Logotipo;
 
   // Fallback con gradiente empresarial si no hay logo
   if (!logoSrc) {
