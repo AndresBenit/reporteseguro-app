@@ -94,44 +94,40 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header mejorado */}
+    <div className="space-y-6">
+      {/* Header simple */}
       <div className="text-center">
-        <div className="bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20">
-          <div className="flex items-center justify-center gap-3 mb-2">
-            <div className="p-2 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-xl">
-              <Icon name="Analytics" size={24} color="white" />
+        <div className="bg-white rounded-lg p-4 shadow-sm border border-gray-200">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="p-2 bg-blue-600 rounded-lg">
+              <Icon name="Analytics" size={20} color="white" />
             </div>
-            <h2 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-blue-800 bg-clip-text text-transparent">
+            <h2 className="text-xl font-bold text-gray-900">
               Resumen Ejecutivo
             </h2>
           </div>
-          <p className="text-slate-600 font-medium">Métricas clave del sistema</p>
+          <p className="text-gray-600">Métricas clave del sistema</p>
         </div>
       </div>
 
-      {/* Stats Grid con diseño empresarial */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+      {/* Stats Grid empresarial */}
+      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-4">
         {stats.map((stat) => (
           <div
             key={stat.id}
-            className={`bg-white/90 backdrop-blur-lg rounded-2xl p-6 shadow-xl border border-white/20 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 ${
-              stat.color === 'blue' ? 'hover:border-blue-200' :
-              stat.color === 'green' ? 'hover:border-green-200' :
-              stat.color === 'red' ? 'hover:border-red-200' : 'hover:border-gray-200'
-            }`}
+            className="bg-white rounded-lg p-6 shadow-sm border border-gray-200 hover:shadow-md transition-shadow duration-200"
           >
             <div className="flex items-center gap-4 mb-4">
-              <div className={`p-3 rounded-xl shadow-lg ${
-                stat.color === 'blue' ? 'bg-gradient-to-br from-blue-500 to-blue-600' :
-                stat.color === 'green' ? 'bg-gradient-to-br from-emerald-500 to-emerald-600' :
-                stat.color === 'red' ? 'bg-gradient-to-br from-red-500 to-red-600' : 'bg-gradient-to-br from-gray-500 to-gray-600'
+              <div className={`p-3 rounded-lg ${
+                stat.color === 'blue' ? 'bg-blue-600' :
+                stat.color === 'green' ? 'bg-emerald-600' :
+                stat.color === 'red' ? 'bg-red-600' : 'bg-gray-600'
               }`}>
                 <Icon name={stat.icon} size={20} color="white" />
               </div>
               <div className="flex-1">
-                <div className="text-3xl font-black text-gray-900 leading-none">{stat.value}</div>
-                <div className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{stat.title}</div>
+                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
+                <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.title}</div>
               </div>
             </div>
 
@@ -148,61 +144,61 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
         ))}
       </div>
 
-      {/* Indicadores de rendimiento en tiempo real modernizados */}
-      <div className="bg-white/90 backdrop-blur-lg rounded-3xl p-8 shadow-xl border border-white/20">
-        <div className="text-center mb-8">
-          <div className="flex items-center justify-center gap-3 mb-3 flex-wrap">
-            <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+      {/* Indicadores en tiempo real */}
+      <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-2 mb-2">
+            <div className="p-2 bg-green-600 rounded-lg">
               <Icon name="TrendingUp" size={20} color="white" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900">
-              Indicadores de Rendimiento en Tiempo Real
+            <h3 className="text-lg font-bold text-gray-900">
+              Indicadores de Rendimiento
             </h3>
-            <div className="flex items-center gap-2 px-3 py-1 bg-red-500 text-white rounded-full text-xs font-bold uppercase tracking-wide">
-              <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+            <div className="flex items-center gap-1 px-2 py-1 bg-green-100 text-green-800 rounded-full text-xs font-semibold">
+              <div className="w-2 h-2 bg-green-600 rounded-full"></div>
               EN VIVO
             </div>
           </div>
           <p className="text-gray-600 text-sm">
-            Estado actual del sistema de reportes • Última actualización: {lastUpdate.toLocaleTimeString()}
+            Última actualización: {lastUpdate.toLocaleTimeString()}
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
-            <div className="p-3 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="p-2 bg-amber-500 rounded-lg">
               <Icon name="Clock" size={16} color="white" />
             </div>
             <div>
-              <div className="text-2xl font-black text-gray-900">
+              <div className="text-xl font-bold text-gray-900">
                 {reportesPendientes}
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Pendientes</span>
+                <span className="text-xs font-medium text-gray-500 uppercase ml-2">Pendientes</span>
               </div>
               <div className="text-xs text-gray-500">Requieren atención</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
-            <div className="p-3 bg-gradient-to-br from-cyan-500 to-blue-500 rounded-lg">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="p-2 bg-blue-500 rounded-lg">
               <Icon name="Settings" size={16} color="white" />
             </div>
             <div>
-              <div className="text-2xl font-black text-gray-900">
+              <div className="text-xl font-bold text-gray-900">
                 {reportesEnProceso}
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">En Proceso</span>
+                <span className="text-xs font-medium text-gray-500 uppercase ml-2">En Proceso</span>
               </div>
               <div className="text-xs text-gray-500">En seguimiento</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
-            <div className="p-3 bg-gradient-to-br from-red-500 to-rose-500 rounded-lg">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="p-2 bg-red-500 rounded-lg">
               <Icon name="AlertCircle" size={16} color="white" />
             </div>
             <div>
-              <div className="text-2xl font-black text-gray-900">
+              <div className="text-xl font-bold text-gray-900">
                 {reportesCriticos}
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Críticos</span>
+                <span className="text-xs font-medium text-gray-500 uppercase ml-2">Críticos</span>
               </div>
               <div className="text-xs text-gray-500">
                 {reportesCriticos === 0 ? 'Sin críticos' : 'Atención urgente'}
@@ -210,14 +206,14 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
             </div>
           </div>
 
-          <div className="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-white/30">
-            <div className="p-3 bg-gradient-to-br from-emerald-500 to-green-500 rounded-lg">
+          <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-lg">
+            <div className="p-2 bg-emerald-500 rounded-lg">
               <Icon name="CheckCircle" size={16} color="white" />
             </div>
             <div>
-              <div className="text-2xl font-black text-gray-900">
+              <div className="text-xl font-bold text-gray-900">
                 {reportesResueltos}
-                <span className="text-xs font-semibold text-gray-500 uppercase tracking-wider ml-2">Resueltos</span>
+                <span className="text-xs font-medium text-gray-500 uppercase ml-2">Resueltos</span>
               </div>
               <div className="text-xs text-gray-500">Completados exitosamente</div>
             </div>
