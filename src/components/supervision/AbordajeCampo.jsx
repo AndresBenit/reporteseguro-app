@@ -205,101 +205,63 @@ const AbordajeCampo = () => {
   ];
 
   return (
-    <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }} className="mobile-container">
+    <div className="min-h-screen p-4 md:p-6 max-w-4xl mx-auto">
       {/* Botón de volver */}
       <button
         onClick={() => window.history.back()}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "12px 20px",
-          background: "#f8fafc",
-          border: "2px solid #e2e8f0",
-          borderRadius: "12px",
-          cursor: "pointer",
-          fontSize: "0.9rem",
-          fontWeight: "600",
-          color: "#475569",
-          marginBottom: "24px",
-          transition: "all 0.2s ease",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = "#e2e8f0";
-          e.target.style.transform = "translateY(-1px)";
-          e.target.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = "#f8fafc";
-          e.target.style.transform = "translateY(0)";
-          e.target.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.05)";
-        }}
+        className="flex items-center gap-2 px-5 py-3 bg-gray-50 border-2 border-gray-200 rounded-xl text-gray-600 font-semibold mb-6 transition-all duration-200 hover:bg-gray-100 hover:-translate-y-0.5 hover:shadow-md"
       >
         ← Volver
       </button>
       {/* Header */}
-      <div style={{ marginBottom: '30px' }} className="mobile-header">
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: '700', 
-          color: '#1f2937',
-          marginBottom: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '15px'
-        }}>
-          👨‍💼 Abordaje en Campo
+      <div className="text-center mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
+          Abordaje en Campo
         </h1>
-        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
+        <p className="text-gray-600 text-lg">
           Registro de abordajes y seguimiento de seguridad
         </p>
       </div>
 
       {/* Mensaje */}
       {mensaje && (
-        <div style={{
-          padding: '12px 18px',
-          borderRadius: '10px',
-          background: mensaje.includes('Éxito') ? '#d1fae5' : mensaje.includes('Advertencia') ? '#fef3cd' : '#fef2f2',
-          color: mensaje.includes('Éxito') ? '#059669' : mensaje.includes('Advertencia') ? '#92400e' : '#dc2626',
-          border: `1px solid ${mensaje.includes('Éxito') ? '#a7f3d0' : mensaje.includes('Advertencia') ? '#fde68a' : '#fecaca'}`,
-          marginBottom: '20px',
-          fontWeight: '600',
-          textAlign: 'center'
-        }}>
+        <div className={`mb-6 p-4 rounded-lg border font-medium text-center ${
+          mensaje.includes('Éxito') ? "bg-green-50 text-green-800 border-green-200" :
+          mensaje.includes('Advertencia') ? "bg-yellow-50 text-yellow-800 border-yellow-200" :
+          "bg-red-50 text-red-800 border-red-200"
+        }`}>
           {mensaje}
         </div>
       )}
 
       {/* Formulario */}
-      <div className="card" style={{ padding: '30px' }}>
-        <h2 style={{ marginBottom: '25px', color: '#1f2937' }}>
-          📝 Nuevo Abordaje en Campo
-        </h2>
-        
-        <form onSubmit={handleSubmit}>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl mx-auto">
+        <div className="mb-6 pb-4 border-b border-gray-200">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">Nuevo Abordaje en Campo</h2>
+          <p className="text-gray-600">Complete la información del abordaje en campo</p>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-6">
           {/* Fecha */}
-          <div className="form-group">
-            <label className="form-label">📅 Fecha</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Fecha</label>
             <input
               type="text"
-              value={new Date().toLocaleDateString('es-ES', { 
+              value={new Date().toLocaleDateString('es-ES', {
                 weekday: 'long',
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
               })}
               disabled
-              className="form-input"
-              style={{ background: '#f3f4f6', color: '#6b7280' }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg bg-gray-100 text-gray-600 cursor-not-allowed"
             />
           </div>
 
           {/* Colaborador con Autocompletado */}
-          <div className="form-group">
-            <label className="form-label">👤 Colaborador *</label>
-            <div style={{ position: 'relative' }}>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Colaborador *</label>
+            <div className="relative">
               <input
                 type="text"
                 placeholder="Escribe el nombre del colaborador..."
