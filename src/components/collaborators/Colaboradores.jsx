@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, dbHelpers } from '../../services/supabase';
+import { Icon } from '../common/Icons';
 import ExcelUploader from './ExcelUploader';
 
 const Colaboradores = () => {
@@ -7,13 +8,12 @@ const Colaboradores = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [stats, setStats] = useState({ total: 0, activos: 0, centroIndustrial: 0, hornosSolera: 0 });
-  const [viewMode, setViewMode] = useState('table'); // 'table' o 'cards'
   const [filtroArea, setFiltroArea] = useState('TODOS');
   const [filtroBusqueda, setFiltroBusqueda] = useState('');
   const [mensaje, setMensaje] = useState('');
   const [showExcelUploader, setShowExcelUploader] = useState(false);
   const [showAddForm, setShowAddForm] = useState(false);
-  
+
   // Formulario para nuevo colaborador
   const [newColaborador, setNewColaborador] = useState({
     nombre: '',
@@ -28,22 +28,22 @@ const Colaboradores = () => {
 
   const loadColaboradores = async () => {
     try {
-      const data = await dbHelpers.getAll('colaboradores', { 
-        orderBy: 'nombre', 
-        ascending: true 
+      const data = await dbHelpers.getAll('colaboradores', {
+        orderBy: 'nombre',
+        ascending: true
       });
       setColaboradores(data);
       calculateStats(data);
       setLoading(false);
       setError(null);
-      
+
       // Set up real-time subscription
       const subscription = dbHelpers.subscribe('colaboradores', (payload) => {
         console.log('Colaboradores subscription event:', payload);
         // Reload data when changes occur
         loadColaboradoresData();
       });
-      
+
       return () => subscription.unsubscribe();
     } catch (err) {
       console.error('Error obteniendo colaboradores:', err);
@@ -51,12 +51,12 @@ const Colaboradores = () => {
       setLoading(false);
     }
   };
-  
+
   const loadColaboradoresData = async () => {
     try {
-      const data = await dbHelpers.getAll('colaboradores', { 
-        orderBy: 'nombre', 
-        ascending: true 
+      const data = await dbHelpers.getAll('colaboradores', {
+        orderBy: 'nombre',
+        ascending: true
       });
       setColaboradores(data);
       calculateStats(data);
@@ -77,15 +77,15 @@ const Colaboradores = () => {
 
   const handleAddColaborador = async (e) => {
     e.preventDefault();
-    
+
     if (!newColaborador.nombre.trim() || !newColaborador.cedula.trim()) {
-      setMensaje('❌ Por favor completa todos los campos');
+      setMensaje('Por favor completa todos los campos');
       setTimeout(() => setMensaje(''), 3000);
       return;
     }
 
     setAddingColaborador(true);
-    
+
     try {
       // Verificar si ya existe
       const existing = await supabase
@@ -93,9 +93,9 @@ const Colaboradores = () => {
         .select('*')
         .eq('cedula', newColaborador.cedula.trim())
         .maybeSingle();
-      
+
       if (existing.data) {
-        setMensaje('❌ Ya existe un colaborador con esta cédula');
+        setMensaje('Ya existe un colaborador con esta cédula');
         setTimeout(() => setMensaje(''), 3000);
         setAddingColaborador(false);
         return;
@@ -114,13 +114,13 @@ const Colaboradores = () => {
         fuenteDatos: 'Manual'
       });
 
-      setMensaje('✅ Colaborador agregado exitosamente');
+      setMensaje('Colaborador agregado exitosamente');
       setNewColaborador({ nombre: '', cedula: '', area: 'Centro Industrial' });
       setShowAddForm(false);
       setTimeout(() => setMensaje(''), 3000);
     } catch (error) {
       console.error('Error agregando colaborador:', error);
-      setMensaje('❌ Error al agregar colaborador');
+      setMensaje('Error al agregar colaborador');
       setTimeout(() => setMensaje(''), 3000);
     } finally {
       setAddingColaborador(false);
@@ -133,12 +133,12 @@ const Colaboradores = () => {
         activo: nuevoEstado,
         fechaActualizacion: new Date().toISOString()
       });
-      
-      setMensaje(`✅ Colaborador ${nuevoEstado ? 'activado' : 'desactivado'} exitosamente`);
+
+      setMensaje(`Colaborador ${nuevoEstado ? 'activado' : 'desactivado'} exitosamente`);
       setTimeout(() => setMensaje(''), 3000);
     } catch (error) {
       console.error('Error actualizando colaborador:', error);
-      setMensaje(`❌ Error actualizando colaborador`);
+      setMensaje(`Error actualizando colaborador`);
       setTimeout(() => setMensaje(''), 3000);
     }
   };
@@ -146,7 +146,7 @@ const Colaboradores = () => {
   // Filtrar colaboradores
   const colaboradoresFiltrados = colaboradores.filter(colaborador => {
     const cumpleFiltroArea = filtroArea === 'TODOS' || colaborador.area === filtroArea;
-    const cumpleBusqueda = 
+    const cumpleBusqueda =
       colaborador.nombre?.toLowerCase().includes(filtroBusqueda.toLowerCase()) ||
       colaborador.cedula?.includes(filtroBusqueda);
     return cumpleFiltroArea && cumpleBusqueda;
@@ -154,19 +154,11 @@ const Colaboradores = () => {
 
   if (loading) {
     return (
-      <div style={{
-        minHeight: "50vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center"
-      }}>
-        <div style={{
-          textAlign: "center",
-          padding: "40px"
-        }}>
-          <div style={{ fontSize: "3rem", marginBottom: "20px" }} className="pulse">👥</div>
-          <h2 style={{ color: "#374151", marginBottom: "10px" }}>Cargando Colaboradores</h2>
-          <p style={{ color: "#6b7280" }}>Conectando con Supabase...</p>
+      <div className="min-h-96 flex items-center justify-center">
+        <div className="text-center p-8">
+          <Icon name="Users" size={48} color="#6b7280" className="mx-auto mb-4 animate-pulse" />
+          <h2 className="text-xl font-semibold text-gray-700 mb-2">Cargando Colaboradores</h2>
+          <p className="text-gray-500">Conectando con la base de datos...</p>
         </div>
       </div>
     );
@@ -174,31 +166,17 @@ const Colaboradores = () => {
 
   if (error) {
     return (
-      <div style={{
-        minHeight: "50vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px"
-      }}>
-        <div style={{
-          textAlign: "center",
-          padding: "40px",
-          background: "white",
-          borderRadius: "20px",
-          boxShadow: "0 10px 40px rgba(0, 0, 0, 0.1)",
-          border: "1px solid #fecaca",
-          maxWidth: "450px",
-          width: "100%"
-        }}>
-          <div style={{ fontSize: "3rem", marginBottom: "20px" }}>⚠️</div>
-          <h2 style={{ color: "#dc2626", marginBottom: "15px" }}>Error de Conexión</h2>
-          <p style={{ color: "#6b7280", marginBottom: "20px" }}>{error}</p>
+      <div className="min-h-96 flex items-center justify-center p-4">
+        <div className="text-center p-8 bg-white rounded-xl shadow-lg border border-red-200 max-w-md w-full">
+          <Icon name="AlertTriangle" size={48} color="#dc2626" className="mx-auto mb-4" />
+          <h2 className="text-xl font-semibold text-red-600 mb-3">Error de Conexión</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={() => window.location.reload()}
-            className="btn btn-primary"
+            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
           >
-            🔄 Reintentar
+            <Icon name="RotateCcw" size={16} className="inline mr-2" />
+            Reintentar
           </button>
         </div>
       </div>
@@ -206,100 +184,39 @@ const Colaboradores = () => {
   }
 
   return (
-    <div style={{ padding: "20px", maxWidth: "1200px", margin: "0 auto" }}>
-      {/* Header Mejorado */}
-      <div style={{
-        background: "linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)",
-        borderRadius: "16px",
-        padding: "24px",
-        marginBottom: "24px",
-        color: "white",
-        boxShadow: "0 4px 20px rgba(37, 99, 235, 0.15)"
-      }}>
-        <div style={{
-          display: "flex",
-          flexDirection: window.innerWidth <= 768 ? "column" : "row",
-          justifyContent: "space-between",
-          alignItems: window.innerWidth <= 768 ? "flex-start" : "center",
-          gap: "20px"
-        }}>
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-blue-600 to-blue-700 rounded-xl p-6 text-white shadow-lg">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
           <div>
-            <h1 style={{ 
-              fontSize: window.innerWidth <= 768 ? "1.8rem" : "2.2rem", 
-              fontWeight: "700", 
-              color: "white",
-              marginBottom: "8px",
-              display: "flex",
-              alignItems: "center",
-              gap: "12px"
-            }}>
-              👥 Gestión de Colaboradores
-            </h1>
-            <p style={{ color: "rgba(255,255,255,0.9)", fontSize: "1rem", margin: 0 }}>
+            <div className="flex items-center gap-3 mb-2">
+              <div className="p-2 bg-white bg-opacity-20 rounded-lg">
+                <Icon name="Users" size={28} color="white" />
+              </div>
+              <h1 className="text-3xl font-bold">
+                Gestión de Colaboradores
+              </h1>
+            </div>
+            <p className="text-blue-100 text-lg">
               Administra la base de datos de colaboradores por área • {stats.total} colaboradores registrados
             </p>
           </div>
-          
-          <div style={{
-            display: "flex",
-            flexDirection: window.innerWidth <= 480 ? "column" : "row",
-            gap: "12px",
-            width: window.innerWidth <= 768 ? "100%" : "auto"
-          }}>
+
+          <div className="flex flex-col sm:flex-row gap-3 w-full lg:w-auto">
             <button
               onClick={() => setShowAddForm(true)}
-              style={{
-                padding: "12px 20px",
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                background: "rgba(255,255,255,0.2)",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: "8px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                backdropFilter: "blur(10px)",
-                whiteSpace: "nowrap",
-                width: window.innerWidth <= 480 ? "100%" : "auto"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "rgba(255,255,255,0.25)";
-                e.target.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "rgba(255,255,255,0.2)";
-                e.target.style.transform = "translateY(0)";
-              }}
+              className="px-6 py-3 bg-white bg-opacity-20 text-white border border-white border-opacity-30 rounded-lg hover:bg-opacity-30 transition-all font-semibold backdrop-blur-sm"
             >
-              ➕ Agregar Individual
+              <Icon name="UserPlus" size={16} className="inline mr-2" />
+              Agregar Individual
             </button>
-            
+
             <button
               onClick={() => setShowExcelUploader(true)}
-              style={{
-                padding: "12px 20px",
-                fontSize: "0.9rem",
-                fontWeight: "600",
-                background: "rgba(16, 185, 129, 0.9)",
-                color: "white",
-                border: "1px solid rgba(255,255,255,0.3)",
-                borderRadius: "8px",
-                cursor: "pointer",
-                transition: "all 0.2s ease",
-                backdropFilter: "blur(10px)",
-                whiteSpace: "nowrap",
-                width: window.innerWidth <= 480 ? "100%" : "auto"
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "rgba(16, 185, 129, 1)";
-                e.target.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "rgba(16, 185, 129, 0.9)";
-                e.target.style.transform = "translateY(0)";
-              }}
+              className="px-6 py-3 bg-green-600 bg-opacity-90 text-white border border-white border-opacity-30 rounded-lg hover:bg-green-700 transition-all font-semibold backdrop-blur-sm"
             >
-              📊 Subir Excel
+              <Icon name="FileSpreadsheet" size={16} className="inline mr-2" />
+              Subir Excel
             </button>
           </div>
         </div>
@@ -307,401 +224,216 @@ const Colaboradores = () => {
 
       {/* Mensaje de estado */}
       {mensaje && (
-        <div style={{
-          padding: "16px 20px",
-          borderRadius: "12px",
-          background: mensaje.includes('✅') ? "#d1fae5" : "#fef2f2",
-          color: mensaje.includes('✅') ? "#065f46" : "#991b1b",
-          border: `1px solid ${mensaje.includes('✅') ? "#a7f3d0" : "#fecaca"}`,
-          marginBottom: "20px",
-          whiteSpace: "pre-line",
-          fontWeight: "600"
-        }}>
-          {mensaje}
+        <div className={`p-4 rounded-lg border font-semibold ${
+          mensaje.includes('exitosamente')
+            ? 'bg-green-50 text-green-800 border-green-200'
+            : 'bg-red-50 text-red-800 border-red-200'
+        }`}>
+          <div className="flex items-center gap-2">
+            <Icon
+              name={mensaje.includes('exitosamente') ? 'CheckCircle' : 'XCircle'}
+              size={16}
+            />
+            {mensaje}
+          </div>
         </div>
       )}
 
-      {/* Estadísticas Mejoradas */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: window.innerWidth <= 768 
-          ? "repeat(2, 1fr)" 
-          : "repeat(4, 1fr)",
-        gap: "16px",
-        marginBottom: "24px"
-      }}>
-        <div style={{
-          background: "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)",
-          borderRadius: "12px",
-          padding: "20px",
-          color: "white",
-          textAlign: "center",
-          boxShadow: "0 4px 12px rgba(59, 130, 246, 0.15)",
-          border: "1px solid rgba(255,255,255,0.1)"
-        }}>
-          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-            {stats.total}
+      {/* Estadísticas */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-blue-100 rounded-lg">
+              <Icon name="Users" size={24} color="#2563eb" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-blue-600">{stats.total}</div>
+              <div className="text-sm text-gray-500">Total</div>
+            </div>
           </div>
-          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-            👥 Total Colaboradores
-          </div>
+          <div className="text-gray-700 font-semibold">Total Colaboradores</div>
+          <div className="text-xs text-gray-500 mt-1">Registrados en el sistema</div>
         </div>
-        
-        <div style={{
-          background: "linear-gradient(135deg, #10b981 0%, #059669 100%)",
-          borderRadius: "12px",
-          padding: "20px",
-          color: "white",
-          textAlign: "center",
-          boxShadow: "0 4px 12px rgba(16, 185, 129, 0.15)",
-          border: "1px solid rgba(255,255,255,0.1)"
-        }}>
-          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-            {stats.activos}
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-green-100 rounded-lg">
+              <Icon name="CheckCircle" size={24} color="#059669" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-green-600">{stats.activos}</div>
+              <div className="text-sm text-gray-500">Total</div>
+            </div>
           </div>
-          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-            ✅ Activos
-          </div>
+          <div className="text-gray-700 font-semibold">Activos</div>
+          <div className="text-xs text-gray-500 mt-1">Colaboradores habilitados</div>
         </div>
-        
-        <div style={{
-          background: "linear-gradient(135deg, #f59e0b 0%, #d97706 100%)",
-          borderRadius: "12px",
-          padding: "20px",
-          color: "white",
-          textAlign: "center",
-          boxShadow: "0 4px 12px rgba(245, 158, 11, 0.15)",
-          border: "1px solid rgba(255,255,255,0.1)"
-        }}>
-          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-            {stats.centroIndustrial}
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-orange-100 rounded-lg">
+              <Icon name="Building" size={24} color="#d97706" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-orange-600">{stats.centroIndustrial}</div>
+              <div className="text-sm text-gray-500">Total</div>
+            </div>
           </div>
-          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-            🏭 Centro Industrial
-          </div>
+          <div className="text-gray-700 font-semibold">Centro Industrial</div>
+          <div className="text-xs text-gray-500 mt-1">Área de producción</div>
         </div>
-        
-        <div style={{
-          background: "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)",
-          borderRadius: "12px",
-          padding: "20px",
-          color: "white",
-          textAlign: "center",
-          boxShadow: "0 4px 12px rgba(239, 68, 68, 0.15)",
-          border: "1px solid rgba(255,255,255,0.1)"
-        }}>
-          <div style={{ fontSize: "2.2rem", fontWeight: "800", marginBottom: "4px" }}>
-            {stats.hornosSolera}
+
+        <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm hover:shadow-md transition-shadow">
+          <div className="flex items-center justify-between mb-4">
+            <div className="p-3 bg-red-100 rounded-lg">
+              <Icon name="Flame" size={24} color="#dc2626" />
+            </div>
+            <div className="text-right">
+              <div className="text-3xl font-bold text-red-600">{stats.hornosSolera}</div>
+              <div className="text-sm text-gray-500">Total</div>
+            </div>
           </div>
-          <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-            🔥 Hornos Solera
-          </div>
+          <div className="text-gray-700 font-semibold">Hornos Solera</div>
+          <div className="text-xs text-gray-500 mt-1">Área especializada</div>
         </div>
       </div>
 
-      {/* Filtros y Controles */}
-      <div style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "20px",
-        marginBottom: "20px",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        border: "1px solid #e5e7eb"
-      }}>
-        <div style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          marginBottom: "16px",
-          flexWrap: "wrap",
-          gap: "12px"
-        }}>
-          <h3 style={{ margin: 0, color: "#1f2937", fontWeight: "600", fontSize: "1.1rem" }}>
-            🔍 Filtros y Vista
-          </h3>
-          
-          {/* Toggle Vista */}
-          <div style={{
-            display: "flex",
-            background: "#f3f4f6",
-            borderRadius: "8px",
-            padding: "4px"
-          }}>
-            <button
-              onClick={() => setViewMode('table')}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "6px",
-                border: "none",
-                background: viewMode === 'table' ? "#2563eb" : "transparent",
-                color: viewMode === 'table' ? "white" : "#6b7280",
-                fontWeight: "600",
-                fontSize: "0.875rem",
-                cursor: "pointer",
-                transition: "all 0.2s ease"
-              }}
-            >
-              📋 Tabla
-            </button>
-            <button
-              onClick={() => setViewMode('cards')}
-              style={{
-                padding: "8px 16px",
-                borderRadius: "6px",
-                border: "none",
-                background: viewMode === 'cards' ? "#2563eb" : "transparent",
-                color: viewMode === 'cards' ? "white" : "#6b7280",
-                fontWeight: "600",
-                fontSize: "0.875rem",
-                cursor: "pointer",
-                transition: "all 0.2s ease"
-              }}
-            >
-              🃏 Cards
-            </button>
-          </div>
+      {/* Filtros */}
+      <div className="bg-white rounded-xl border border-gray-200 p-6 shadow-sm">
+        <div className="flex items-center gap-2 mb-4">
+          <Icon name="Filter" size={20} color="#374151" />
+          <h3 className="text-lg font-semibold text-gray-900">Filtros de Búsqueda</h3>
         </div>
-        
-        <div style={{
-          display: "grid",
-          gridTemplateColumns: window.innerWidth <= 768 
-            ? "1fr" 
-            : "1fr 200px 120px",
-          gap: "16px",
-          alignItems: "end"
-        }}>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
-            <label style={{ 
-              display: "block", 
-              marginBottom: "8px", 
-              fontWeight: "600",
-              color: "#374151"
-            }}>
-              🔍 Buscar Colaborador
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Buscar Colaborador
             </label>
-            <input
-              type="text"
-              placeholder="Nombre o cédula..."
-              value={filtroBusqueda}
-              onChange={(e) => setFiltroBusqueda(e.target.value)}
-              className="form-input"
-              style={{ width: "100%" }}
-            />
+            <div className="relative">
+              <Icon name="Search" size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Nombre o cédula..."
+                value={filtroBusqueda}
+                onChange={(e) => setFiltroBusqueda(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
           </div>
-          
+
           <div>
-            <label style={{ 
-              display: "block", 
-              marginBottom: "8px", 
-              fontWeight: "600",
-              color: "#374151"
-            }}>
-              🏢 Filtrar por Área
+            <label className="block text-sm font-semibold text-gray-700 mb-2">
+              Filtrar por Área
             </label>
             <select
               value={filtroArea}
               onChange={(e) => setFiltroArea(e.target.value)}
-              className="form-select"
-              style={{ width: "100%" }}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
             >
               <option value="TODOS">Todas las Áreas</option>
               <option value="Centro Industrial">Centro Industrial</option>
               <option value="Hornos Solera">Hornos Solera</option>
             </select>
           </div>
-          
-          {window.innerWidth > 768 && (
-            <div style={{ display: "flex", alignItems: "end" }}>
-              <button
-                onClick={() => {
-                  setFiltroBusqueda('');
-                  setFiltroArea('TODOS');
-                }}
-                className="btn"
-                style={{
-                  background: "#6b7280",
-                  color: "white",
-                  width: "100%",
-                  padding: "10px"
-                }}
-              >
-                🔄 Limpiar Filtros
-              </button>
-            </div>
-          )}
+
+          <div className="flex items-end">
+            <button
+              onClick={() => {
+                setFiltroBusqueda('');
+                setFiltroArea('TODOS');
+              }}
+              className="w-full px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors font-semibold"
+            >
+              <Icon name="RotateCcw" size={16} className="inline mr-2" />
+              Limpiar Filtros
+            </button>
+          </div>
         </div>
-        
-        {window.innerWidth <= 768 && (
-          <button
-            onClick={() => {
-              setFiltroBusqueda('');
-              setFiltroArea('TODOS');
-            }}
-            className="btn"
-            style={{
-              background: "#6b7280",
-              color: "white",
-              width: "100%",
-              padding: "10px",
-              marginTop: "16px"
-            }}
-          >
-            🔄 Limpiar Filtros
-          </button>
-        )}
       </div>
 
-      {/* Lista de Colaboradores Mejorada */}
-      <div style={{
-        background: "white",
-        borderRadius: "12px",
-        overflow: "hidden",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
-        border: "1px solid #e5e7eb"
-      }}>
-        <div style={{
-          padding: "20px",
-          borderBottom: "1px solid #e5e7eb",
-          background: "#f8fafc"
-        }}>
-          <h2 style={{ 
-            margin: 0, 
-            color: "#1f2937", 
-            fontSize: "1.3rem",
-            fontWeight: "600",
-            display: "flex",
-            alignItems: "center",
-            gap: "8px"
-          }}>
-            📋 Lista de Colaboradores ({colaboradoresFiltrados.length})
+      {/* Tabla de Colaboradores */}
+      <div className="bg-white rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h2 className="text-xl font-semibold text-gray-900 flex items-center gap-2">
+            <Icon name="Users" size={20} />
+            Lista de Colaboradores ({colaboradoresFiltrados.length})
           </h2>
         </div>
-        
+
         {colaboradoresFiltrados.length === 0 ? (
-          <div style={{
-            padding: "60px 20px",
-            textAlign: "center",
-            color: "#6b7280"
-          }}>
-            <div style={{ fontSize: "3rem", marginBottom: "20px", opacity: 0.5 }}>👤</div>
-            <h3 style={{ marginBottom: "10px" }}>No se encontraron colaboradores</h3>
-            <p>Intenta ajustar los filtros o agrega nuevos colaboradores</p>
+          <div className="p-12 text-center">
+            <Icon name="UserX" size={48} color="#9ca3af" className="mx-auto mb-4" />
+            <h3 className="text-lg font-semibold text-gray-700 mb-2">No se encontraron colaboradores</h3>
+            <p className="text-gray-500">Intenta ajustar los filtros o agrega nuevos colaboradores</p>
           </div>
-        ) : viewMode === 'table' && window.innerWidth > 768 ? (
-          // Vista Tabla Desktop
-          <div style={{ padding: "0" }}>
-            <table style={{ width: "100%", borderCollapse: "collapse" }}>
-              <thead style={{ background: "#f8fafc" }}>
-                <tr>
-                  <th style={{ padding: "16px", textAlign: "left", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
-                    Colaborador
-                  </th>
-                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
-                    Cédula
-                  </th>
-                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
-                    Área
-                  </th>
-                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
-                    Estado
-                  </th>
-                  <th style={{ padding: "16px", textAlign: "center", fontWeight: "600", color: "#374151", borderBottom: "1px solid #e5e7eb" }}>
-                    Acciones
-                  </th>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full border-collapse">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-700">Colaborador</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Cédula</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Área</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Estado</th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-700">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {colaboradoresFiltrados.map((colaborador) => (
-                  <tr key={colaborador.id} style={{ 
-                    borderBottom: "1px solid #f3f4f6",
-                    transition: "background 0.2s ease",
-                    background: "white"
-                  }}
-                  onMouseEnter={(e) => e.target.parentElement.style.background = "#f8fafc"}
-                  onMouseLeave={(e) => e.target.parentElement.style.background = "white"}
-                  >
-                    <td style={{ padding: "16px" }}>
-                      <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
-                        <div style={{
-                          width: "40px",
-                          height: "40px",
-                          borderRadius: "50%",
-                          background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          color: "white",
-                          fontWeight: "700",
-                          fontSize: "0.9rem"
-                        }}>
+                  <tr key={colaborador.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-sm">
                           {colaborador.nombre.charAt(0).toUpperCase()}
                         </div>
                         <div>
-                          <div style={{ fontWeight: "600", color: "#1f2937", fontSize: "0.95rem" }}>
-                            {colaborador.nombre}
-                          </div>
-                          <div style={{ fontSize: "0.8rem", color: "#6b7280" }}>
-                            {colaborador.area}
-                          </div>
+                          <div className="font-semibold text-gray-900">{colaborador.nombre}</div>
+                          <div className="text-sm text-gray-500">{colaborador.area}</div>
                         </div>
                       </div>
                     </td>
-                    <td style={{ padding: "16px", textAlign: "center" }}>
-                      <span style={{
-                        background: "#f3f4f6",
-                        padding: "4px 8px",
-                        borderRadius: "6px",
-                        fontFamily: "monospace",
-                        fontSize: "0.85rem",
-                        color: "#374151"
-                      }}>
+                    <td className="px-6 py-4 text-center">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-gray-100 text-gray-800 font-mono">
                         {colaborador.cedula}
                       </span>
                     </td>
-                    <td style={{ padding: "16px", textAlign: "center" }}>
-                      <span style={{
-                        padding: "6px 12px",
-                        borderRadius: "20px",
-                        fontSize: "0.8rem",
-                        fontWeight: "600",
-                        background: colaborador.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
-                        color: colaborador.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
-                      }}>
-                        {colaborador.area === 'Centro Industrial' ? '🏭 Centro Industrial' : '🔥 Hornos Solera'}
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                        colaborador.area === 'Centro Industrial'
+                          ? 'bg-orange-100 text-orange-800'
+                          : 'bg-red-100 text-red-800'
+                      }`}>
+                        <Icon
+                          name={colaborador.area === 'Centro Industrial' ? 'Building' : 'Flame'}
+                          size={12}
+                          className="mr-1"
+                        />
+                        {colaborador.area === 'Centro Industrial' ? 'Centro Industrial' : 'Hornos Solera'}
                       </span>
                     </td>
-                    <td style={{ padding: "16px", textAlign: "center" }}>
-                      <span style={{
-                        padding: "6px 12px",
-                        borderRadius: "20px",
-                        fontSize: "0.8rem",
-                        fontWeight: "600",
-                        background: colaborador.activo !== false ? '#d1fae5' : '#f3f4f6',
-                        color: colaborador.activo !== false ? '#065f46' : '#374151'
-                      }}>
-                        {colaborador.activo !== false ? '✅ Activo' : '⏸️ Inactivo'}
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold ${
+                        colaborador.activo !== false
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}>
+                        <Icon
+                          name={colaborador.activo !== false ? 'CheckCircle' : 'Pause'}
+                          size={12}
+                          className="mr-1"
+                        />
+                        {colaborador.activo !== false ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td style={{ padding: "16px", textAlign: "center" }}>
+                    <td className="px-6 py-4 text-center">
                       <button
                         onClick={() => handleToggleActivo(colaborador.id, !(colaborador.activo !== false))}
-                        style={{
-                          padding: "8px 16px",
-                          background: colaborador.activo !== false ? "#ef4444" : "#10b981",
-                          color: "white",
-                          border: "none",
-                          borderRadius: "6px",
-                          cursor: "pointer",
-                          fontSize: "0.8rem",
-                          fontWeight: "600",
-                          transition: "all 0.2s ease"
-                        }}
-                        onMouseEnter={(e) => {
-                          e.target.style.transform = "scale(1.05)";
-                        }}
-                        onMouseLeave={(e) => {
-                          e.target.style.transform = "scale(1)";
-                        }}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                          colaborador.activo !== false
+                            ? 'bg-red-600 hover:bg-red-700 text-white'
+                            : 'bg-green-600 hover:bg-green-700 text-white'
+                        }`}
                       >
                         {colaborador.activo !== false ? 'Desactivar' : 'Activar'}
                       </button>
@@ -711,247 +443,83 @@ const Colaboradores = () => {
               </tbody>
             </table>
           </div>
-        ) : (
-          // Vista Cards (Mobile y Cards Mode)
-          <div style={{ padding: "20px" }}>
-            <div style={{
-              display: "grid",
-              gridTemplateColumns: window.innerWidth <= 480 
-                ? "1fr" 
-                : window.innerWidth <= 768
-                  ? "repeat(2, 1fr)"
-                  : "repeat(auto-fit, minmax(320px, 1fr))",
-              gap: "16px"
-            }}>
-              {colaboradoresFiltrados.map((colaborador) => (
-                <div key={colaborador.id} style={{
-                  padding: "20px",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "12px",
-                  background: "white",
-                  transition: "all 0.3s ease",
-                  boxShadow: "0 2px 4px rgba(0,0,0,0.04)"
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.boxShadow = "0 8px 20px rgba(0,0,0,0.1)";
-                  e.target.style.transform = "translateY(-2px)";
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.boxShadow = "0 2px 4px rgba(0,0,0,0.04)";
-                  e.target.style.transform = "translateY(0)";
-                }}
-                >
-                  <div style={{ 
-                    display: "flex", 
-                    alignItems: "center",
-                    gap: "12px",
-                    marginBottom: "16px"
-                  }}>
-                    <div style={{
-                      width: "48px",
-                      height: "48px",
-                      borderRadius: "50%",
-                      background: "linear-gradient(135deg, #3b82f6, #2563eb)",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      color: "white",
-                      fontWeight: "700",
-                      fontSize: "1.1rem"
-                    }}>
-                      {colaborador.nombre.charAt(0).toUpperCase()}
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ 
-                        fontWeight: "600", 
-                        color: "#1f2937", 
-                        fontSize: "1rem",
-                        marginBottom: "4px"
-                      }}>
-                        {colaborador.nombre}
-                      </div>
-                      <div style={{ fontSize: "0.85rem", color: "#6b7280" }}>
-                        📧 {colaborador.cedula}
-                      </div>
-                    </div>
-                    <span style={{
-                      padding: "4px 8px",
-                      borderRadius: "8px",
-                      fontSize: "0.75rem",
-                      fontWeight: "600",
-                      background: colaborador.activo !== false ? '#d1fae5' : '#f3f4f6',
-                      color: colaborador.activo !== false ? '#065f46' : '#374151'
-                    }}>
-                      {colaborador.activo !== false ? '✅' : '⏸️'}
-                    </span>
-                  </div>
-                  
-                  <div style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    gap: "12px"
-                  }}>
-                    <span style={{ 
-                      padding: "6px 12px",
-                      borderRadius: "8px",
-                      fontSize: "0.8rem",
-                      fontWeight: "600",
-                      background: colaborador.area === 'Centro Industrial' ? '#fef3c7' : '#fee2e2',
-                      color: colaborador.area === 'Centro Industrial' ? '#92400e' : '#991b1b'
-                    }}>
-                      {colaborador.area === 'Centro Industrial' ? '🏭 CI' : '🔥 HS'}
-                    </span>
-                    
-                    <button
-                      onClick={() => handleToggleActivo(colaborador.id, !(colaborador.activo !== false))}
-                      style={{
-                        padding: "8px 16px",
-                        background: colaborador.activo !== false ? "#ef4444" : "#10b981",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "0.8rem",
-                        fontWeight: "600",
-                        transition: "all 0.2s ease"
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.transform = "scale(1.05)";
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.transform = "scale(1)";
-                      }}
-                    >
-                      {colaborador.activo !== false ? '×' : '✓'}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
       </div>
 
       {/* Modal para agregar colaborador */}
       {showAddForm && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: "20px"
-        }}>
-          <div style={{
-            background: 'white',
-            borderRadius: '20px',
-            padding: '30px',
-            maxWidth: '500px',
-            width: '100%',
-            maxHeight: '90vh',
-            overflow: 'auto',
-            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)'
-          }}>
-            <h2 style={{ 
-              fontSize: '1.8rem',
-              marginBottom: '20px',
-              color: '#1f2937',
-              textAlign: 'center'
-            }}>
-              ➕ Agregar Colaborador
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl p-6 max-w-md w-full max-h-[90vh] overflow-auto shadow-2xl">
+            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+              Agregar Colaborador
             </h2>
-            
-            <form onSubmit={handleAddColaborador}>
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ 
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontWeight: '600',
-                  color: '#374151'
-                }}>
-                  👤 Nombre Completo *
+
+            <form onSubmit={handleAddColaborador} className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Icon name="User" size={16} className="inline mr-1" />
+                  Nombre Completo *
                 </label>
                 <input
                   type="text"
                   value={newColaborador.nombre}
                   onChange={(e) => setNewColaborador({...newColaborador, nombre: e.target.value})}
-                  className="form-input"
-                  style={{ width: '100%' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ej: Juan Carlos Pérez"
                   required
                 />
               </div>
-              
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{ 
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontWeight: '600',
-                  color: '#374151'
-                }}>
-                  📄 Cédula *
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Icon name="FileText" size={16} className="inline mr-1" />
+                  Cédula *
                 </label>
                 <input
                   type="text"
                   value={newColaborador.cedula}
                   onChange={(e) => setNewColaborador({...newColaborador, cedula: e.target.value})}
-                  className="form-input"
-                  style={{ width: '100%' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   placeholder="Ej: 12345678"
                   required
                 />
               </div>
-              
-              <div style={{ marginBottom: '30px' }}>
-                <label style={{ 
-                  display: 'block',
-                  marginBottom: '8px',
-                  fontWeight: '600',
-                  color: '#374151'
-                }}>
-                  🏢 Área *
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  <Icon name="Building" size={16} className="inline mr-1" />
+                  Área *
                 </label>
                 <select
                   value={newColaborador.area}
                   onChange={(e) => setNewColaborador({...newColaborador, area: e.target.value})}
-                  className="form-select"
-                  style={{ width: '100%' }}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   required
                 >
                   <option value="Centro Industrial">Centro Industrial</option>
                   <option value="Hornos Solera">Hornos Solera</option>
                 </select>
               </div>
-              
-              <div style={{ 
-                display: 'flex', 
-                gap: '12px',
-                flexDirection: window.innerWidth <= 480 ? 'column' : 'row'
-              }}>
+
+              <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
                   disabled={addingColaborador}
-                  style={{
-                    flex: 1,
-                    padding: '12px 20px',
-                    background: addingColaborador ? '#9ca3af' : '#10b981',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    cursor: addingColaborador ? 'not-allowed' : 'pointer',
-                    fontSize: '1rem'
-                  }}
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
                 >
-                  {addingColaborador ? '⏳ Agregando...' : '✅ Agregar Colaborador'}
+                  {addingColaborador ? (
+                    <>
+                      <Icon name="Loader2" size={16} className="inline mr-2 animate-spin" />
+                      Agregando...
+                    </>
+                  ) : (
+                    <>
+                      <Icon name="CheckCircle" size={16} className="inline mr-2" />
+                      Agregar Colaborador
+                    </>
+                  )}
                 </button>
-                
+
                 <button
                   type="button"
                   onClick={() => {
@@ -959,19 +527,10 @@ const Colaboradores = () => {
                     setNewColaborador({ nombre: '', cedula: '', area: 'Centro Industrial' });
                   }}
                   disabled={addingColaborador}
-                  style={{
-                    flex: window.innerWidth <= 480 ? 1 : 'auto',
-                    padding: '12px 20px',
-                    background: '#6b7280',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '8px',
-                    fontWeight: '600',
-                    cursor: addingColaborador ? 'not-allowed' : 'pointer',
-                    fontSize: '1rem'
-                  }}
+                  className="px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed font-semibold transition-colors"
                 >
-                  ❌ Cancelar
+                  <Icon name="X" size={16} className="inline mr-2" />
+                  Cancelar
                 </button>
               </div>
             </form>
@@ -981,13 +540,10 @@ const Colaboradores = () => {
 
       {/* Excel Uploader Modal */}
       {showExcelUploader && (
-        <ExcelUploader 
+        <ExcelUploader
           onUploadComplete={(resultado) => {
             setMensaje(
-              `✅ Excel procesado exitosamente:\n` +
-              `• ${resultado.migrados} colaboradores nuevos\n` +
-              `• ${resultado.yaExisten} ya existían\n` +
-              `• Total: ${resultado.total}`
+              `Excel procesado exitosamente: ${resultado.migrados} colaboradores nuevos, ${resultado.yaExisten} ya existían, Total: ${resultado.total}`
             );
             setTimeout(() => setMensaje(''), 5000);
           }}

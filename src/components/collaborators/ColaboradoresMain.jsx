@@ -7,70 +7,41 @@ const ColaboradoresMain = () => {
   const [activeTab, setActiveTab] = useState('gestion');
 
   return (
-    <div>
-      {/* Navegación de Colaboradores */}
-      <div style={{
-        background: 'var(--color-surface)',
-        borderRadius: 'var(--radius-lg)',
-        padding: '6px',
-        marginBottom: '24px',
-        boxShadow: 'var(--shadow-sm)',
-        border: '1px solid var(--color-border)',
-        maxWidth: '500px',
-        margin: '0 auto 24px auto'
-      }}>
-        <div style={{ display: 'flex', gap: '4px' }}>
-          <button
-            onClick={() => setActiveTab('gestion')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              background: activeTab === 'gestion' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'gestion' ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
-              fontWeight: '600',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'var(--transition-base)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-          >
-            <Icon name="Users" size={16} />
-            Gestión
-          </button>
-          
-          <button
-            onClick={() => setActiveTab('perfil')}
-            style={{
-              flex: 1,
-              padding: '12px 16px',
-              border: 'none',
-              borderRadius: 'var(--radius-md)',
-              background: activeTab === 'perfil' ? 'var(--color-primary)' : 'transparent',
-              color: activeTab === 'perfil' ? 'var(--color-text-inverse)' : 'var(--color-text-secondary)',
-              fontWeight: '600',
-              fontSize: '0.875rem',
-              cursor: 'pointer',
-              transition: 'var(--transition-base)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px'
-            }}
-          >
-            <Icon name="Analytics" size={16} />
-            Perfil Individual
-          </button>
-        </div>
-      </div>
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Navegación de Colaboradores */}
+        <div className="bg-white rounded-xl border border-gray-200 p-1.5 mb-8 shadow-sm max-w-lg mx-auto">
+          <div className="flex gap-1">
+            <button
+              onClick={() => setActiveTab('gestion')}
+              className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+                activeTab === 'gestion'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Icon name="Users" size={16} />
+              Gestión
+            </button>
 
-      {/* Contenido */}
-      {activeTab === 'gestion' && <Colaboradores />}
-      {activeTab === 'perfil' && <PerfilIndividual />}
+            <button
+              onClick={() => setActiveTab('perfil')}
+              className={`flex-1 px-4 py-3 rounded-lg font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 ${
+                activeTab === 'perfil'
+                  ? 'bg-blue-600 text-white shadow-md'
+                  : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              }`}
+            >
+              <Icon name="Analytics" size={16} />
+              Perfil Individual
+            </button>
+          </div>
+        </div>
+
+        {/* Contenido */}
+        {activeTab === 'gestion' && <Colaboradores />}
+        {activeTab === 'perfil' && <PerfilIndividual />}
+      </div>
     </div>
   );
 };
