@@ -6,21 +6,21 @@ const SupervisionSelector = ({ onFormSelect }) => {
       id: 'recomendaciones',
       title: 'Recomendaciones',
       description: 'Registrar recomendación a colaborador',
-      icon: '💡',
+      icon: '•',
       color: '#3b82f6'
     },
     {
-      id: 'abordajes', 
+      id: 'abordajes',
       title: 'Abordajes en Campo',
       description: 'Documentar abordaje directo',
-      icon: '👨‍💼',
+      icon: '•',
       color: '#059669'
     },
     {
       id: 'supervision',
-      title: 'Supervisión Completa', 
+      title: 'Supervisión Completa',
       description: 'Registro completo con evidencias',
-      icon: '📋',
+      icon: '•',
       color: '#7c3aed'
     }
   ];
@@ -29,7 +29,7 @@ const SupervisionSelector = ({ onFormSelect }) => {
     <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
       <div style={{ textAlign: 'center', marginBottom: '30px' }}>
         <h1 style={{ fontSize: '2rem', marginBottom: '10px', color: '#1f2937' }}>
-          🛡️ Supervisión de Campo
+          Supervisión de Campo
         </h1>
         <p style={{ color: '#6b7280' }}>Selecciona el tipo de registro</p>
       </div>

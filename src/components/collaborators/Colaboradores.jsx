@@ -703,7 +703,7 @@ const Colaboradores = () => {
                           e.target.style.transform = "scale(1)";
                         }}
                       >
-                        {colaborador.activo !== false ? '🚫 Desactivar' : '✅ Activar'}
+                        {colaborador.activo !== false ? 'Desactivar' : 'Activar'}
                       </button>
                     </td>
                   </tr>
@@ -823,7 +823,7 @@ const Colaboradores = () => {
                         e.target.style.transform = "scale(1)";
                       }}
                     >
-                      {colaborador.activo !== false ? '🚫' : '✅'}
+                      {colaborador.activo !== false ? '×' : '✓'}
                     </button>
                   </div>
                 </div>

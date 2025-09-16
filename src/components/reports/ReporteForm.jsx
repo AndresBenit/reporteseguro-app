@@ -99,7 +99,7 @@ const ReporteForm = () => {
 
       try {
         // Comprimir imagen
-        setMensaje("🔄 Optimizando imagen...");
+        setMensaje("Optimizando imagen...");
         const compressedBlob = await compressImage(file);
         
         // Crear archivo comprimido
@@ -255,115 +255,103 @@ const ReporteForm = () => {
   };
 
   return (
-    <form onSubmit={crearReporte} style={{ position: "relative" }}>
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 max-w-4xl mx-auto">
+      {/* Header del formulario */}
+      <div className="mb-6 pb-4 border-b border-gray-200">
+        <h2 className="text-2xl font-bold text-gray-900 mb-2">Nuevo Reporte de Incidencia</h2>
+        <p className="text-gray-600">Complete la información del reporte de seguridad</p>
+      </div>
+
+      {/* Mensaje de estado */}
       {mensaje && (
-        <div style={{
-          position: "absolute",
-          top: "-10px",
-          left: "0",
-          right: "0",
-          padding: "10px 16px",
-          borderRadius: "10px",
-          background: mensaje.includes("Éxito") ? "#d1fae5" : mensaje.includes("Advertencia") ? "#fef3cd" : "#fef2f2",
-          color: mensaje.includes("Éxito") ? "#059669" : mensaje.includes("Advertencia") ? "#92400e" : "#dc2626",
-          border: `1px solid ${mensaje.includes("Éxito") ? "#a7f3d0" : mensaje.includes("Advertencia") ? "#fde68a" : "#fecaca"}`,
-          fontWeight: "600",
-          textAlign: "center",
-          zIndex: 10,
-          fontSize: "0.9rem"
-        }}>
+        <div className={`mb-6 p-4 rounded-lg border font-medium text-center ${
+          mensaje.includes("Éxito") ? "bg-green-50 text-green-800 border-green-200" :
+          mensaje.includes("Advertencia") ? "bg-yellow-50 text-yellow-800 border-yellow-200" :
+          "bg-red-50 text-red-800 border-red-200"
+        }`}>
           {mensaje}
         </div>
       )}
 
-      <div style={{ marginTop: mensaje ? "45px" : "0" }}>
+      <form onSubmit={crearReporte} className="space-y-6">
         {/* Tipo de Incidencia */}
-        <div className="form-group">
-          <label className="form-label">🔍 Tipo de Incidencia</label>
-          <div style={{ 
-            display: "grid", 
-            gridTemplateColumns: "1fr 1fr", 
-            gap: "12px" 
-          }}>
-            <label style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "8px", 
-              cursor: "pointer",
-              padding: "12px 16px",
-              borderRadius: "10px",
-              border: form.tipo === "Condición Insegura" ? "2px solid #3b82f6" : "2px solid #e5e7eb",
-              background: form.tipo === "Condición Insegura" ? "#eff6ff" : "white",
-              transition: "all 0.3s ease"
-            }}>
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-3">Tipo de Incidencia</label>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+              form.tipo === "Condición Insegura"
+                ? "border-blue-500 bg-blue-50"
+                : "border-gray-300 bg-white hover:border-blue-300"
+            }`}>
               <input
                 type="radio"
                 name="tipo"
                 value="Condición Insegura"
                 checked={form.tipo === "Condición Insegura"}
                 onChange={handleChange}
-                style={{ display: "none" }}
+                className="sr-only"
               />
-              <span style={{ fontSize: "1.1rem", fontWeight: "600" }}>●</span>
-              <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>Condición Insegura</span>
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                form.tipo === "Condición Insegura" ? "border-blue-500 bg-blue-500" : "border-gray-300"
+              }`}>
+                {form.tipo === "Condición Insegura" && (
+                  <div className="w-2 h-2 rounded-full bg-white"></div>
+                )}
+              </div>
+              <span className="font-medium text-gray-900">Condición Insegura</span>
             </label>
-            
-            <label style={{ 
-              display: "flex", 
-              alignItems: "center", 
-              gap: "8px", 
-              cursor: "pointer",
-              padding: "12px 16px",
-              borderRadius: "10px",
-              border: form.tipo === "Acto Inseguro" ? "2px solid #3b82f6" : "2px solid #e5e7eb",
-              background: form.tipo === "Acto Inseguro" ? "#eff6ff" : "white",
-              transition: "all 0.3s ease"
-            }}>
+
+            <label className={`flex items-center gap-3 p-4 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+              form.tipo === "Acto Inseguro"
+                ? "border-orange-500 bg-orange-50"
+                : "border-gray-300 bg-white hover:border-orange-300"
+            }`}>
               <input
                 type="radio"
                 name="tipo"
                 value="Acto Inseguro"
                 checked={form.tipo === "Acto Inseguro"}
                 onChange={handleChange}
-                style={{ display: "none" }}
+                className="sr-only"
               />
-              <span style={{ fontSize: "1.1rem", fontWeight: "600" }}>●</span>
-              <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>Acto Inseguro</span>
+              <div className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                form.tipo === "Acto Inseguro" ? "border-orange-500 bg-orange-500" : "border-gray-300"
+              }`}>
+                {form.tipo === "Acto Inseguro" && (
+                  <div className="w-2 h-2 rounded-full bg-white"></div>
+                )}
+              </div>
+              <span className="font-medium text-gray-900">Acto Inseguro</span>
             </label>
           </div>
         </div>
 
         {/* Descripción */}
-        <div className="form-group">
-          <label className="form-label">📝 Descripción Detallada *</label>
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-2">Descripción Detallada *</label>
           <textarea
             name="descripcion"
             placeholder="Describe de manera detallada la condición o acto inseguro observado. Incluye ubicación específica, condiciones presentes y riesgo potencial..."
             value={form.descripcion}
             onChange={handleChange}
-            className="form-textarea"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             required
-            style={{ minHeight: "100px" }}
+            rows={4}
           />
         </div>
 
         {/* Severidad */}
-        <div className="form-group">
-          <label className="form-label">Nivel de Severidad</label>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: "8px" }}>
+        <div>
+          <label className="block text-sm font-semibold text-gray-900 mb-3">Nivel de Severidad</label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {["baja", "media", "alta", "critica"].map(severity => (
-              <label key={severity} style={{ 
-                display: "flex", 
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "6px", 
-                cursor: "pointer",
-                padding: "12px 8px",
-                borderRadius: "10px",
-                border: form.severidad === severity ? `2px solid ${getSeverityColor(severity)}` : "2px solid #e5e7eb",
-                background: form.severidad === severity ? `${getSeverityColor(severity)}10` : "white",
-                transition: "all 0.3s ease",
-                textAlign: "center"
+              <label key={severity} className={`flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 text-center ${
+                form.severidad === severity
+                  ? `border-[${getSeverityColor(severity)}] bg-opacity-10`
+                  : "border-gray-300 bg-white hover:border-gray-400"
+              }`} style={{
+                borderColor: form.severidad === severity ? getSeverityColor(severity) : '#d1d5db',
+                backgroundColor: form.severidad === severity ? `${getSeverityColor(severity)}15` : 'white'
               }}>
                 <input
                   type="radio"
@@ -371,19 +359,11 @@ const ReporteForm = () => {
                   value={severity}
                   checked={form.severidad === severity}
                   onChange={handleChange}
-                  style={{ display: "none" }}
+                  className="sr-only"
                 />
-                <div style={{ 
-                  width: "10px", 
-                  height: "10px", 
-                  borderRadius: "50%", 
-                  background: getSeverityColor(severity) 
-                }} />
-                <span style={{ 
-                  fontWeight: "600", 
-                  textTransform: "capitalize",
-                  color: form.severidad === severity ? getSeverityColor(severity) : "#6b7280",
-                  fontSize: "0.85rem"
+                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: getSeverityColor(severity) }} />
+                <span className="font-semibold text-sm capitalize" style={{
+                  color: form.severidad === severity ? getSeverityColor(severity) : '#6b7280'
                 }}>
                   {severity}
                 </span>
@@ -393,19 +373,15 @@ const ReporteForm = () => {
         </div>
 
         {/* Grid para campos medianos */}
-        <div style={{ 
-          display: "grid", 
-          gridTemplateColumns: "1fr 1fr", 
-          gap: "16px" 
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Área de Trabajo */}
-          <div className="form-group">
-            <label className="form-label">🏢 Área de Trabajo *</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Área de Trabajo *</label>
             <select
               name="area"
               value={form.area}
               onChange={handleChange}
-              className="form-select"
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors bg-white"
               required
             >
               <option value="">Selecciona un área...</option>
@@ -416,24 +392,19 @@ const ReporteForm = () => {
           </div>
 
           {/* Nombre del Reportante */}
-          <div className="form-group">
-            <label className="form-label">👤 Nombre del Reportante</label>
+          <div>
+            <label className="block text-sm font-semibold text-gray-900 mb-2">Nombre del Reportante</label>
             <input
               type="text"
               name="reportante"
               placeholder="Tu nombre (opcional)"
               value={form.reportante}
               onChange={handleChange}
-              className="form-input"
-              style={{ width: "100%" }}
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-colors"
             />
-            <div style={{ 
-              fontSize: "0.75rem", 
-              color: "#6b7280", 
-              marginTop: "4px" 
-            }}>
+            <p className="text-xs text-gray-500 mt-1">
               Si se deja vacío será marcado como "Anónimo"
-            </div>
+            </p>
           </div>
         </div>
 
@@ -498,7 +469,7 @@ const ReporteForm = () => {
                   style={{ display: "none" }}
                   id="photo-upload"
                 />
-                <div style={{ fontSize: "2.5rem", marginBottom: "12px", opacity: 0.5 }}>📸</div>
+                <div className="text-4xl mb-3 opacity-50">📸</div>
                 <label
                   htmlFor="photo-upload"
                   style={{
@@ -516,7 +487,7 @@ const ReporteForm = () => {
                     fontSize: "0.9rem"
                   }}
                 >
-                  📸 Seleccionar Foto
+                  Seleccionar Foto
                 </label>
                 <p style={{ 
                   marginTop: "8px", 
@@ -556,7 +527,7 @@ const ReporteForm = () => {
                       border: "none"
                     }}
                   >
-                    🔄 Cambiar
+                    Cambiar
                   </label>
                   <button
                     type="button"
@@ -575,7 +546,7 @@ const ReporteForm = () => {
                       border: "none"
                     }}
                   >
-                    🗑️ Eliminar
+                    Eliminar
                   </button>
                 </div>
                 <input
@@ -591,48 +562,28 @@ const ReporteForm = () => {
         </div>
 
         {/* Botón de Envío */}
-        <button 
-          type="submit" 
-          className="btn btn-primary"
+        <button
+          type="submit"
           disabled={enviando || uploadingImage}
-          style={{ 
-            width: "100%", 
-            fontSize: "1rem",
-            padding: "14px 24px",
-            opacity: (enviando || uploadingImage) ? 0.7 : 1,
-            cursor: (enviando || uploadingImage) ? "not-allowed" : "pointer",
-            background: (enviando || uploadingImage) ? "#9ca3af" : "#3b82f6",
-            transition: "all 0.3s ease"
-          }}
+          className={`w-full py-4 px-6 rounded-lg font-semibold text-lg transition-all duration-300 focus:ring-4 focus:outline-none ${
+            enviando || uploadingImage
+              ? "bg-gray-400 text-gray-600 cursor-not-allowed"
+              : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-200"
+          }`}
         >
           {enviando ? (
             <>
-              <span className="pulse">⏳</span>
-              {uploadingImage ? 
-                `Subiendo imagen (${uploadProgress}%)...` : 
+              {uploadingImage ?
+                `Subiendo imagen (${uploadProgress}%)...` :
                 "Enviando reporte..."
               }
             </>
           ) : (
-            <>
-              📤 Enviar Reporte de Incidencia
-            </>
+            "Enviar Reporte de Incidencia"
           )}
         </button>
-      </div>
-
-      {/* Estilos responsive adicionales */}
-      <style>
-        {`
-          @media (max-width: 768px) {
-            .form-group > div[style*="grid-template-columns"] {
-              grid-template-columns: 1fr !important;
-              gap: 12px !important;
-            }
-          }
-        `}
-      </style>
-    </form>
+      </form>
+    </div>
   );
 };
 

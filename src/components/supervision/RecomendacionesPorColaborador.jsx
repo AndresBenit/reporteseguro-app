@@ -312,13 +312,13 @@ const RecomendacionesPorColaborador = () => {
                 </div>
                 
                 <div style={{ fontSize: '0.8rem', color: '#6b7280', marginBottom: '8px' }}>
-                  📧 {colaborador.cedula} • 🏢 {colaborador.area}
+                  Cédula: {colaborador.cedula} • Área: {colaborador.area}
                 </div>
                 
                 {colaborador.totalReportes > 0 && (
                   <div style={{ fontSize: '0.75rem', color: '#374151' }}>
-                    🚨 {colaborador.criticos} críticas • ⚠️ {colaborador.altos} altas • 
-                    📊 {colaborador.medios} medias • ℹ️ {colaborador.bajos} bajas
+                    {colaborador.criticos} críticas • {colaborador.altos} altas •
+                    {colaborador.medios} medias • {colaborador.bajos} bajas
                   </div>
                 )}
               </div>

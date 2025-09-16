@@ -718,7 +718,7 @@ const ReportesHistorialMejorado = () => {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
         <TablaReportes 
           tipo="incidencia" 
-          titulo="🚨 Reportes de Incidencia" 
+          titulo="Reportes de Incidencia" 
           color="#dc2626" 
         />
         <TablaReportes 

@@ -608,7 +608,7 @@ const PerfilIndividual = () => {
                 {stats.totalEPP}
               </div>
               <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                🛡️ Control EPP
+                Control EPP
               </div>
             </div>
             
@@ -626,7 +626,7 @@ const PerfilIndividual = () => {
                 {stats.totalIncidencias}
               </div>
               <div style={{ fontSize: "0.85rem", fontWeight: "600", opacity: 0.9 }}>
-                🚨 Incidencias
+                Incidencias
               </div>
             </div>
             

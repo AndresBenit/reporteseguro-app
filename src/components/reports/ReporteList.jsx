@@ -149,7 +149,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
   if (reportesValidos.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "50px 20px" }}>
-        <div style={{ fontSize: "3.5rem", marginBottom: "20px", opacity: 0.3 }}>📋</div>
+        <div style={{ fontSize: "2rem", marginBottom: "20px", fontWeight: "bold", color: "#9ca3af" }}>Sin reportes</div>
         <h3 style={{ color: "#6b7280", marginBottom: "10px" }}>No hay reportes registrados</h3>
         <p style={{ color: "#9ca3af" }}>
           Los reportes aparecerán aquí una vez que se registren algunas incidencias
@@ -248,7 +248,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
         gap: "10px"
       }}>
         <span style={{ fontWeight: "600", color: "#374151", fontSize: "0.9rem" }}>
-          📊 Mostrando {reportesFiltrados.length} de {reportesValidos.length} reportes
+          Mostrando {reportesFiltrados.length} de {reportesValidos.length} reportes
         </span>
         {(filtroEstado !== "todos" || filtroSeveridad !== "todos" || busqueda) && (
           <button
@@ -303,7 +303,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
                     fontWeight: "600",
                     fontSize: "0.85rem"
                   }}>
-                    {reporte.tipo === "Condición Insegura" ? "💡" : "⚠️"}
+                    <span className={`w-3 h-3 rounded-full ${reporte.tipo === "Condición Insegura" ? "bg-blue-500" : "bg-orange-500"}`}></span>
                     <span style={{ display: "block" }}>
                       {reporte.tipo}
                     </span>
@@ -431,7 +431,7 @@ const ReporteList = ({ reportes, actualizarEstado, eliminarReporte }) => {
                   marginBottom: "4px"
                 }}>
                   <span style={{ fontSize: "1.1rem" }}>
-                    {reporte.tipo === "Condición Insegura" ? "💡" : "⚠️"}
+                    <span className={`w-3 h-3 rounded-full ${reporte.tipo === "Condición Insegura" ? "bg-blue-500" : "bg-orange-500"}`}></span>
                   </span>
                   <span style={{ fontWeight: "600", fontSize: "0.9rem" }}>
                     {reporte.tipo}
