@@ -183,7 +183,9 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
       } transition-all duration-300`}>
 
         {/* Header del Sidebar */}
-        <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200 bg-white">
+        <div className={`flex items-center justify-between h-16 border-b border-gray-200 bg-white ${
+          sidebarCollapsed ? 'px-3' : 'px-6'
+        } transition-all duration-300`}>
           {!sidebarCollapsed && (
             <Logo variant="main" size="md" />
           )}
@@ -206,7 +208,7 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
         <div className="flex-1 overflow-y-auto py-4">
           <nav className="space-y-6">
             {enterpriseModules.map((category) => (
-              <div key={category.category} className="px-4">
+              <div key={category.category} className={sidebarCollapsed ? "px-2" : "px-4"}>
                 {!sidebarCollapsed && (
                   <h3 className="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-3">
                     {category.category}
@@ -219,7 +221,7 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
                       <button
                         key={module.id}
                         onClick={() => handleNavigation(module.path)}
-                        className={`w-full flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 ${
+                        className={`w-full flex items-center ${sidebarCollapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5'} text-sm font-medium rounded-lg transition-all duration-200 ${
                           getColorClasses(category.color, isActive)
                         }`}
                         title={sidebarCollapsed ? module.label : module.description}
@@ -238,7 +240,7 @@ const MainLayoutEnterprise = ({ user, onLogout, children, reportes = [] }) => {
         </div>
 
         {/* Usuario - Footer del Sidebar */}
-        <div className="p-4 border-t border-gray-200 bg-gray-50">
+        <div className={`border-t border-gray-200 bg-gray-50 ${sidebarCollapsed ? 'p-2' : 'p-4'} transition-all duration-300`}>
           {!sidebarCollapsed ? (
             <div className="flex items-center space-x-3">
               <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center">
