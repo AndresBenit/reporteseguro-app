@@ -1,10 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { dbHelpers, supabase } from '../../services/supabase';
+import { supabase } from '../../services/supabase';
+import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
 
 const ReportesHistorialMejorado = () => {
-  const [reportes, setReportes] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    reportes,
+    loading,
+    actualizarEstado,
+    eliminarReporte,
+    isUpdating
+  } = useReportes();
+
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState({
@@ -24,71 +31,15 @@ const ReportesHistorialMejorado = () => {
   const [reporteAEditar, setReporteAEditar] = useState(null);
   const [nuevoEstado, setNuevoEstado] = useState('');
   const [comentario, setComentario] = useState('');
-  const [updating, setUpdating] = useState(null);
 
   const reportesPorPagina = 10;
 
-  useEffect(() => {
-    const fetchReportes = async () => {
-      try {
-        const data = await dbHelpers.getAll('reportes', {
-          orderBy: 'fecha',
-          ascending: false
-        });
-        const processedData = data.map(item => ({
-          ...item,
-          fecha: item.fecha ? new Date(item.fecha) : null
-        }));
-        setReportes(processedData);
-      } catch (error) {
-        console.error('Error fetching reportes:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  // Función para manejar actualización de estado
+  const handleActualizarEstado = async () => {
+    if (!reporteAEditar || !nuevoEstado) return;
 
-    fetchReportes();
-
-    // Set up real-time subscription
-    const subscription = dbHelpers.subscribe('reportes', (payload) => {
-      console.log('Reportes updated:', payload);
-      // Refresh data when changes occur
-      fetchReportes();
-    });
-
-    return () => {
-      if (subscription) {
-        subscription.unsubscribe();
-      }
-    };
-  }, []);
-
-  // Función para actualizar estado con historial
-  const actualizarEstadoConHistorial = async (reporteId, estado, comentario = '') => {
-    setUpdating(reporteId);
     try {
-      const ahora = new Date().toISOString();
-
-      // Buscar el reporte actual para mantener el historial
-      const reporteActual = reportes.find(r => r.id === reporteId);
-      const historialExistente = reporteActual?.historialEstados || [];
-
-      const nuevoHistorial = [
-        ...historialExistente,
-        {
-          estado: estado,
-          fecha: ahora,
-          comentario: comentario,
-          usuario: 'Admin' // Aquí puedes usar el usuario actual
-        }
-      ];
-
-      await dbHelpers.update(reporteId, {
-        estado: estado,
-        historialEstados: nuevoHistorial,
-        fechaUltimaActualizacion: ahora
-      });
-
+      await actualizarEstado(reporteAEditar.id, nuevoEstado);
       setShowEstadoModal(false);
       setReporteAEditar(null);
       setNuevoEstado('');
@@ -97,7 +48,6 @@ const ReportesHistorialMejorado = () => {
       console.error('Error actualizando estado:', error);
       alert('Error al actualizar el estado del reporte');
     }
-    setUpdating(null);
   };
 
   // Filtrar reportes
@@ -253,15 +203,15 @@ const ReportesHistorialMejorado = () => {
               Cancelar
             </button>
             <button
-              onClick={() => actualizarEstadoConHistorial(reporteAEditar.id, nuevoEstado, comentario)}
-              disabled={updating === reporteAEditar.id}
+              onClick={handleActualizarEstado}
+              disabled={isUpdating(reporteAEditar?.id)}
               className={`px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-colors ${
-                updating === reporteAEditar.id
+                isUpdating(reporteAEditar?.id)
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-blue-700'
               }`}
             >
-              {updating === reporteAEditar.id ? 'Actualizando...' : 'Actualizar Estado'}
+              {isUpdating(reporteAEditar?.id) ? 'Actualizando...' : 'Actualizar Estado'}
             </button>
           </div>
         </div>

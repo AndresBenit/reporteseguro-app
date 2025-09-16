@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { dbHelpers, storageHelpers } from "../../services/supabase";
+import { storageHelpers } from "../../services/supabase";
+import { useReportes } from "../../hooks/useReportes";
 
 const initialState = {
   tipo: "Condición Insegura",
@@ -33,6 +34,7 @@ const areasDisponibles = [
 ];
 
 const ReporteForm = () => {
+  const { crearReporte: crearReporteHook } = useReportes();
   const [form, setForm] = useState(initialState);
   const [enviando, setEnviando] = useState(false);
   const [mensaje, setMensaje] = useState("");
@@ -216,7 +218,7 @@ const ReporteForm = () => {
         }
       }
 
-      await dbHelpers.create('reportes', { 
+      await crearReporteHook({
         ...form,
         fotoUrl,
         fecha: new Date().toISOString(),
