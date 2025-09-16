@@ -596,7 +596,7 @@ const ControlEPP = () => {
             marginBottom: "12px",
             fontSize: "14px"
           }}>
-            🦺 Elementos de Protección Personal *
+            Elementos de Protección Personal *
           </label>
           
           {elementosSeleccionados.map((elemento, index) => (
@@ -974,7 +974,7 @@ const ControlEPP = () => {
             </>
           ) : (
             <>
-              🦺 Registrar Entrega de EPP
+              Registrar Entrega de EPP
             </>
           )}
         </button>
