@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { supabase, dbHelpers } from "../services/supabase";
 import { reporteUtils, REPORTE_ESTADOS } from "../constants/reporteStates";
-import { useNotifications } from "../components/common/NotificationSystem";
 
 export const useReportes = () => {
-  const { success, error: showError, info } = useNotifications();
   const [reportes, setReportes] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -83,11 +81,10 @@ export const useReportes = () => {
         setReportes(prev => prev.filter(reporte => reporte.id !== id));
         
         console.log(`✅ Reporte ${id} eliminado exitosamente`);
-        success("Reporte eliminado exitosamente");
         
       } catch (err) {
         console.error("❌ Error eliminando reporte:", err);
-        showError("Error al eliminar el reporte", { details: err.message });
+        console.error("Error al eliminar el reporte:", err.message);
       } finally {
         setUpdating(prev => {
           const newSet = new Set(prev);
@@ -122,7 +119,7 @@ export const useReportes = () => {
       
     } catch (err) {
       console.error("❌ Error actualizando estado:", err);
-      showError("Error al actualizar el estado", { details: err.message });
+      console.error("Error al actualizar el estado:", err.message);
     } finally {
       setUpdating(prev => {
         const newSet = new Set(prev);
