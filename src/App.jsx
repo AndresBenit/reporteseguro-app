@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { supabase, authHelpers } from "./services/supabase";
+import { NotificationProvider } from "./components/common/NotificationSystem";
 
 // Componentes principales
 import LoginMejorado from "./components/auth/LoginMejorado";
@@ -155,8 +156,9 @@ function App() {
   }
 
   return (
-    <div className="app fade-in">
-      <Routes>
+    <NotificationProvider>
+      <div className="app fade-in">
+        <Routes>
         {/* Ruta de login */}
         <Route
           path="/login"
@@ -293,8 +295,9 @@ function App() {
             )
           }
         />
-      </Routes>
-    </div>
+        </Routes>
+      </div>
+    </NotificationProvider>
   );
 }
 
