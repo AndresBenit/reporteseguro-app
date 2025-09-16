@@ -2,6 +2,19 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { dbHelpers, storageHelpers } from '../../services/supabase';
 import SignaturePad from '../common/SignaturePad';
+import {
+  FormContainer,
+  FormHeader,
+  FormSection,
+  FormRow,
+  FormField,
+  FormInput,
+  FormSelect,
+  FormTextarea,
+  FormButton,
+  FormButtonGroup,
+  FormMessage
+} from '../common/FormComponents';
 
 const ControlEPP = () => {
   const navigate = useNavigate();
@@ -409,583 +422,263 @@ const ControlEPP = () => {
   };
 
   return (
-    <div
-      style={{ 
-        padding: window.innerWidth <= 768 ? "15px" : "20px", 
-        maxWidth: "800px", 
-        margin: "0 auto",
-        minHeight: "100vh"
-      }}
-      className="mobile-container"
-    >
-      {/* Botón de volver */}
-      <button
-        onClick={() => window.history.back()}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-          padding: "12px 20px",
-          background: "#f8fafc",
-          border: "2px solid #e2e8f0",
-          borderRadius: "12px",
-          cursor: "pointer",
-          fontSize: "0.9rem",
-          fontWeight: "600",
-          color: "#475569",
-          marginBottom: "24px",
-          transition: "all 0.2s ease",
-          boxShadow: "0 2px 4px rgba(0, 0, 0, 0.05)"
-        }}
-        onMouseEnter={(e) => {
-          e.target.style.background = "#e2e8f0";
-          e.target.style.transform = "translateY(-1px)";
-          e.target.style.boxShadow = "0 4px 8px rgba(0, 0, 0, 0.1)";
-        }}
-        onMouseLeave={(e) => {
-          e.target.style.background = "#f8fafc";
-          e.target.style.transform = "translateY(0)";
-          e.target.style.boxShadow = "0 2px 4px rgba(0, 0, 0, 0.05)";
-        }}
-      >
-        ← Volver
-      </button>
-
-      {/* Header */}
-      <div style={{ textAlign: "center", marginBottom: "30px" }}>
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">
-          Control de EPP
-        </h1>
-        <p style={{ color: "#6b7280", fontSize: "1rem" }}>
-          Registro de entrega de Elementos de Protección Personal
-        </p>
-      </div>
-
-      {/* Formulario */}
-      <form onSubmit={handleSubmit} style={{
-        background: "white",
-        padding: "30px",
-        borderRadius: "16px",
-        border: "1px solid #e5e7eb",
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)"
-      }}>
-        
-        {/* Título (fijo) */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            Título del Registro
-          </label>
-          <input
-            type="text"
-            value={form.titulo}
-            readOnly
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "16px",
-              backgroundColor: "#f9fafb",
-              color: "#6b7280"
-            }}
-          />
-        </div>
-
-        {/* Colaborador con Autocompletado */}
-        <div>
-          <label className="block text-sm font-semibold text-gray-900 mb-2">
-            Colaborador *
-          </label>
-          <div style={{ position: "relative" }}>
-            <input
-              type="text"
-              placeholder="Escribe el nombre del colaborador..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              onFocus={() =>
-                searchTerm &&
-                setShowSugerencias(colaboradoresFiltrados.length > 0)
-              }
-              onBlur={handleBlurColaborador}
-              required
-              style={{
-                width: "100%",
-                padding: "12px",
-                border: form.nombre ? "2px solid #10b981" : "2px solid #e5e7eb",
-                borderRadius: "8px",
-                fontSize: "16px",
-                backgroundColor: form.nombre ? "#f0fdf4" : "white",
-                transition: "all 0.2s ease",
-              }}
-            />
-
-            {/* Indicador de selección */}
-            {form.nombre && (
-              <div style={{
-                position: "absolute",
-                right: "12px",
-                top: "50%",
-                transform: "translateY(-50%)",
-                color: "#10b981",
-                fontSize: "18px",
-              }}>
-                ✓
-              </div>
-            )}
-
-            {/* Sugerencias */}
-            {showSugerencias && colaboradoresFiltrados.length > 0 && (
-              <div style={{
-                position: "absolute",
-                top: "100%",
-                left: 0,
-                right: 0,
-                backgroundColor: "white",
-                border: "2px solid #e5e7eb",
-                borderTop: "none",
-                borderRadius: "0 0 8px 8px",
-                boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                maxHeight: "200px",
-                overflowY: "auto",
-                zIndex: 1000,
-              }}>
-                {colaboradoresFiltrados.map((colaborador) => (
-                  <div
-                    key={colaborador.id}
-                    onClick={() => seleccionarColaborador(colaborador)}
-                    style={{
-                      padding: "12px 16px",
-                      cursor: "pointer",
-                      borderBottom: "1px solid #f3f4f6",
-                      display: "flex",
-                      justifyContent: "space-between",
-                      alignItems: "center",
-                      transition: "background-color 0.2s ease",
-                    }}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = "#f9fafb"}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = "white"}
-                  >
-                    <div>
-                      <div style={{ fontWeight: "600", color: "#374151" }}>
-                        {colaborador.nombre}
-                      </div>
-                      <div style={{ fontSize: "12px", color: "#6b7280" }}>
-                        {colaborador.area}
-                      </div>
-                    </div>
-                    <div style={{ color: "#10b981" }}>+</div>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Elementos de Protección Personal (Múltiples) */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "12px",
-            fontSize: "14px"
-          }}>
-            Elementos de Protección Personal *
-          </label>
-          
-          {elementosSeleccionados.map((elemento, index) => (
-            <div key={elemento.id} style={{
-              display: "flex",
-              gap: "12px",
-              alignItems: "end",
-              marginBottom: "12px",
-              padding: "16px",
-              background: "#f8fafc",
-              borderRadius: "8px",
-              border: "1px solid #e2e8f0"
-            }}>
-              <div style={{ flex: 2 }}>
-                <label style={{ 
-                  display: "block", 
-                  fontWeight: "500", 
-                  color: "#6b7280", 
-                  marginBottom: "6px",
-                  fontSize: "12px"
-                }}>
-                  Elemento EPP
-                </label>
-                {cargandoProductos ? (
-                  <div style={{ padding: "12px", textAlign: "center", color: "#6b7280" }}>
-                    Cargando...
-                  </div>
-                ) : (
-                  <select
-                    value={elemento.producto}
-                    onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
-                    required
-                    style={{
-                      width: "100%",
-                      padding: "12px",
-                      border: "2px solid #e5e7eb",
-                      borderRadius: "6px",
-                      fontSize: "14px",
-                      backgroundColor: "white",
-                      cursor: "pointer"
-                    }}
-                  >
-                    <option value="">Seleccionar elemento...</option>
-                    {productosEPP.map((producto) => (
-                      <option key={producto.id} value={producto.nombre}>
-                        {producto.nombre} (Stock: {producto.stock_actual})
-                      </option>
-                    ))}
-                    <option value="__nuevo__" style={{ borderTop: "1px solid #e5e7eb", fontStyle: "italic" }}>
-                      + Escribir nuevo elemento...
-                    </option>
-                  </select>
-                )}
-                
-                {/* Input para nuevo producto */}
-                {elemento.producto === '__nuevo__' && (
-                  <input
-                    type="text"
-                    placeholder="Escriba el nombre del nuevo elemento EPP..."
-                    style={{
-                      width: "100%",
-                      padding: "8px 12px",
-                      border: "2px solid #3b82f6",
-                      borderRadius: "6px",
-                      fontSize: "14px",
-                      marginTop: "8px"
-                    }}
-                    onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
-                    autoFocus
-                  />
-                )}
-              </div>
-              
-              <div style={{ flex: 1 }}>
-                <label style={{ 
-                  display: "block", 
-                  fontWeight: "500", 
-                  color: "#6b7280", 
-                  marginBottom: "6px",
-                  fontSize: "12px"
-                }}>
-                  Cantidad
-                </label>
-                <input
-                  type="number"
-                  value={elemento.cantidad}
-                  onChange={(e) => actualizarElemento(elemento.id, 'cantidad', parseInt(e.target.value) || 1)}
-                  min="1"
-                  max="100"
-                  style={{
-                    width: "100%",
-                    padding: "12px",
-                    border: "2px solid #e5e7eb",
-                    borderRadius: "6px",
-                    fontSize: "14px"
-                  }}
-                />
-              </div>
-              
-              <div style={{ display: "flex", gap: "4px" }}>
-                {elementosSeleccionados.length > 1 && (
-                  <button
-                    type="button"
-                    onClick={() => eliminarElemento(elemento.id)}
-                    style={{
-                      padding: "10px",
-                      background: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      fontWeight: "600",
-                      minWidth: "40px"
-                    }}
-                    title="Eliminar elemento"
-                  >
-                    Eliminar
-                  </button>
-                )}
-              </div>
-            </div>
-          ))}
-          
-          {/* Botón para agregar más elementos */}
-          <button
-            type="button"
-            onClick={agregarElemento}
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: "8px",
-              padding: "12px 16px",
-              background: "#10b981",
-              color: "white",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontSize: "14px",
-              fontWeight: "600",
-              marginTop: "8px"
-            }}
-          >
-            ➕ Agregar otro elemento EPP
-          </button>
-        </div>
-
-        {/* Área */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            Área de Trabajo *
-          </label>
-          <select
-            name="area"
-            value={form.area}
-            onChange={handleChange}
-            required
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "16px",
-              backgroundColor: "white",
-              cursor: "pointer"
-            }}
-          >
-            <option value="">Selecciona un área</option>
-            {areasDisponibles.map((area) => (
-              <option key={area} value={area}>
-                {area}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Observaciones */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            Observaciones
-          </label>
-          <textarea
-            name="observaciones"
-            value={form.observaciones}
-            onChange={handleChange}
-            placeholder="Observaciones adicionales sobre la entrega (opcional)"
-            rows="3"
-            style={{
-              width: "100%",
-              padding: "12px",
-              border: "2px solid #e5e7eb",
-              borderRadius: "8px",
-              fontSize: "16px",
-              resize: "vertical",
-              minHeight: "80px"
-            }}
-          />
-        </div>
-
-        {/* Subida de foto */}
-        <div style={{ marginBottom: "24px" }}>
-          <label style={{ 
-            display: "block", 
-            fontWeight: "600", 
-            color: "#374151", 
-            marginBottom: "8px",
-            fontSize: "14px"
-          }}>
-            Foto del Elemento Entregado
-          </label>
-          <div style={{
-            border: "2px dashed #d1d5db",
-            borderRadius: "12px",
-            padding: "20px",
-            textAlign: "center",
-            backgroundColor: "#f9fafb"
-          }}>
-            {!imagePreview ? (
-              <div>
-                <input
-                  type="file"
-                  accept="image/*"
-                  capture="camera"
-                  onChange={handleImageChange}
-                  style={{ display: "none" }}
-                  id="photo-upload"
-                  disabled={uploadingImage}
-                />
-                <label 
-                  htmlFor="photo-upload" 
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    background: "#3b82f6",
-                    color: "white",
-                    padding: "12px 24px",
-                    borderRadius: "8px",
-                    cursor: uploadingImage ? "not-allowed" : "pointer",
-                    fontSize: "16px",
-                    fontWeight: "600",
-                    opacity: uploadingImage ? 0.7 : 1
-                  }}
-                >
-                  {uploadingImage ? "Subiendo..." : "Tomar Foto"}
-                </label>
-                <p style={{ color: "#6b7280", marginTop: "8px", fontSize: "14px" }}>
-                  Toma una foto del elemento EPP que estás entregando
-                </p>
-              </div>
-            ) : (
-              <div>
-                <img
-                  src={imagePreview}
-                  alt="Elemento EPP"
-                  style={{
-                    maxWidth: "100%",
-                    maxHeight: "200px",
-                    borderRadius: "8px",
-                    marginBottom: "12px"
-                  }}
-                />
-                <div style={{ display: "flex", gap: "8px", justifyContent: "center" }}>
-                  <button
-                    type="button"
-                    onClick={removeImage}
-                    style={{
-                      background: "#ef4444",
-                      color: "white",
-                      border: "none",
-                      padding: "8px 16px",
-                      borderRadius: "6px",
-                      cursor: "pointer",
-                      fontSize: "14px",
-                      fontWeight: "600"
-                    }}
-                  >
-                    Eliminar
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Barra de progreso */}
-            {uploadingImage && (
-              <div style={{ marginTop: "16px" }}>
-                <div style={{
-                  background: "#e5e7eb",
-                  borderRadius: "10px",
-                  overflow: "hidden",
-                  height: "8px"
-                }}>
-                  <div style={{
-                    background: "#3b82f6",
-                    height: "100%",
-                    width: `${uploadProgress}%`,
-                    transition: "width 0.3s ease"
-                  }} />
-                </div>
-                <p style={{ color: "#3b82f6", marginTop: "8px", fontSize: "14px" }}>
-                  Subiendo imagen... {uploadProgress}%
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Firma Digital */}
-        <SignaturePad 
-          onSignatureChange={handleSignatureChange}
-          required={true}
-          label="Firma del Colaborador que Recibe"
+    <div className="min-h-screen bg-gray-50 p-4 md:p-8">
+      <FormContainer>
+        <FormHeader
+          title="Control de EPP"
+          subtitle="Registro de entrega de Elementos de Protección Personal"
+          onBack={() => window.history.back()}
         />
 
-        {/* Mensaje */}
-        {mensaje && (
-          <div style={{
-            padding: "12px",
-            marginBottom: "20px",
-            borderRadius: "8px",
-            backgroundColor: mensaje.includes("Error") ? "#fef2f2" : mensaje.includes("Advertencia") ? "#fef3cd" : "#f0fdf4",
-            borderLeft: `4px solid ${mensaje.includes("Error") ? "#ef4444" : mensaje.includes("Advertencia") ? "#f59e0b" : "#10b981"}`,
-            color: mensaje.includes("Error") ? "#dc2626" : mensaje.includes("Advertencia") ? "#92400e" : "#059669",
-            fontSize: "14px",
-            fontWeight: "500"
-          }}>
-            {mensaje}
-          </div>
-        )}
+        <form onSubmit={handleSubmit}>
+          <FormSection title="Información de la Entrega">
+            <FormRow columns={1}>
+              <FormField label="Título del Registro">
+                <FormInput
+                  type="text"
+                  value={form.titulo}
+                  readOnly
+                  className="bg-gray-50 text-gray-600"
+                />
+              </FormField>
+            </FormRow>
 
-        {/* Botón de envío */}
-        <button
-          type="submit"
-          disabled={loading}
-          style={{
-            width: "100%",
-            padding: "16px",
-            background: loading ? "#9ca3af" : "#10b981",
-            color: "white",
-            border: "none",
-            borderRadius: "12px",
-            fontSize: "18px",
-            fontWeight: "600",
-            cursor: loading ? "not-allowed" : "pointer",
-            transition: "all 0.2s ease",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "12px"
-          }}
-        >
-          {loading ? (
-            <>
-              <span style={{ 
-                width: "20px", 
-                height: "20px", 
-                border: "2px solid #ffffff40", 
-                borderTop: "2px solid #ffffff", 
-                borderRadius: "50%", 
-                animation: "spin 1s linear infinite" 
-              }}></span>
-              Registrando entrega...
-            </>
-          ) : (
-            <>
-              Registrar Entrega de EPP
-            </>
-          )}
-        </button>
-      </form>
+            <FormField label="Colaborador" required>
+              <div className="relative">
+                <FormInput
+                  type="text"
+                  placeholder="Escribe el nombre del colaborador..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  onFocus={() =>
+                    searchTerm &&
+                    setShowSugerencias(colaboradoresFiltrados.length > 0)
+                  }
+                  onBlur={handleBlurColaborador}
+                  required
+                  className={form.nombre ? "border-green-300 bg-green-50" : ""}
+                />
 
-      <style jsx>{`
-        @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
-        }
-      `}</style>
+                {form.nombre && (
+                  <div className="absolute right-4 top-1/2 transform -translate-y-1/2 text-green-500 text-lg">
+                    ✓
+                  </div>
+                )}
+
+                {showSugerencias && colaboradoresFiltrados.length > 0 && (
+                  <div className="absolute top-full left-0 right-0 bg-white border-2 border-gray-200 border-t-0 rounded-b-lg shadow-lg max-h-48 overflow-y-auto z-50">
+                    {colaboradoresFiltrados.map((colaborador) => (
+                      <div
+                        key={colaborador.id}
+                        onClick={() => seleccionarColaborador(colaborador)}
+                        className="p-3 cursor-pointer border-b border-gray-100 hover:bg-gray-50 flex justify-between items-center transition-colors"
+                      >
+                        <div>
+                          <div className="font-semibold text-gray-800">
+                            {colaborador.nombre}
+                          </div>
+                          <div className="text-sm text-gray-500">
+                            {colaborador.area}
+                          </div>
+                        </div>
+                        <div className="text-green-500">+</div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </FormField>
+          </FormSection>
+
+          <FormSection title="Elementos de Protección Personal">
+            {elementosSeleccionados.map((elemento, index) => (
+              <div key={elemento.id} className="flex gap-4 items-end mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="flex-2">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Elemento EPP
+                  </label>
+                  {cargandoProductos ? (
+                    <div className="p-3 text-center text-gray-500">
+                      Cargando...
+                    </div>
+                  ) : (
+                    <FormSelect
+                      value={elemento.producto}
+                      onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
+                      required
+                      placeholder="Seleccionar elemento..."
+                      options={[
+                        ...productosEPP.map(producto => ({
+                          value: producto.nombre,
+                          label: `${producto.nombre} (Stock: ${producto.stock_actual})`
+                        })),
+                        { value: "__nuevo__", label: "+ Escribir nuevo elemento..." }
+                      ]}
+                    />
+                  )}
+
+                  {elemento.producto === '__nuevo__' && (
+                    <FormInput
+                      type="text"
+                      placeholder="Escriba el nombre del nuevo elemento EPP..."
+                      onChange={(e) => actualizarElemento(elemento.id, 'producto', e.target.value)}
+                      autoFocus
+                      className="mt-2 border-blue-300"
+                    />
+                  )}
+                </div>
+
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-600 mb-2">
+                    Cantidad
+                  </label>
+                  <FormInput
+                    type="number"
+                    value={elemento.cantidad}
+                    onChange={(e) => actualizarElemento(elemento.id, 'cantidad', parseInt(e.target.value) || 1)}
+                    min="1"
+                    max="100"
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  {elementosSeleccionados.length > 1 && (
+                    <FormButton
+                      type="button"
+                      variant="danger"
+                      size="sm"
+                      onClick={() => eliminarElemento(elemento.id)}
+                      title="Eliminar elemento"
+                    >
+                      Eliminar
+                    </FormButton>
+                  )}
+                </div>
+              </div>
+            ))}
+
+            <FormButton
+              type="button"
+              variant="success"
+              size="sm"
+              onClick={agregarElemento}
+              className="mt-2"
+            >
+              + Agregar otro elemento EPP
+            </FormButton>
+          </FormSection>
+
+          <FormSection title="Ubicación y Observaciones">
+            <FormRow columns={1}>
+              <FormField label="Área de Trabajo" required>
+                <FormSelect
+                  name="area"
+                  value={form.area}
+                  onChange={handleChange}
+                  required
+                  placeholder="Selecciona un área"
+                  options={areasDisponibles}
+                />
+              </FormField>
+
+              <FormField label="Observaciones">
+                <FormTextarea
+                  name="observaciones"
+                  value={form.observaciones}
+                  onChange={handleChange}
+                  placeholder="Observaciones adicionales sobre la entrega (opcional)"
+                  rows={3}
+                />
+              </FormField>
+            </FormRow>
+          </FormSection>
+
+          <FormSection title="Documentación">
+            <FormField label="Foto del Elemento Entregado">
+              <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center bg-gray-50">
+                {!imagePreview ? (
+                  <div>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      capture="camera"
+                      onChange={handleImageChange}
+                      className="hidden"
+                      id="photo-upload"
+                      disabled={uploadingImage}
+                    />
+                    <label
+                      htmlFor="photo-upload"
+                      className={`inline-flex items-center gap-2 px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold text-base cursor-pointer hover:bg-blue-700 transition-colors ${uploadingImage ? 'opacity-70 cursor-not-allowed' : ''}`}
+                    >
+                      {uploadingImage ? "Subiendo..." : "Tomar Foto"}
+                    </label>
+                    <p className="text-gray-500 mt-2 text-sm">
+                      Toma una foto del elemento EPP que estás entregando
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    <img
+                      src={imagePreview}
+                      alt="Elemento EPP"
+                      className="max-w-full max-h-48 rounded-lg mx-auto mb-3"
+                    />
+                    <FormButton
+                      type="button"
+                      variant="danger"
+                      size="sm"
+                      onClick={removeImage}
+                    >
+                      Eliminar
+                    </FormButton>
+                  </div>
+                )}
+
+                {uploadingImage && (
+                  <div className="mt-4">
+                    <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                      <div
+                        className="bg-blue-600 h-full transition-all duration-300"
+                        style={{ width: `${uploadProgress}%` }}
+                      />
+                    </div>
+                    <p className="text-blue-600 mt-2 text-sm">
+                      Subiendo imagen... {uploadProgress}%
+                    </p>
+                  </div>
+                )}
+              </div>
+            </FormField>
+
+            <FormField label="Firma del Colaborador que Recibe" required>
+              <SignaturePad
+                onSignatureChange={handleSignatureChange}
+                required={true}
+                label="Firma del Colaborador que Recibe"
+              />
+            </FormField>
+          </FormSection>
+
+          <FormMessage
+            type={mensaje.includes("Error") ? "error" : mensaje.includes("Advertencia") ? "warning" : "success"}
+            message={mensaje}
+            onClose={() => setMensaje("")}
+          />
+
+          <FormButtonGroup>
+            <FormButton
+              type="submit"
+              variant="success"
+              size="lg"
+              loading={loading}
+              className="w-full"
+            >
+              {loading ? "Registrando entrega..." : "Registrar Entrega de EPP"}
+            </FormButton>
+          </FormButtonGroup>
+        </form>
+      </FormContainer>
     </div>
   );
 };
