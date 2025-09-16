@@ -141,7 +141,8 @@ const IncidentReportForm = () => {
     setUploadingImage(true);
     try {
       const fileName = `incident-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
-      const imageUrl = await storageHelpers.uploadFile(selectedImage, fileName, 'reportes-fotos');
+      const uploadResult = await storageHelpers.upload('reportes-fotos', fileName, selectedImage);
+      const imageUrl = storageHelpers.getPublicUrl('reportes-fotos', uploadResult.path);
       setUploadingImage(false);
       return imageUrl;
     } catch (error) {
@@ -177,7 +178,8 @@ const IncidentReportForm = () => {
         setMensaje("Guardando firma...");
         const blob = await fetch(signatureData).then(r => r.blob());
         const fileName = `signature-${Date.now()}.png`;
-        firma_url = await storageHelpers.uploadFile(blob, fileName, 'firmas');
+        const uploadResult = await storageHelpers.upload('firmas', fileName, blob);
+        firma_url = storageHelpers.getPublicUrl('firmas', uploadResult.path);
       }
 
       setMensaje("Creando reporte...");
