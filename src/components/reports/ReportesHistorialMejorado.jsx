@@ -44,17 +44,27 @@ const ReportesHistorialMejorado = () => {
 
   // Función para manejar actualización de estado
   const handleActualizarEstado = async () => {
-    if (!reporteAEditar || !nuevoEstado) return;
+    if (!reporteAEditar || !nuevoEstado) {
+      console.log('[HISTORIAL] Error: faltan datos', { reporteAEditar, nuevoEstado });
+      return;
+    }
+
+    console.log('[HISTORIAL] Iniciando actualización de estado:', {
+      reporteId: reporteAEditar.id,
+      estadoActual: reporteAEditar.estado,
+      nuevoEstado: nuevoEstado
+    });
 
     try {
       await actualizarEstado(reporteAEditar.id, nuevoEstado);
+      console.log('[HISTORIAL] Estado actualizado exitosamente');
       setShowEstadoModal(false);
       setReporteAEditar(null);
       setNuevoEstado('');
       setComentario('');
     } catch (error) {
-      console.error('Error actualizando estado:', error);
-      alert('Error al actualizar el estado del reporte');
+      console.error('[HISTORIAL] Error actualizando estado:', error);
+      alert(`Error al actualizar el estado del reporte: ${error.message}`);
     }
   };
 
@@ -132,7 +142,9 @@ const ReportesHistorialMejorado = () => {
 
   const formatearFecha = (fecha) => {
     if (!fecha) return 'N/A';
-    return fecha.toLocaleDateString('es-ES', {
+    const date = typeof fecha === 'string' ? new Date(fecha) : fecha;
+    if (isNaN(date.getTime())) return 'N/A';
+    return date.toLocaleDateString('es-ES', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric',
@@ -317,7 +329,7 @@ const ReportesHistorialMejorado = () => {
               {datos.map((reporte) => (
                 <tr key={reporte.id} className="border-b border-gray-100 hover:bg-gray-50 transition-colors">
                   <td className="px-6 py-4 text-sm text-gray-600">
-                    {formatearFecha(reporte.fecha)}
+                    {formatearFecha(reporte.created_at)}
                   </td>
                   <td className="px-6 py-4">
                     <div className="max-w-xs overflow-hidden text-ellipsis">
@@ -598,7 +610,7 @@ const ReportesHistorialMejorado = () => {
 
               <div className="space-y-4">
                 <div>
-                  <span className="font-semibold text-gray-900">Fecha:</span> {formatearFecha(selectedReporte.fecha)}
+                  <span className="font-semibold text-gray-900">Fecha:</span> {formatearFecha(selectedReporte.created_at)}
                 </div>
                 <div>
                   <span className="font-semibold text-gray-900">Tipo:</span> {selectedReporte.tipo || selectedReporte.tipoReporte}
