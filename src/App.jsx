@@ -279,6 +279,8 @@ function App() {
                   
                   {/* Módulo de Investigación de Accidentes */}
                   <Route path="/investigacion-accidentes" element={<InvestigacionAccidentesMain />} />
+                  <Route path="/investigacion" element={<InvestigacionAccidentesMain />} />
+                  <Route path="/investigacion/nuevo" element={<InvestigacionAccidentesMain />} />
                   
                   {/* Módulo de Auditorías SST */}
                   <Route path="/auditorias" element={<AuditoriasMain />} />
