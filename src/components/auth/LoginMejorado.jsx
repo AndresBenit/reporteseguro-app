@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { authHelpers } from "../../services/supabase";
 import { Icon } from "../common/Icons";
+import logotipo from "../../assets/images/Logotipo.png";
 
 const LoginMejorado = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -13,10 +14,10 @@ const LoginMejorado = () => {
     const checkIsMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
-    
+
     checkIsMobile();
     window.addEventListener('resize', checkIsMobile);
-    
+
     return () => window.removeEventListener('resize', checkIsMobile);
   }, []);
 
@@ -40,7 +41,7 @@ const LoginMejorado = () => {
       await authHelpers.signIn(form.email, form.password);
     } catch (error) {
       console.error("Error de autenticación:", error);
-      
+
       // Mensajes de error más amigables
       const errorMessages = {
         "Invalid login credentials": "Credenciales inválidas",
@@ -48,345 +49,180 @@ const LoginMejorado = () => {
         "Invalid email": "El formato del email no es válido",
         "Too many requests": "Demasiados intentos fallidos. Intenta más tarde"
       };
-      
+
       setError(errorMessages[error.message] || "Error de autenticación. Intenta nuevamente.");
     }
-    
+
     setLoading(false);
   };
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        {/* Header */}
-        <div className="login-header">
-          <div className="logo-animation">
-            <div className="logo-shield"><Icon name="Shield" size={32} color="white" /></div>
-            <div className="logo-glow"></div>
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
+      {/* Background decorations */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-white rounded-full blur-2xl"></div>
+      </div>
+
+      <div className="relative z-10 w-full max-w-md">
+        {/* Login Card */}
+        <div className="bg-white backdrop-blur-lg bg-opacity-95 rounded-2xl shadow-2xl border border-white/20 p-8 space-y-6 animate-fade-in">
+
+          {/* Header with Logo */}
+          <div className="text-center space-y-4">
+            <div className="flex justify-center">
+              <div className="relative">
+                <img
+                  src={logotipo}
+                  alt="ReporteSeguro"
+                  className="h-16 w-auto object-contain animate-float"
+                />
+                <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-xl animate-pulse"></div>
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                Sistema de Gestión
+              </h1>
+              <p className="text-gray-600 font-medium">
+                {isMobile ? 'Seguridad Industrial' : 'Plataforma Profesional de Seguridad Industrial'}
+              </p>
+            </div>
           </div>
-          <h1 className="login-title">
-            ReporteSeguro
-          </h1>
-          <p className="login-subtitle">
-            {isMobile ? 'Gestión de Seguridad' : 'Sistema Profesional de Gestión de Incidencias'}
-          </p>
+
+          {/* Error Message */}
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center space-x-3 animate-shake">
+              <Icon name="AlertCircle" size={20} className="text-red-500 flex-shrink-0" />
+              <p className="text-red-700 text-sm font-medium">{error}</p>
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Correo Electrónico
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    name="email"
+                    placeholder="usuario@empresa.com"
+                    value={form.email}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    required
+                    autoComplete="email"
+                    autoCapitalize="none"
+                    autoCorrect="off"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <Icon name="Mail" size={20} className="text-gray-400" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Contraseña
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    name="password"
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    required
+                    autoComplete="current-password"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <Icon name="Lock" size={20} className="text-gray-400" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+            >
+              {loading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <span>Iniciando sesión...</span>
+                </>
+              ) : (
+                <>
+                  <Icon name="LogIn" size={20} />
+                  <span>Acceder al Sistema</span>
+                </>
+              )}
+            </button>
+          </form>
+
+          {/* Features Section */}
+          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+            <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
+              <Icon name="Shield" size={16} className="text-blue-600" />
+              <span>Características del Sistema</span>
+            </h4>
+            <ul className="text-xs text-gray-600 space-y-1">
+              <li className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                <span>Gestión centralizada de reportes</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                <span>Dashboard ejecutivo en tiempo real</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                <span>Seguimiento completo de incidencias</span>
+              </li>
+              <li className="flex items-center space-x-2">
+                <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                <span>Interfaz optimizada para móviles</span>
+              </li>
+              {!isMobile && (
+                <li className="flex items-center space-x-2">
+                  <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
+                  <span>Cumplimiento de normativas industriales</span>
+                </li>
+              )}
+            </ul>
+          </div>
+
+          {/* Footer */}
+          <div className="text-center pt-4 border-t border-gray-200 space-y-2">
+            <p className="text-sm font-semibold text-gray-600 flex items-center justify-center space-x-2">
+              <Icon name="Lock" size={14} className="text-gray-500" />
+              <span>Acceso autorizado únicamente</span>
+            </p>
+            <p className="text-xs text-gray-500">
+              Sistema privado • Contacta al administrador
+            </p>
+          </div>
         </div>
 
-        {/* Error Message */}
-        {error && (
-          <div className="mobile-alert error login-error">
-            {error}
-          </div>
-        )}
-
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label className="form-label">
-              Correo Electrónico
-            </label>
-            <input
-              type="email"
-              name="email"
-              placeholder="usuario@empresa.com"
-              value={form.email}
-              onChange={handleChange}
-              className="form-input"
-              required
-              autoComplete="email"
-              autoCapitalize="none"
-              autoCorrect="off"
-            />
-          </div>
-
-          <div className="form-group">
-            <label className="form-label">
-              Contraseña
-            </label>
-            <input
-              type="password"
-              name="password"
-              placeholder="••••••••"
-              value={form.password}
-              onChange={handleChange}
-              className="form-input"
-              required
-              autoComplete="current-password"
-            />
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary login-button"
-            disabled={loading}
-          >
-            {loading ? (
-              <>
-                Iniciando sesión...
-              </>
-            ) : (
-              <>
-                Acceder al Sistema
-              </>
-            )}
-          </button>
-        </form>
-
-        {/* Info del sistema */}
-        <div className="login-features">
-          <h4 className="features-title">
-            <Icon name="Info" size={16} />
-            Características del Sistema
-          </h4>
-          <ul className="features-list">
-            <li>Gestión centralizada de reportes</li>
-            <li>Dashboard ejecutivo en tiempo real</li>
-            <li>Seguimiento completo de incidencias</li>
-            <li>Interfaz optimizada para móviles</li>
-            {!isMobile && <li>Cumplimiento de normativas industriales</li>}
-          </ul>
-        </div>
-
-        {/* Footer */}
-        <div className="login-footer">
-          <p className="footer-security">
-            Acceso autorizado únicamente
-          </p>
-          <p className="footer-contact">
-            Sistema privado · Contacta al administrador
+        {/* Version info */}
+        <div className="text-center mt-6">
+          <p className="text-white/70 text-xs">
+            ReporteSeguro Enterprise v2.0 • Powered by Supabase
           </p>
         </div>
       </div>
 
       <style jsx>{`
-        .login-container {
-          min-height: 100vh;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: ${isMobile ? '16px' : '20px'};
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .login-container::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%23ffffff03" points="0,1000 1000,0 1000,1000"/></svg>');
-          background-size: cover;
-        }
-
-        .login-card {
-          background: white;
-          border-radius: ${isMobile ? '16px' : '24px'};
-          padding: ${isMobile ? '28px 24px' : '48px 40px'};
-          box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-          border: 1px solid rgba(255, 255, 255, 0.2);
-          width: 100%;
-          max-width: ${isMobile ? '340px' : '440px'};
-          position: relative;
-          z-index: 1;
-          backdrop-filter: blur(10px);
-          animation: slideUp 0.6s ease;
-        }
-
-        .login-header {
-          text-align: center;
-          margin-bottom: ${isMobile ? '28px' : '40px'};
-        }
-
-        .logo-animation {
-          position: relative;
-          display: inline-block;
-          margin-bottom: ${isMobile ? '16px' : '24px'};
-        }
-
-        .logo-shield {
-          font-size: ${isMobile ? '3rem' : '4rem'};
-          position: relative;
-          z-index: 2;
-          animation: float 3s ease-in-out infinite;
-        }
-
-        .logo-glow {
-          position: absolute;
-          top: 50%;
-          left: 50%;
-          transform: translate(-50%, -50%);
-          width: ${isMobile ? '60px' : '80px'};
-          height: ${isMobile ? '60px' : '80px'};
-          background: radial-gradient(circle, rgba(59, 130, 246, 0.3) 0%, transparent 70%);
-          border-radius: 50%;
-          animation: pulse 2s ease-in-out infinite;
-        }
-
-        .login-title {
-          font-size: ${isMobile ? '2rem' : '2.5rem'};
-          font-weight: 800;
-          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-          -webkit-background-clip: text;
-          -webkit-text-fill-color: transparent;
-          background-clip: text;
-          margin-bottom: ${isMobile ? '8px' : '12px'};
-          letter-spacing: -0.02em;
-        }
-
-        .login-subtitle {
-          color: #6b7280;
-          font-size: ${isMobile ? '0.9rem' : '1rem'};
-          font-weight: 500;
-          margin: 0;
-        }
-
-        .login-error {
-          margin-bottom: 20px;
-          animation: shake 0.5s ease;
-        }
-
-        .login-form {
-          margin-bottom: ${isMobile ? '24px' : '32px'};
-        }
-
-        .form-group {
-          margin-bottom: ${isMobile ? '20px' : '24px'};
-        }
-
-        .form-label {
-          display: block;
-          font-weight: 600;
-          font-size: ${isMobile ? '0.9rem' : '0.95rem'};
-          color: #374151;
-          margin-bottom: 8px;
-          padding-left: 4px;
-        }
-
-        .form-input {
-          width: 100%;
-          padding: ${isMobile ? '14px 16px' : '16px 18px'};
-          font-size: 16px;
-          line-height: 1.4;
-          color: #1f2937;
-          background-color: #f9fafb;
-          border: 2px solid #e5e7eb;
-          border-radius: 12px;
-          transition: all 0.3s ease;
-          box-sizing: border-box;
-        }
-
-        .form-input:focus {
-          outline: none;
-          border-color: #3b82f6;
-          background-color: #ffffff;
-          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-          transform: translateY(-1px);
-        }
-
-        .login-button {
-          width: 100%;
-          min-height: ${isMobile ? '52px' : '56px'};
-          font-size: ${isMobile ? '1rem' : '1.1rem'};
-          font-weight: 700;
-          border-radius: 12px;
-          background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%);
-          border: none;
-          color: white;
-          cursor: pointer;
-          transition: all 0.3s ease;
-          box-shadow: 0 8px 24px rgba(59, 130, 246, 0.3);
-          position: relative;
-          overflow: hidden;
-        }
-
-        .login-button::before {
-          content: '';
-          position: absolute;
-          top: 0;
-          left: -100%;
-          width: 100%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-          transition: left 0.5s ease;
-        }
-
-        .login-button:hover:not(:disabled) {
-          background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 100%);
-          transform: translateY(-2px);
-          box-shadow: 0 12px 32px rgba(59, 130, 246, 0.4);
-        }
-
-        .login-button:hover:not(:disabled)::before {
-          left: 100%;
-        }
-
-        .login-button:active:not(:disabled) {
-          transform: translateY(-1px);
-        }
-
-        .login-button:disabled {
-          opacity: 0.7;
-          cursor: not-allowed;
-          transform: none;
-        }
-
-        .login-features {
-          padding: ${isMobile ? '16px' : '20px'};
-          background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
-          border-radius: 12px;
-          border: 1px solid #e2e8f0;
-          margin-bottom: ${isMobile ? '20px' : '28px'};
-        }
-
-        .features-title {
-          color: #374151;
-          margin-bottom: ${isMobile ? '12px' : '16px'};
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          font-size: ${isMobile ? '0.9rem' : '1rem'};
-          font-weight: 600;
-        }
-
-        .features-list {
-          color: #6b7280;
-          font-size: ${isMobile ? '0.8rem' : '0.85rem'};
-          line-height: 1.6;
-          padding-left: ${isMobile ? '16px' : '20px'};
-          margin: 0;
-        }
-
-        .features-list li {
-          margin-bottom: ${isMobile ? '4px' : '6px'};
-        }
-
-        .login-footer {
-          text-align: center;
-          padding-top: ${isMobile ? '16px' : '20px'};
-          border-top: 1px solid #e5e7eb;
-        }
-
-        .footer-security {
-          color: #6b7280;
-          font-size: ${isMobile ? '0.85rem' : '0.9rem'};
-          font-weight: 600;
-          margin: 0 0 ${isMobile ? '6px' : '8px'} 0;
-        }
-
-        .footer-contact {
-          color: #9ca3af;
-          font-size: ${isMobile ? '0.75rem' : '0.8rem'};
-          margin: 0;
-        }
-
-        /* Animaciones */
-        @keyframes slideUp {
+        @keyframes fade-in {
           from {
             opacity: 0;
-            transform: translateY(30px);
+            transform: translateY(20px);
           }
           to {
             opacity: 1;
@@ -399,18 +235,7 @@ const LoginMejorado = () => {
             transform: translateY(0px);
           }
           50% {
-            transform: translateY(-10px);
-          }
-        }
-
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 0.6;
-            transform: translate(-50%, -50%) scale(1);
-          }
-          50% {
-            opacity: 0.2;
-            transform: translate(-50%, -50%) scale(1.1);
+            transform: translateY(-8px);
           }
         }
 
@@ -420,67 +245,16 @@ const LoginMejorado = () => {
           75% { transform: translateX(5px); }
         }
 
-        /* Responsive para pantallas muy pequeñas */
-        @media (max-width: 480px) {
-          .login-container {
-            padding: 12px;
-          }
-
-          .login-card {
-            padding: 24px 20px;
-            border-radius: 12px;
-            max-width: none;
-          }
-
-          .login-title {
-            font-size: 1.8rem;
-          }
-
-          .login-subtitle {
-            font-size: 0.85rem;
-          }
-
-          .form-input {
-            padding: 12px 14px;
-          }
-
-          .login-button {
-            min-height: 48px;
-            font-size: 0.95rem;
-          }
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
         }
 
-        /* Mejoras para landscape en móviles */
-        @media (max-height: 600px) and (orientation: landscape) {
-          .login-container {
-            padding: 8px;
-          }
+        .animate-float {
+          animation: float 3s ease-in-out infinite;
+        }
 
-          .login-card {
-            padding: 20px 24px;
-          }
-
-          .login-header {
-            margin-bottom: 20px;
-          }
-
-          .logo-shield {
-            font-size: 2.5rem;
-          }
-
-          .login-title {
-            font-size: 1.8rem;
-          }
-
-          .login-features {
-            padding: 12px;
-          }
-
-          .features-list {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 4px;
-          }
+        .animate-shake {
+          animation: shake 0.5s ease-in-out;
         }
       `}</style>
     </div>

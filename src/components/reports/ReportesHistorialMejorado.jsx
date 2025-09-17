@@ -20,14 +20,6 @@ const ReportesHistorialMejorado = () => {
     isArray: Array.isArray(reportes)
   });
 
-  console.log('[HISTORIAL] Reportes filtrados:', {
-    total: reportesFiltrados.length,
-    incidencia: reportesPorTipo.incidencia.length,
-    recomendacion: reportesPorTipo.recomendacion.length,
-    abordaje: reportesPorTipo.abordaje.length,
-    epp: reportesPorTipo.epp.length
-  });
-
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState({
@@ -108,6 +100,15 @@ const ReportesHistorialMejorado = () => {
       r.tipo === 'epp'
     )
   };
+
+  // Debug logs de filtrado
+  console.log('[HISTORIAL] Reportes filtrados:', {
+    total: reportesFiltrados.length,
+    incidencia: reportesPorTipo.incidencia.length,
+    recomendacion: reportesPorTipo.recomendacion.length,
+    abordaje: reportesPorTipo.abordaje.length,
+    epp: reportesPorTipo.epp.length
+  });
 
   // Paginación
   const getPaginatedData = (tipo) => {
