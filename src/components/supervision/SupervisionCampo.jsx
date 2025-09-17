@@ -199,7 +199,7 @@ const SupervisionCampo = () => {
       };
 
       const progressInterval = simulateProgress();
-      const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
+      const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, selectedImage);
 
       clearInterval(progressInterval);
       setUploadProgress(100);

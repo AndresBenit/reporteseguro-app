@@ -274,12 +274,12 @@ const ControlEPP = () => {
       };
 
       const progressInterval = simulateProgress();
-      const uploadResult = await storageHelpers.upload('reportes-adjuntos', fileName, selectedImage);
+      const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, selectedImage);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
 
-      const downloadURL = storageHelpers.getPublicUrl('reportes-adjuntos', uploadResult.path);
+      const downloadURL = storageHelpers.getPublicUrl('reportes-firmas', uploadResult.path);
       await new Promise((resolve) => setTimeout(resolve, 500));
 
       setUploadingImage(false);
