@@ -38,8 +38,8 @@ const tiposAccidente = [
   "Exposición a radiaciones",
   "Incendio",
   "Explosión",
-  "Accidente de tránsito",
-  "Otro"
+  "Accidente de trayecto",
+  "Otros"
 ];
 
 const nivelesGravedad = [

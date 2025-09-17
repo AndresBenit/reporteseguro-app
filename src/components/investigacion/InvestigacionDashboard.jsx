@@ -514,7 +514,7 @@ const InvestigacionDashboard = () => {
           <div className="p-6 border-b border-slate-200">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <Icon name="List" size={24} className="text-slate-600" />
+                <Icon name="FileText" size={24} className="text-slate-600" />
                 <h3 className="text-xl font-bold text-slate-800">Investigaciones Recientes</h3>
               </div>
               <span className="text-sm text-slate-600">
