@@ -388,15 +388,25 @@ const ReportesHistorialMejorado = () => {
                       >
                         <Icon name="Eye" size={14} />
                       </button>
-                      {reporte.fotoUrl && (
+                      {(reporte.fotoUrl || reporte.evidencia_url || reporte.evidenciaUrl) && (
                         <button
-                          onClick={() => verImagen(reporte.fotoUrl)}
+                          onClick={() => verImagen(reporte.fotoUrl || reporte.evidencia_url || reporte.evidenciaUrl)}
                           className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                           title="Ver imagen"
                         >
                           <Icon name="Camera" size={14} />
                         </button>
                       )}
+                      <button
+                        onClick={() => eliminarReporte(reporte.id)}
+                        disabled={isUpdating(reporte.id)}
+                        className={`p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors ${
+                          isUpdating(reporte.id) ? 'opacity-50 cursor-not-allowed' : ''
+                        }`}
+                        title="Eliminar reporte"
+                      >
+                        <Icon name="Trash2" size={14} />
+                      </button>
                     </div>
                   </td>
                 </tr>
@@ -699,15 +709,27 @@ const ReportesHistorialMejorado = () => {
                     <span className="font-semibold text-gray-900">Abordaje:</span> {selectedReporte.abordaje}
                   </div>
                 )}
-                {selectedReporte.fotoUrl && (
+                {(selectedReporte.fotoUrl || selectedReporte.evidencia_url || selectedReporte.evidenciaUrl) && (
                   <div>
                     <span className="font-semibold text-gray-900">Evidencia:</span>
                     <button
-                      onClick={() => verImagen(selectedReporte.fotoUrl)}
+                      onClick={() => verImagen(selectedReporte.fotoUrl || selectedReporte.evidencia_url || selectedReporte.evidenciaUrl)}
                       className="ml-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm transition-colors"
                     >
                       <Icon name="Camera" size={16} className="inline mr-1" />
                       Ver imagen
+                    </button>
+                  </div>
+                )}
+                {(selectedReporte.firma_url || selectedReporte.firmaUrl) && (
+                  <div>
+                    <span className="font-semibold text-gray-900">Firma:</span>
+                    <button
+                      onClick={() => verImagen(selectedReporte.firma_url || selectedReporte.firmaUrl)}
+                      className="ml-2 px-3 py-1 bg-purple-600 text-white rounded hover:bg-purple-700 text-sm transition-colors"
+                    >
+                      <Icon name="PenTool" size={16} className="inline mr-1" />
+                      Ver firma
                     </button>
                   </div>
                 )}
