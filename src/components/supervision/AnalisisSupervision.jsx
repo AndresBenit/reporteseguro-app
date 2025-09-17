@@ -162,10 +162,16 @@ const AnalisisSupervision = () => {
 
     // Reportes por área (top 10)
     const reportesPorArea = reportesValidos.reduce((acc, reporte) => {
+      // El área ya está unificada en el campo 'area' después del mapeo
       const area = reporte.area || 'Sin área';
       acc[area] = (acc[area] || 0) + 1;
       return acc;
     }, {});
+
+    console.log('DEBUG - reportesValidos count:', reportesValidos.length);
+    console.log('DEBUG - Sample reporte fields:', reportesValidos[0] ? Object.keys(reportesValidos[0]) : 'No data');
+    console.log('DEBUG - First 3 reportes:', reportesValidos.slice(0, 3));
+    console.log('DEBUG - reportesPorArea:', reportesPorArea);
 
     const areaData = Object.entries(reportesPorArea)
       .sort(([,a], [,b]) => b - a)
@@ -174,6 +180,8 @@ const AnalisisSupervision = () => {
         area: area.length > 15 ? area.substring(0, 15) + '...' : area,
         cantidad
       }));
+
+    console.log('DEBUG - areaData:', areaData);
 
     // Tendencia mensual (últimos 6 meses)
     const tendenciaMensual = [];
