@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '../common/Icons';
 import { FormComponents } from '../common/FormComponents';
-import { supabase } from '../../lib/supabase';
+import { supabase } from '../../services/supabase';
 
 const CapacitacionForm = () => {
   const [capacitaciones, setCapacitaciones] = useState([]);
