@@ -28,23 +28,35 @@ const ReportesHistorialMejorado = () => {
 
         // TEMPORAL: Actualizar abordajes con estado "completado" a "pendiente"
         try {
-          const { data: abordajesCompletados } = await supabase
+          console.log('[HISTORIAL] 🔄 Verificando abordajes con estado completado...');
+
+          const { data: abordajesCompletados, error: selectError } = await supabase
             .from('abordajes_campo')
-            .select('id')
+            .select('id, estado')
             .eq('estado', 'completado');
 
-          if (abordajesCompletados && abordajesCompletados.length > 0) {
-            console.log('[HISTORIAL] Actualizando', abordajesCompletados.length, 'abordajes de completado a pendiente...');
+          if (selectError) {
+            console.error('[HISTORIAL] Error consultando abordajes:', selectError);
+          } else if (abordajesCompletados && abordajesCompletados.length > 0) {
+            console.log('[HISTORIAL] 📊 Encontrados', abordajesCompletados.length, 'abordajes completados:', abordajesCompletados);
+            console.log('[HISTORIAL] 🔄 Actualizando a pendiente...');
 
-            await supabase
+            const { data: updateResult, error: updateError } = await supabase
               .from('abordajes_campo')
               .update({ estado: 'pendiente' })
-              .eq('estado', 'completado');
+              .eq('estado', 'completado')
+              .select();
 
-            console.log('[HISTORIAL] ✅ Abordajes actualizados a pendiente');
+            if (updateError) {
+              console.error('[HISTORIAL] ❌ Error actualizando:', updateError);
+            } else {
+              console.log('[HISTORIAL] ✅ Abordajes actualizados exitosamente:', updateResult);
+            }
+          } else {
+            console.log('[HISTORIAL] ✅ No hay abordajes completados para actualizar');
           }
         } catch (updateError) {
-          console.error('[HISTORIAL] Error actualizando abordajes:', updateError);
+          console.error('[HISTORIAL] ❌ Error general actualizando abordajes:', updateError);
         }
 
         // Cargar supervision_campo
@@ -101,6 +113,7 @@ const ReportesHistorialMejorado = () => {
   const [supervisionCampo, setSupervisionCampo] = useState([]);
   const [abordajesCampo, setAbordajesCampo] = useState([]);
   const [loadingSupervision, setLoadingSupervision] = useState(true);
+  const [updatingMultiple, setUpdatingMultiple] = useState(new Set());
 
   const reportesPorPagina = 10;
 
@@ -147,6 +160,53 @@ const ReportesHistorialMejorado = () => {
     } catch (error) {
       console.error('[HISTORIAL] Error actualizando estado:', error);
       alert(`Error al actualizar el estado del reporte: ${error.message}`);
+    }
+  };
+
+  // Función para verificar si un reporte está siendo actualizado
+  const isUpdatingMultiple = (id, fuente) => {
+    if (fuente === 'reportes') {
+      return isUpdating(id);
+    } else {
+      return updatingMultiple.has(id);
+    }
+  };
+
+  // Función para eliminar reportes de múltiples tablas
+  const eliminarReporteMultiple = async (id, fuente) => {
+    if (!window.confirm("¿Seguro que deseas eliminar este reporte? Esta acción no se puede deshacer.")) {
+      return;
+    }
+
+    try {
+      if (fuente === 'reportes') {
+        // Usar función original del hook
+        await eliminarReporte(id);
+      } else {
+        // Eliminar de tablas específicas
+        setUpdatingMultiple(prev => new Set([...prev, id]));
+
+        if (fuente === 'supervision_campo') {
+          await dbHelpers.delete('supervision_campo', id);
+          setSupervisionCampo(prev => prev.filter(r => r.id !== id));
+        } else if (fuente === 'abordajes_campo') {
+          await dbHelpers.delete('abordajes_campo', id);
+          setAbordajesCampo(prev => prev.filter(r => r.id !== id));
+        }
+
+        console.log('[HISTORIAL] Reporte eliminado exitosamente de', fuente);
+      }
+    } catch (error) {
+      console.error('[HISTORIAL] Error eliminando reporte:', error);
+      alert(`Error al eliminar el reporte: ${error.message}`);
+    } finally {
+      if (fuente !== 'reportes') {
+        setUpdatingMultiple(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(id);
+          return newSet;
+        });
+      }
     }
   };
 
@@ -378,14 +438,14 @@ const ReportesHistorialMejorado = () => {
             </button>
             <button
               onClick={handleActualizarEstado}
-              disabled={isUpdating(reporteAEditar?.id)}
+              disabled={isUpdatingMultiple(reporteAEditar?.id, reporteAEditar?.fuente)}
               className={`px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold transition-colors ${
-                isUpdating(reporteAEditar?.id)
+                isUpdatingMultiple(reporteAEditar?.id, reporteAEditar?.fuente)
                   ? 'opacity-50 cursor-not-allowed'
                   : 'hover:bg-blue-700'
               }`}
             >
-              {isUpdating(reporteAEditar?.id) ? 'Actualizando...' : 'Actualizar Estado'}
+              {isUpdatingMultiple(reporteAEditar?.id, reporteAEditar?.fuente) ? 'Actualizando...' : 'Actualizar Estado'}
             </button>
           </div>
         </div>
@@ -509,9 +569,9 @@ const ReportesHistorialMejorado = () => {
                       </span>
                       <button
                         onClick={() => abrirModalEstado(reporte)}
-                        disabled={isUpdating(reporte.id)}
+                        disabled={isUpdatingMultiple(reporte.id, reporte.fuente)}
                         className={`p-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors ${
-                          isUpdating(reporte.id) ? 'opacity-50 cursor-not-allowed' : ''
+                          isUpdatingMultiple(reporte.id, reporte.fuente) ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                         title="Cambiar estado"
                       >
@@ -538,10 +598,10 @@ const ReportesHistorialMejorado = () => {
                         </button>
                       )}
                       <button
-                        onClick={() => eliminarReporte(reporte.id)}
-                        disabled={isUpdating(reporte.id)}
+                        onClick={() => eliminarReporteMultiple(reporte.id, reporte.fuente)}
+                        disabled={isUpdatingMultiple(reporte.id, reporte.fuente)}
                         className={`p-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors ${
-                          isUpdating(reporte.id) ? 'opacity-50 cursor-not-allowed' : ''
+                          isUpdatingMultiple(reporte.id, reporte.fuente) ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                         title="Eliminar reporte"
                       >
