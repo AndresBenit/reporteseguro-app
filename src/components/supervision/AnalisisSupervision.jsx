@@ -160,28 +160,45 @@ const AnalisisSupervision = () => {
       { categoria: 'Abordajes', cantidad: abordajes, color: '#10b981' }
     ].filter(item => item.cantidad > 0);
 
-    // Reportes por área (top 10)
+    // Reportes por área (top 10) - con validación robusta
     const reportesPorArea = reportesValidos.reduce((acc, reporte) => {
-      // El área ya está unificada en el campo 'area' después del mapeo
-      const area = reporte.area || 'Sin área';
+      // Buscar el área en múltiples campos posibles para máxima compatibilidad
+      let area = null;
+
+      // Verificar campo area unificado primero
+      if (reporte.area && typeof reporte.area === 'string' && reporte.area.trim()) {
+        area = reporte.area.trim();
+      }
+      // Fallback a campos originales de cada tabla
+      else if (reporte.lugar_labor && typeof reporte.lugar_labor === 'string' && reporte.lugar_labor.trim()) {
+        area = reporte.lugar_labor.trim();
+      }
+      else if (reporte.area_abordaje && typeof reporte.area_abordaje === 'string' && reporte.area_abordaje.trim()) {
+        area = reporte.area_abordaje.trim();
+      }
+      // Área por defecto
+      else {
+        area = 'Sin área especificada';
+      }
+
       acc[area] = (acc[area] || 0) + 1;
       return acc;
     }, {});
-
-    console.log('DEBUG - reportesValidos count:', reportesValidos.length);
-    console.log('DEBUG - Sample reporte fields:', reportesValidos[0] ? Object.keys(reportesValidos[0]) : 'No data');
-    console.log('DEBUG - First 3 reportes:', reportesValidos.slice(0, 3));
-    console.log('DEBUG - reportesPorArea:', reportesPorArea);
 
     const areaData = Object.entries(reportesPorArea)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 10)
       .map(([area, cantidad]) => ({
-        area: area.length > 15 ? area.substring(0, 15) + '...' : area,
+        area: area.length > 20 ? area.substring(0, 20) + '...' : area,
         cantidad
-      }));
+      }))
+      .filter(item => item.cantidad > 0); // Solo mostrar áreas con datos
 
-    console.log('DEBUG - areaData:', areaData);
+    // Validación adicional: Asegurar que siempre hay algo que mostrar
+    if (areaData.length === 0 && reportesValidos.length > 0) {
+      // Si hay reportes pero no áreas, mostrar un resumen básico
+      areaData.push({ area: 'Datos sin área', cantidad: reportesValidos.length });
+    }
 
     // Tendencia mensual (últimos 6 meses)
     const tendenciaMensual = [];
