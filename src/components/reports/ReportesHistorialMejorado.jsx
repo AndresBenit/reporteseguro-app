@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { supabase } from '../../services/supabase';
+import { supabase, dbHelpers } from '../../services/supabase';
 import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
 
@@ -20,6 +20,42 @@ const ReportesHistorialMejorado = () => {
     isArray: Array.isArray(reportes)
   });
 
+  // Cargar datos de supervision y abordajes
+  useEffect(() => {
+    const loadSupervisionData = async () => {
+      try {
+        setLoadingSupervision(true);
+
+        // Cargar supervision_campo
+        const supervisionData = await dbHelpers.getAll('supervision_campo', {
+          orderBy: 'created_at',
+          ascending: false
+        });
+
+        // Cargar abordajes_campo
+        const abordajesData = await dbHelpers.getAll('abordajes_campo', {
+          orderBy: 'created_at',
+          ascending: false
+        });
+
+        console.log('[HISTORIAL] Datos de supervisión cargados:', {
+          supervision: supervisionData.length,
+          abordajes: abordajesData.length
+        });
+
+        setSupervisionCampo(supervisionData);
+        setAbordajesCampo(abordajesData);
+
+      } catch (error) {
+        console.error('[HISTORIAL] Error cargando datos de supervisión:', error);
+      } finally {
+        setLoadingSupervision(false);
+      }
+    };
+
+    loadSupervisionData();
+  }, []);
+
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState({
@@ -39,6 +75,11 @@ const ReportesHistorialMejorado = () => {
   const [reporteAEditar, setReporteAEditar] = useState(null);
   const [nuevoEstado, setNuevoEstado] = useState('');
   const [comentario, setComentario] = useState('');
+
+  // Estados para datos de múltiples tablas
+  const [supervisionCampo, setSupervisionCampo] = useState([]);
+  const [abordajesCampo, setAbordajesCampo] = useState([]);
+  const [loadingSupervision, setLoadingSupervision] = useState(true);
 
   const reportesPorPagina = 10;
 
@@ -90,61 +131,90 @@ const ReportesHistorialMejorado = () => {
     return cumpleTipo && cumpleEstado && cumpleFecha;
   });
 
-  // Agrupar reportes por tipo basado en los tipo_reporte REALES
+  // Combinar datos de todas las tablas en un formato unificado
+  const todosLosReportes = [
+    // Reportes de incidencia de tabla 'reportes'
+    ...reportesFiltrados.filter(r =>
+      r.tipo_reporte === 'incidencia' ||
+      r.tipo === 'incidencia'
+    ).map(r => ({ ...r, fuente: 'reportes', categoria: 'incidencia' })),
+
+    // Reportes EPP de tabla 'reportes'
+    ...reportesFiltrados.filter(r =>
+      r.tipo_reporte === 'epp' ||
+      r.tipo === 'epp'
+    ).map(r => ({ ...r, fuente: 'reportes', categoria: 'epp' })),
+
+    // Supervision de tabla 'supervision_campo' como recomendaciones
+    ...supervisionCampo.map(r => ({
+      id: r.id,
+      created_at: r.created_at,
+      descripcion: r.hallazgo,
+      area: r.lugar_labor,
+      reportante: r.supervisor_reporta,
+      estado: r.estado,
+      tipo_reporte: 'recomendacion',
+      tipo: 'recomendacion',
+      severidad: 'media',
+      colaborador_nombre: r.colaborador_nombre,
+      colaborador_area: r.colaborador_area,
+      recomendacion: r.recomendacion,
+      evidencia_url: r.evidencia_url,
+      firma_url: r.firma_url,
+      firmado_por: r.firmado_por,
+      fuente: 'supervision_campo',
+      categoria: 'recomendacion'
+    })),
+
+    // Abordajes de tabla 'abordajes_campo'
+    ...abordajesCampo.map(r => ({
+      id: r.id,
+      created_at: r.created_at,
+      descripcion: r.hallazgo,
+      area: r.lugar_labor,
+      reportante: r.supervisor_reporta,
+      estado: r.estado,
+      tipo_reporte: 'abordaje',
+      tipo: 'abordaje',
+      severidad: 'baja',
+      colaborador_nombre: r.colaborador_nombre,
+      colaborador_area: r.colaborador_area,
+      abordaje: r.abordaje,
+      firma_url: r.firma_url,
+      firmado_por: r.firmado_por,
+      fuente: 'abordajes_campo',
+      categoria: 'abordaje'
+    }))
+  ];
+
+  // Agrupar todos los reportes por tipo
   const reportesPorTipo = {
-    incidencia: reportesFiltrados.filter(r => {
-      return r.tipo_reporte === 'incidencia' ||
-             r.tipo === 'incidencia' ||
-             r.subtipo?.toLowerCase().includes('insegur') ||
-             r.subtipo?.toLowerCase().includes('condicion') ||
-             r.subtipo?.toLowerCase().includes('acto') ||
-             r.subtipo?.toLowerCase().includes('accidente') ||
-             r.subtipo?.toLowerCase().includes('incidente');
-    }),
-    recomendacion: reportesFiltrados.filter(r => {
-      // Los formularios REALES que crean recomendaciones
-      return r.tipo_reporte === 'observacion' ||
-             r.tipo_reporte === 'personal' ||
-             r.tipo_reporte === 'seguimiento' ||
-             r.tipo === 'recomendacion' ||
-             r.subtipo?.toLowerCase().includes('recomenda') ||
-             r.subtipo?.toLowerCase().includes('mejora') ||
-             r.subtipo?.toLowerCase().includes('observacion') ||
-             r.subtipo?.toLowerCase().includes('capacita');
-    }),
-    abordaje: reportesFiltrados.filter(r => {
-      // Por ahora los abordajes van a tabla separada, pero si hay alguno en reportes
-      return r.tipo_reporte === 'abordaje' ||
-             r.tipo === 'abordaje' ||
-             r.subtipo?.toLowerCase().includes('abordaj') ||
-             r.subtipo?.toLowerCase().includes('conversation') ||
-             r.subtipo?.toLowerCase().includes('personal');
-    }),
-    epp: reportesFiltrados.filter(r => {
-      return r.tipo_reporte === 'epp' ||
-             r.tipo === 'epp' ||
-             r.subtipo?.toLowerCase().includes('epp') ||
-             r.subtipo?.toLowerCase().includes('equipo') ||
-             r.subtipo?.toLowerCase().includes('proteccion');
-    })
+    incidencia: todosLosReportes.filter(r => r.categoria === 'incidencia'),
+    recomendacion: todosLosReportes.filter(r => r.categoria === 'recomendacion'),
+    abordaje: todosLosReportes.filter(r => r.categoria === 'abordaje'),
+    epp: todosLosReportes.filter(r => r.categoria === 'epp')
   };
 
   // Debug logs de filtrado
-  console.log('[HISTORIAL] Reportes filtrados:', {
-    total: reportesFiltrados.length,
+  console.log('[HISTORIAL] Reportes combinados:', {
+    totalReportes: reportesFiltrados.length,
+    totalSupervision: supervisionCampo.length,
+    totalAbordajes: abordajesCampo.length,
+    totalCombinado: todosLosReportes.length,
     incidencia: reportesPorTipo.incidencia.length,
     recomendacion: reportesPorTipo.recomendacion.length,
     abordaje: reportesPorTipo.abordaje.length,
     epp: reportesPorTipo.epp.length
   });
 
-  // Debug detallado de los primeros reportes
-  if (reportesFiltrados.length > 0) {
-    console.log('[HISTORIAL] Primeros 3 reportes para debug:', reportesFiltrados.slice(0, 3).map(r => ({
+  // Debug detallado de los primeros reportes combinados
+  if (todosLosReportes.length > 0) {
+    console.log('[HISTORIAL] Primeros 3 reportes combinados para debug:', todosLosReportes.slice(0, 3).map(r => ({
       id: r.id,
       tipo: r.tipo,
       tipo_reporte: r.tipo_reporte,
-      subtipo: r.subtipo,
+      categoria: r.categoria,
+      fuente: r.fuente,
       descripcion: r.descripcion?.substring(0, 50) + '...'
     })));
   }
@@ -447,7 +517,7 @@ const ReportesHistorialMejorado = () => {
     );
   };
 
-  if (loading) {
+  if (loading || loadingSupervision) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
