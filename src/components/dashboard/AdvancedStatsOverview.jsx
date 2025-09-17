@@ -82,7 +82,8 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
       const finSemana = new Date(inicioSemana.getTime() + 6 * 24 * 60 * 60 * 1000);
       
       const reportesSemana = reportesValidos.filter(r => {
-        const fechaReporte = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
+        if (!r.created_at) return false;
+        const fechaReporte = new Date(r.created_at);
         return fechaReporte && fechaReporte >= inicioSemana && fechaReporte <= finSemana;
       });
       
