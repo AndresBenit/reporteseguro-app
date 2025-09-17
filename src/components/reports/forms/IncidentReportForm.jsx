@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase, dbHelpers, storageHelpers } from "../../../services/supabase";
 import SignaturePad from "../../common/SignaturePad";
@@ -51,6 +51,9 @@ const IncidentReportForm = () => {
     severidad: "media",
     area: "",
     reportante: "",
+    colaboradorId: "",
+    colaboradorNombre: "",
+    colaboradorArea: "",
     foto_url: "",
     firma_url: "",
     firmado_por: "",
@@ -63,8 +66,75 @@ const IncidentReportForm = () => {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [signatureData, setSignatureData] = useState(null);
 
+  // Estados para colaboradores y autocompletado
+  const [colaboradores, setColaboradores] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [showSugerencias, setShowSugerencias] = useState(false);
+  const [colaboradoresFiltrados, setColaboradoresFiltrados] = useState([]);
+
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+  };
+
+  // Cargar colaboradores
+  useEffect(() => {
+    const fetchColaboradores = async () => {
+      try {
+        const data = await dbHelpers.getAll('colaboradores', {
+          orderBy: 'nombre',
+          ascending: true
+        });
+        setColaboradores(data);
+      } catch (error) {
+        console.error('Error fetching colaboradores:', error);
+      }
+    };
+
+    fetchColaboradores();
+  }, []);
+
+  // Filtrar colaboradores para autocompletado
+  useEffect(() => {
+    if (searchTerm.trim() === "") {
+      setColaboradoresFiltrados([]);
+      setShowSugerencias(false);
+    } else {
+      const colaboradoresValidos = Array.isArray(colaboradores) ? colaboradores : [];
+      const filtrados = colaboradoresValidos
+        .filter(
+          (col) =>
+            col && col.nombre && col.cedula &&
+            (col.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            col.cedula.includes(searchTerm))
+        )
+        .slice(0, 8);
+      setColaboradoresFiltrados(filtrados);
+      setShowSugerencias(filtrados.length > 0);
+    }
+  }, [searchTerm, colaboradores]);
+
+  // Manejar selección de colaborador del autocompletado
+  const handleSelectColaborador = (colaborador) => {
+    setForm({
+      ...form,
+      colaboradorId: colaborador.id,
+      colaboradorNombre: colaborador.nombre,
+      colaboradorArea: colaborador.area || ""
+    });
+    setSearchTerm(colaborador.nombre);
+    setShowSugerencias(false);
+  };
+
+  // Manejar cambios en el campo de búsqueda de colaboradores
+  const handleSearchChange = (e) => {
+    const value = e.target.value;
+    setSearchTerm(value);
+    setForm({
+      ...form,
+      colaboradorNombre: value,
+      colaboradorId: "",
+      colaboradorArea: ""
+    });
   };
 
   const handleSubtipoChange = (subtipo) => {
@@ -191,6 +261,9 @@ const IncidentReportForm = () => {
         severidad: form.severidad,
         area: form.area,
         reportante: form.reportante || "Anónimo",
+        colaborador_id: form.colaboradorId,
+        colaborador_nombre: form.colaboradorNombre,
+        colaborador_area: form.colaboradorArea,
         estado: "pendiente",
         tipo_reporte: "incidencia",
         prioridad: form.severidad === "critica" ? "urgente" : form.severidad === "alta" ? "alta" : "normal",
@@ -201,6 +274,10 @@ const IncidentReportForm = () => {
       });
 
       setMensaje("¡Reporte de incidencia creado exitosamente!");
+
+      // Limpiar el searchTerm
+      setSearchTerm("");
+
       setTimeout(() => {
         navigate('/dashboard');
       }, 2000);
@@ -276,6 +353,56 @@ const IncidentReportForm = () => {
               />
             </FormField>
           </FormRow>
+        </FormSection>
+
+        <FormSection title="Colaborador Involucrado">
+          <FormField label="Buscar colaborador involucrado (opcional)">
+            <div className="relative">
+              <FormInput
+                type="text"
+                placeholder="Nombre o cédula del colaborador..."
+                value={searchTerm}
+                onChange={handleSearchChange}
+              />
+              {showSugerencias && (
+                <div className="absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                  {colaboradoresFiltrados.map((colaborador) => (
+                    <div
+                      key={colaborador.id}
+                      className="px-4 py-3 cursor-pointer hover:bg-gray-100 border-b border-gray-100"
+                      onClick={() => handleSelectColaborador(colaborador)}
+                    >
+                      <div className="font-medium text-gray-900">{colaborador.nombre}</div>
+                      <div className="text-sm text-gray-600">
+                        Cédula: {colaborador.cedula} | Área: {colaborador.area || 'No especificada'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </FormField>
+
+          {form.colaboradorNombre && (
+            <FormRow columns={2}>
+              <FormField label="Colaborador seleccionado">
+                <FormInput
+                  type="text"
+                  value={form.colaboradorNombre}
+                  readOnly
+                  className="bg-gray-50"
+                />
+              </FormField>
+              <FormField label="Área del colaborador">
+                <FormInput
+                  type="text"
+                  value={form.colaboradorArea}
+                  readOnly
+                  className="bg-gray-50"
+                />
+              </FormField>
+            </FormRow>
+          )}
         </FormSection>
 
         <FormSection title="Descripción de la Incidencia">
