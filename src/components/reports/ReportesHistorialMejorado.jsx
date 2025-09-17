@@ -90,25 +90,38 @@ const ReportesHistorialMejorado = () => {
     return cumpleTipo && cumpleEstado && cumpleFecha;
   });
 
-  // Agrupar reportes por tipo
+  // Agrupar reportes por tipo con lógica mejorada
   const reportesPorTipo = {
-    incidencia: reportesFiltrados.filter(r =>
-      r.tipo_reporte === 'incidencia' ||
-      r.tipo === 'incidencia' ||
-      r.subtipo?.includes('insegur')
-    ),
-    recomendacion: reportesFiltrados.filter(r =>
-      r.tipo_reporte === 'recomendacion' ||
-      r.tipo === 'recomendacion'
-    ),
-    abordaje: reportesFiltrados.filter(r =>
-      r.tipo_reporte === 'abordaje' ||
-      r.tipo === 'abordaje'
-    ),
-    epp: reportesFiltrados.filter(r =>
-      r.tipo_reporte === 'epp' ||
-      r.tipo === 'epp'
-    )
+    incidencia: reportesFiltrados.filter(r => {
+      // Múltiples formas de identificar incidencias
+      return r.tipo_reporte === 'incidencia' ||
+             r.tipo === 'incidencia' ||
+             r.subtipo?.toLowerCase().includes('insegur') ||
+             r.subtipo?.toLowerCase().includes('condicion') ||
+             r.subtipo?.toLowerCase().includes('acto') ||
+             r.subtipo?.toLowerCase().includes('accidente') ||
+             r.subtipo?.toLowerCase().includes('incidente');
+    }),
+    recomendacion: reportesFiltrados.filter(r => {
+      return r.tipo_reporte === 'recomendacion' ||
+             r.tipo === 'recomendacion' ||
+             r.subtipo?.toLowerCase().includes('recomenda') ||
+             r.subtipo?.toLowerCase().includes('mejora') ||
+             r.subtipo?.toLowerCase().includes('capacita');
+    }),
+    abordaje: reportesFiltrados.filter(r => {
+      return r.tipo_reporte === 'abordaje' ||
+             r.tipo === 'abordaje' ||
+             r.subtipo?.toLowerCase().includes('abordaj') ||
+             r.subtipo?.toLowerCase().includes('conversation');
+    }),
+    epp: reportesFiltrados.filter(r => {
+      return r.tipo_reporte === 'epp' ||
+             r.tipo === 'epp' ||
+             r.subtipo?.toLowerCase().includes('epp') ||
+             r.subtipo?.toLowerCase().includes('equipo') ||
+             r.subtipo?.toLowerCase().includes('proteccion');
+    })
   };
 
   // Debug logs de filtrado
@@ -119,6 +132,17 @@ const ReportesHistorialMejorado = () => {
     abordaje: reportesPorTipo.abordaje.length,
     epp: reportesPorTipo.epp.length
   });
+
+  // Debug detallado de los primeros reportes
+  if (reportesFiltrados.length > 0) {
+    console.log('[HISTORIAL] Primeros 3 reportes para debug:', reportesFiltrados.slice(0, 3).map(r => ({
+      id: r.id,
+      tipo: r.tipo,
+      tipo_reporte: r.tipo_reporte,
+      subtipo: r.subtipo,
+      descripcion: r.descripcion?.substring(0, 50) + '...'
+    })));
+  }
 
   // Paginación
   const getPaginatedData = (tipo) => {
