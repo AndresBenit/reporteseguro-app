@@ -83,7 +83,7 @@ const ReportesHistorialMejorado = () => {
 
   const reportesPorPagina = 10;
 
-  // Función para manejar actualización de estado
+  // Función para manejar actualización de estado según la fuente
   const handleActualizarEstado = async () => {
     if (!reporteAEditar || !nuevoEstado) {
       console.log('[HISTORIAL] Error: faltan datos', { reporteAEditar, nuevoEstado });
@@ -93,11 +93,31 @@ const ReportesHistorialMejorado = () => {
     console.log('[HISTORIAL] Iniciando actualización de estado:', {
       reporteId: reporteAEditar.id,
       estadoActual: reporteAEditar.estado,
-      nuevoEstado: nuevoEstado
+      nuevoEstado: nuevoEstado,
+      fuente: reporteAEditar.fuente
     });
 
     try {
-      await actualizarEstado(reporteAEditar.id, nuevoEstado);
+      // Actualizar según la tabla de origen
+      if (reporteAEditar.fuente === 'reportes') {
+        // Usar el hook original para tabla reportes
+        await actualizarEstado(reporteAEditar.id, nuevoEstado);
+      } else if (reporteAEditar.fuente === 'supervision_campo') {
+        // Actualizar directamente en tabla supervision_campo
+        await dbHelpers.update('supervision_campo', reporteAEditar.id, { estado: nuevoEstado });
+        // Actualizar estado local
+        setSupervisionCampo(prev => prev.map(r =>
+          r.id === reporteAEditar.id ? { ...r, estado: nuevoEstado } : r
+        ));
+      } else if (reporteAEditar.fuente === 'abordajes_campo') {
+        // Actualizar directamente en tabla abordajes_campo
+        await dbHelpers.update('abordajes_campo', reporteAEditar.id, { estado: nuevoEstado });
+        // Actualizar estado local
+        setAbordajesCampo(prev => prev.map(r =>
+          r.id === reporteAEditar.id ? { ...r, estado: nuevoEstado } : r
+        ));
+      }
+
       console.log('[HISTORIAL] Estado actualizado exitosamente');
       setShowEstadoModal(false);
       setReporteAEditar(null);
@@ -493,7 +513,7 @@ const ReportesHistorialMejorado = () => {
                           className="p-2 bg-green-600 text-white rounded hover:bg-green-700 transition-colors"
                           title="Ver imagen"
                         >
-                          <Icon name="Camera" size={14} />
+                          <Icon name="Eye" size={14} />
                         </button>
                       )}
                       <button
@@ -815,7 +835,7 @@ const ReportesHistorialMejorado = () => {
                       onClick={() => verImagen(selectedReporte.fotoUrl || selectedReporte.evidencia_url || selectedReporte.evidenciaUrl)}
                       className="ml-2 px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-sm transition-colors"
                     >
-                      <Icon name="Camera" size={16} className="inline mr-1" />
+                      <Icon name="Eye" size={16} className="inline mr-1" />
                       Ver imagen
                     </button>
                   </div>

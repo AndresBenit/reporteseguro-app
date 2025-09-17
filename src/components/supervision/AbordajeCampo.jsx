@@ -152,7 +152,7 @@ const AbordajeCampo = () => {
         firmado_por: form.firmado_por,
         fecha_firma: firmaUrl ? new Date().toISOString() : null,
         fecha_creacion: new Date().toISOString(),
-        estado: 'completado'
+        estado: 'pendiente'
       };
 
       await dbHelpers.create('abordajes_campo', abordajeData);
