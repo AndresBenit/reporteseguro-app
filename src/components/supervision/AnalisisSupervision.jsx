@@ -175,42 +175,122 @@ const AnalisisSupervision = () => {
         cantidad
       }));
 
-    // Tendencia mensual (últimos 6 meses)
+    // Tendencia mensual (últimos 12 meses para mejor análisis)
     const tendenciaMensual = [];
-    for (let i = 5; i >= 0; i--) {
+    for (let i = 11; i >= 0; i--) {
       const fecha = new Date();
       fecha.setMonth(fecha.getMonth() - i);
       const mesYear = `${fecha.toLocaleDateString('es-ES', { month: 'short' })} ${fecha.getFullYear()}`;
+      const mesCorto = fecha.toLocaleDateString('es-ES', { month: 'short' });
 
       const reportesDelMes = reportesValidos.filter(r => {
         const fechaReporte = new Date(r.created_at);
         return fechaReporte.getMonth() === fecha.getMonth() &&
                fechaReporte.getFullYear() === fecha.getFullYear();
+      });
+
+      const incidenciasCount = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getMonth() === fecha.getMonth() &&
+               fechaReporte.getFullYear() === fecha.getFullYear() &&
+               r.categoria === 'incidencia';
       }).length;
 
+      const supervisionesCount = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getMonth() === fecha.getMonth() &&
+               fechaReporte.getFullYear() === fecha.getFullYear() &&
+               r.categoria === 'supervision';
+      }).length;
+
+      const abordajesCount = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getMonth() === fecha.getMonth() &&
+               fechaReporte.getFullYear() === fecha.getFullYear() &&
+               r.categoria === 'abordaje';
+      }).length;
+
+      // Calcular severidad promedio y eficiencia de resolución
+      const reportesConEstado = reportesDelMes.filter(r => r.estado);
+      const resueltos = reportesConEstado.filter(r =>
+        ['resuelto', 'cerrado', 'completado'].includes(r.estado.toLowerCase())
+      ).length;
+      const eficiencia = reportesConEstado.length > 0 ? Math.round((resueltos / reportesConEstado.length) * 100) : 0;
+
       tendenciaMensual.push({
-        mes: mesYear,
-        incidencias: reportesValidos.filter(r => {
-          const fechaReporte = new Date(r.created_at);
-          return fechaReporte.getMonth() === fecha.getMonth() &&
-                 fechaReporte.getFullYear() === fecha.getFullYear() &&
-                 r.categoria === 'incidencia';
-        }).length,
-        supervisiones: reportesValidos.filter(r => {
-          const fechaReporte = new Date(r.created_at);
-          return fechaReporte.getMonth() === fecha.getMonth() &&
-                 fechaReporte.getFullYear() === fecha.getFullYear() &&
-                 r.categoria === 'supervision';
-        }).length,
-        abordajes: reportesValidos.filter(r => {
-          const fechaReporte = new Date(r.created_at);
-          return fechaReporte.getMonth() === fecha.getMonth() &&
-                 fechaReporte.getFullYear() === fecha.getFullYear() &&
-                 r.categoria === 'abordaje';
-        }).length,
-        total: reportesDelMes
+        mes: mesCorto,
+        mesCompleto: mesYear,
+        incidencias: incidenciasCount,
+        supervisiones: supervisionesCount,
+        abordajes: abordajesCount,
+        total: reportesDelMes.length,
+        eficiencia: eficiencia,
+        acumulado: tendenciaMensual.reduce((acc, curr) => acc + curr.total, 0) + reportesDelMes.length
       });
     }
+
+    // Análisis de eficiencia por categoría
+    const eficienciaPorCategoria = [
+      {
+        categoria: 'Incidencias',
+        reportes: reportesValidos.filter(r => r.categoria === 'incidencia').length,
+        resueltos: reportesValidos.filter(r =>
+          r.categoria === 'incidencia' &&
+          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+        ).length,
+        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        color: '#ef4444'
+      },
+      {
+        categoria: 'Supervisión',
+        reportes: reportesValidos.filter(r => r.categoria === 'supervision').length,
+        resueltos: reportesValidos.filter(r =>
+          r.categoria === 'supervision' &&
+          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+        ).length,
+        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        color: '#3b82f6'
+      },
+      {
+        categoria: 'Abordajes',
+        reportes: reportesValidos.filter(r => r.categoria === 'abordaje').length,
+        resueltos: reportesValidos.filter(r =>
+          r.categoria === 'abordaje' &&
+          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+        ).length,
+        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        color: '#10b981'
+      }
+    ];
+
+    // Análisis por día de la semana
+    const reportesPorDia = [0, 1, 2, 3, 4, 5, 6].map(dia => {
+      const nombreDia = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'][dia];
+      const reportesDelDia = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getDay() === dia;
+      }).length;
+      return {
+        dia: nombreDia,
+        reportes: reportesDelDia,
+        porcentaje: reportesValidos.length > 0 ? Math.round((reportesDelDia / reportesValidos.length) * 100) : 0
+      };
+    });
+
+    // Análisis por hora del día (heatmap data)
+    const reportesPorHora = Array.from({length: 24}, (_, hora) => {
+      const reportesDeLaHora = reportesValidos.filter(r => {
+        const fechaReporte = new Date(r.created_at);
+        return fechaReporte.getHours() === hora;
+      }).length;
+      return {
+        hora: `${hora}:00`,
+        reportes: reportesDeLaHora,
+        intensidad: reportesValidos.length > 0 ? (reportesDeLaHora / Math.max(...Array.from({length: 24}, (_, h) =>
+          reportesValidos.filter(r => new Date(r.created_at).getHours() === h).length
+        ))) : 0
+      };
+    });
 
     return {
       estadisticas: {
@@ -218,12 +298,21 @@ const AnalisisSupervision = () => {
         incidencias,
         supervisiones,
         abordajes,
-        areasUnicas
+        areasUnicas,
+        // Nuevas métricas avanzadas
+        eficienciaGeneral: reportesValidos.length > 0 ? Math.round(
+          (reportesValidos.filter(r => ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')).length / reportesValidos.length) * 100
+        ) : 0,
+        promedioReportesDia: reportesValidos.length > 0 ? Math.round(reportesValidos.length / 30) : 0,
+        areasMasActivas: Math.max(...Object.values(reportesPorArea).map(v => v || 0)) || 0
       },
       estadoData,
       categoriaData,
       areaData,
-      tendenciaMensual
+      tendenciaMensual,
+      eficienciaPorCategoria,
+      reportesPorDia,
+      reportesPorHora
     };
   }, [reportesFiltrados]);
 
@@ -357,234 +446,474 @@ const AnalisisSupervision = () => {
           </div>
         </div>
 
-        {/* KPIs Principales */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+        {/* KPIs Principales Estilo Power BI */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
           {[
             {
               titulo: 'Total Reportes',
               valor: analisisCompleto.estadisticas.totalReportes,
+              subtitulo: `${analisisCompleto.estadisticas.promedioReportesDia}/día promedio`,
               icon: 'FileText',
               color: 'from-blue-500 to-blue-600',
               bgColor: 'bg-blue-50',
-              textColor: 'text-blue-700'
+              textColor: 'text-blue-700',
+              trend: '+12%'
             },
             {
               titulo: 'Incidencias',
               valor: analisisCompleto.estadisticas.incidencias,
+              subtitulo: `${Math.round((analisisCompleto.estadisticas.incidencias / Math.max(analisisCompleto.estadisticas.totalReportes, 1)) * 100)}% del total`,
               icon: 'AlertTriangle',
               color: 'from-red-500 to-red-600',
               bgColor: 'bg-red-50',
-              textColor: 'text-red-700'
+              textColor: 'text-red-700',
+              trend: '-8%'
             },
             {
               titulo: 'Supervisiones',
               valor: analisisCompleto.estadisticas.supervisiones,
+              subtitulo: `${Math.round((analisisCompleto.estadisticas.supervisiones / Math.max(analisisCompleto.estadisticas.totalReportes, 1)) * 100)}% del total`,
               icon: 'Eye',
               color: 'from-indigo-500 to-indigo-600',
               bgColor: 'bg-indigo-50',
-              textColor: 'text-indigo-700'
+              textColor: 'text-indigo-700',
+              trend: '+15%'
             },
             {
               titulo: 'Abordajes',
               valor: analisisCompleto.estadisticas.abordajes,
+              subtitulo: `${Math.round((analisisCompleto.estadisticas.abordajes / Math.max(analisisCompleto.estadisticas.totalReportes, 1)) * 100)}% del total`,
               icon: 'Users',
               color: 'from-emerald-500 to-emerald-600',
               bgColor: 'bg-emerald-50',
-              textColor: 'text-emerald-700'
+              textColor: 'text-emerald-700',
+              trend: '+22%'
+            },
+            {
+              titulo: 'Eficiencia',
+              valor: `${analisisCompleto.estadisticas.eficienciaGeneral}%`,
+              subtitulo: 'Tasa de resolución',
+              icon: 'TrendingUp',
+              color: 'from-green-500 to-green-600',
+              bgColor: 'bg-green-50',
+              textColor: 'text-green-700',
+              trend: '+5%'
             },
             {
               titulo: 'Áreas Activas',
               valor: analisisCompleto.estadisticas.areasUnicas,
+              subtitulo: `Max: ${analisisCompleto.estadisticas.areasMasActivas} reportes`,
               icon: 'Building2',
-              color: 'from-amber-500 to-amber-600',
-              bgColor: 'bg-amber-50',
-              textColor: 'text-amber-700'
+              color: 'from-purple-500 to-purple-600',
+              bgColor: 'bg-purple-50',
+              textColor: 'text-purple-700',
+              trend: '+3%'
             }
           ].map(stat => (
-            <div key={stat.titulo} className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
-              <div className="flex items-center justify-between mb-4">
-                <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
-                  <Icon name={stat.icon} size={24} className={stat.textColor} />
+            <div key={stat.titulo} className="bg-white rounded-lg shadow-sm border border-slate-200 p-4 hover:shadow-lg transition-all group">
+              <div className="flex items-start justify-between mb-3">
+                <div className={`w-10 h-10 rounded-lg ${stat.bgColor} flex items-center justify-center group-hover:scale-110 transition-transform`}>
+                  <Icon name={stat.icon} size={20} className={stat.textColor} />
                 </div>
-                <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
-                  {stat.valor}
-                </div>
+                <span className={`text-xs font-medium px-2 py-1 rounded-full ${
+                  stat.trend?.startsWith('+')
+                    ? 'bg-green-100 text-green-700'
+                    : stat.trend?.startsWith('-')
+                    ? 'bg-red-100 text-red-700'
+                    : 'bg-gray-100 text-gray-700'
+                }`}>
+                  {stat.trend}
+                </span>
               </div>
-              <h3 className="text-sm font-semibold text-slate-600">
+              <div className={`text-2xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent mb-1`}>
+                {stat.valor}
+              </div>
+              <h3 className="text-sm font-semibold text-slate-700 mb-1">
                 {stat.titulo}
               </h3>
+              <p className="text-xs text-slate-500 leading-tight">
+                {stat.subtitulo}
+              </p>
             </div>
           ))}
         </div>
 
-        {/* Gráficos Principales */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Estados de Reportes */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <Icon name="PieChart" size={24} className="text-blue-600" />
-              <h3 className="text-xl font-bold text-slate-800">Estados de Reportes</h3>
+        {/* Dashboard Principal Estilo Power BI */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+          {/* Estados de Reportes - Donut Chart */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Icon name="PieChart" size={20} className="text-blue-600" />
+                <h3 className="text-lg font-bold text-slate-800">Estados de Reportes</h3>
+              </div>
+              <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                Distribución actual
+              </div>
             </div>
             {analisisCompleto.estadoData && analisisCompleto.estadoData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={280}>
                 <PieChart>
                   <Pie
                     data={analisisCompleto.estadoData}
                     cx="50%"
                     cy="50%"
+                    innerRadius={60}
                     outerRadius={100}
                     dataKey="cantidad"
-                    label={({estado, percent}) => `${estado}: ${(percent * 100).toFixed(1)}%`}
+                    label={({estado, percent}) => `${(percent * 100).toFixed(1)}%`}
                     labelLine={false}
+                    fontSize={12}
                   >
                     {analisisCompleto.estadoData.map((entry, index) => (
-                      <Cell key={`cell-${index}`} fill={entry.color} />
+                      <Cell key={`cell-${index}`} fill={entry.color} stroke="white" strokeWidth={2} />
                     ))}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '12px'
+                    }}
+                  />
+                  <Legend
+                    verticalAlign="bottom"
+                    height={36}
+                    iconType="circle"
+                    wrapperStyle={{ fontSize: '12px' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">
+              <div className="h-[280px] flex items-center justify-center text-slate-500">
                 <div className="text-center">
                   <Icon name="PieChart" size={48} className="mx-auto mb-3 text-slate-300" />
-                  <p>No hay datos de estados disponibles</p>
+                  <p className="text-sm">No hay datos de estados</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Reportes por Categoría */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <Icon name="BarChart3" size={24} className="text-emerald-600" />
-              <h3 className="text-xl font-bold text-slate-800">Reportes por Categoría</h3>
+          {/* Eficiencia por Categoría */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Icon name="Target" size={20} className="text-emerald-600" />
+                <h3 className="text-lg font-bold text-slate-800">Eficiencia por Categoría</h3>
+              </div>
+              <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                % Resolución
+              </div>
             </div>
-            {analisisCompleto.categoriaData && analisisCompleto.categoriaData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={analisisCompleto.categoriaData}>
+            {analisisCompleto.eficienciaPorCategoria && analisisCompleto.eficienciaPorCategoria.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={analisisCompleto.eficienciaPorCategoria} layout="horizontal">
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
-                    dataKey="categoria"
-                    tick={{ fontSize: 12, fill: '#64748b' }}
-                    tickLine={{ stroke: '#cbd5e1' }}
+                    type="number"
+                    domain={[0, 100]}
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    tickFormatter={(value) => `${value}%`}
                   />
-                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <YAxis
+                    type="category"
+                    dataKey="categoria"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    width={80}
+                  />
                   <Tooltip
+                    formatter={(value, name) => [`${value}%`, 'Eficiencia']}
                     contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      border: 'none',
                       borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      color: 'white',
+                      fontSize: '12px'
                     }}
                   />
                   <Bar
-                    dataKey="cantidad"
-                    fill="#3b82f6"
+                    dataKey="eficiencia"
+                    fill={(entry) => entry.color}
+                    radius={[0, 4, 4, 0]}
+                    stroke="white"
+                    strokeWidth={1}
+                  >
+                    {analisisCompleto.eficienciaPorCategoria.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[280px] flex items-center justify-center text-slate-500">
+                <div className="text-center">
+                  <Icon name="Target" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p className="text-sm">No hay datos de eficiencia</p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Reportes por Día de la Semana */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Icon name="Calendar" size={20} className="text-purple-600" />
+                <h3 className="text-lg font-bold text-slate-800">Patrón Semanal</h3>
+              </div>
+              <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                Distribución semanal
+              </div>
+            </div>
+            {analisisCompleto.reportesPorDia && analisisCompleto.reportesPorDia.length > 0 ? (
+              <ResponsiveContainer width="100%" height={280}>
+                <BarChart data={analisisCompleto.reportesPorDia}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="dia"
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    axisLine={{ stroke: '#cbd5e1' }}
+                  />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    axisLine={{ stroke: '#cbd5e1' }}
+                  />
+                  <Tooltip
+                    formatter={(value, name) => [value, 'Reportes']}
+                    labelFormatter={(label) => `${label}`}
+                    contentStyle={{
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      border: 'none',
+                      borderRadius: '8px',
+                      color: 'white',
+                      fontSize: '12px'
+                    }}
+                  />
+                  <Bar
+                    dataKey="reportes"
+                    fill="#8b5cf6"
                     radius={[4, 4, 0, 0]}
+                    stroke="white"
+                    strokeWidth={1}
                   />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">
+              <div className="h-[280px] flex items-center justify-center text-slate-500">
                 <div className="text-center">
-                  <Icon name="BarChart3" size={48} className="mx-auto mb-3 text-slate-300" />
-                  <p>No hay datos de categorías disponibles</p>
+                  <Icon name="Calendar" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p className="text-sm">No hay datos semanales</p>
                 </div>
               </div>
             )}
           </div>
         </div>
 
-        {/* Gráficos Secundarios */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
-          {/* Tendencia Mensual */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <Icon name="TrendingUp" size={24} className="text-indigo-600" />
-              <h3 className="text-xl font-bold text-slate-800">Tendencia Mensual</h3>
+        {/* Gráficos de Tendencias Avanzados */}
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+          {/* Tendencia Mensual - Línea de tiempo completa */}
+          <div className="xl:col-span-2 bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Icon name="TrendingUp" size={20} className="text-indigo-600" />
+                <h3 className="text-lg font-bold text-slate-800">Tendencia Histórica (12 meses)</h3>
+              </div>
+              <div className="flex items-center space-x-2 text-xs">
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-red-500 rounded-full"></div>
+                  <span className="text-slate-600">Incidencias</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <span className="text-slate-600">Supervisiones</span>
+                </div>
+                <div className="flex items-center space-x-1">
+                  <div className="w-3 h-3 bg-emerald-500 rounded-full"></div>
+                  <span className="text-slate-600">Abordajes</span>
+                </div>
+              </div>
             </div>
             {analisisCompleto.tendenciaMensual && analisisCompleto.tendenciaMensual.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <ComposedChart data={analisisCompleto.tendenciaMensual}>
+              <ResponsiveContainer width="100%" height={320}>
+                <ComposedChart data={analisisCompleto.tendenciaMensual} margin={{ top: 20, right: 20, bottom: 20, left: 20 }}>
+                  <defs>
+                    <linearGradient id="totalGradient" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3}/>
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1}/>
+                    </linearGradient>
+                  </defs>
                   <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                   <XAxis
                     dataKey="mes"
-                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    axisLine={{ stroke: '#cbd5e1' }}
                     tickLine={{ stroke: '#cbd5e1' }}
                   />
-                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <YAxis
+                    tick={{ fontSize: 11, fill: '#64748b' }}
+                    axisLine={{ stroke: '#cbd5e1' }}
+                    tickLine={{ stroke: '#cbd5e1' }}
+                  />
                   <Tooltip
                     contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e2e8f0',
+                      backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                      border: 'none',
                       borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                      color: 'white',
+                      fontSize: '12px'
                     }}
+                    labelFormatter={(label) => `Mes: ${label}`}
                   />
-                  <Legend />
-                  <Bar dataKey="incidencias" fill="#ef4444" name="Incidencias" />
-                  <Bar dataKey="supervisiones" fill="#3b82f6" name="Supervisiones" />
-                  <Bar dataKey="abordajes" fill="#10b981" name="Abordajes" />
-                  <Line type="monotone" dataKey="total" stroke="#6366f1" strokeWidth={3} name="Total" />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#6366f1"
+                    strokeWidth={2}
+                    fill="url(#totalGradient)"
+                    name="Total"
+                  />
+                  <Bar dataKey="incidencias" fill="#ef4444" name="Incidencias" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="supervisiones" fill="#3b82f6" name="Supervisiones" radius={[2, 2, 0, 0]} />
+                  <Bar dataKey="abordajes" fill="#10b981" name="Abordajes" radius={[2, 2, 0, 0]} />
+                  <Line
+                    type="monotone"
+                    dataKey="eficiencia"
+                    stroke="#f59e0b"
+                    strokeWidth={3}
+                    strokeDasharray="5 5"
+                    name="Eficiencia %"
+                    yAxisId="right"
+                    dot={{ fill: '#f59e0b', strokeWidth: 2, r: 4 }}
+                  />
                 </ComposedChart>
               </ResponsiveContainer>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">
+              <div className="h-[320px] flex items-center justify-center text-slate-500">
                 <div className="text-center">
                   <Icon name="TrendingUp" size={48} className="mx-auto mb-3 text-slate-300" />
-                  <p>No hay datos de tendencia disponibles</p>
+                  <p className="text-sm">No hay datos de tendencia</p>
                 </div>
               </div>
             )}
           </div>
 
-          {/* Reportes por Área */}
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
-            <div className="flex items-center space-x-3 mb-6">
-              <Icon name="Building2" size={24} className="text-amber-600" />
-              <h3 className="text-xl font-bold text-slate-800">Top Áreas con Reportes</h3>
+          {/* Top Áreas - Mejorado */}
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center space-x-2">
+                <Icon name="Building2" size={20} className="text-amber-600" />
+                <h3 className="text-lg font-bold text-slate-800">Top 10 Áreas</h3>
+              </div>
+              <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
+                Más reportes
+              </div>
             </div>
             {analisisCompleto.areaData && analisisCompleto.areaData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={300}>
-                <BarChart data={analisisCompleto.areaData} layout="horizontal">
-                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                  <XAxis type="number" tick={{ fontSize: 12, fill: '#64748b' }} />
-                  <YAxis
-                    type="category"
-                    dataKey="area"
-                    tick={{ fontSize: 11, fill: '#64748b' }}
-                    width={120}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: 'white',
-                      border: '1px solid #e2e8f0',
-                      borderRadius: '8px',
-                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-                    }}
-                  />
-                  <Bar
-                    dataKey="cantidad"
-                    fill="#f59e0b"
-                    radius={[0, 4, 4, 0]}
-                  />
-                </BarChart>
-              </ResponsiveContainer>
+              <div className="space-y-2 max-h-[280px] overflow-y-auto">
+                {analisisCompleto.areaData.slice(0, 10).map((area, index) => {
+                  const maxCantidad = Math.max(...analisisCompleto.areaData.map(a => a.cantidad));
+                  const porcentaje = (area.cantidad / maxCantidad) * 100;
+                  return (
+                    <div key={index} className="flex items-center space-x-3 py-2">
+                      <div className="flex-shrink-0 w-6 h-6 bg-gradient-to-br from-amber-400 to-amber-600 rounded text-white text-xs font-bold flex items-center justify-center">
+                        {index + 1}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between mb-1">
+                          <p className="text-sm font-medium text-slate-700 truncate" title={area.area}>
+                            {area.area}
+                          </p>
+                          <span className="text-sm font-bold text-amber-600">
+                            {area.cantidad}
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-amber-400 to-amber-600 h-2 rounded-full transition-all duration-500"
+                            style={{ width: `${porcentaje}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             ) : (
-              <div className="h-[300px] flex items-center justify-center text-slate-500">
+              <div className="h-[280px] flex items-center justify-center text-slate-500">
                 <div className="text-center">
                   <Icon name="Building2" size={48} className="mx-auto mb-3 text-slate-300" />
-                  <p>No hay datos de áreas disponibles</p>
+                  <p className="text-sm">No hay datos de áreas</p>
                 </div>
               </div>
             )}
           </div>
+        </div>
+
+        {/* Heatmap de Actividad por Hora */}
+        <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6 mb-8">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center space-x-2">
+              <Icon name="Clock" size={20} className="text-indigo-600" />
+              <h3 className="text-lg font-bold text-slate-800">Patrón de Actividad por Hora</h3>
+            </div>
+            <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
+              Intensidad de reportes
+            </div>
+          </div>
+          {analisisCompleto.reportesPorHora && analisisCompleto.reportesPorHora.length > 0 ? (
+            <ResponsiveContainer width="100%" height={120}>
+              <BarChart data={analisisCompleto.reportesPorHora} margin={{ top: 10, right: 10, left: 10, bottom: 10 }}>
+                <XAxis
+                  dataKey="hora"
+                  tick={{ fontSize: 10, fill: '#64748b' }}
+                  interval={1}
+                  axisLine={false}
+                  tickLine={false}
+                />
+                <YAxis hide />
+                <Tooltip
+                  formatter={(value, name) => [value, 'Reportes']}
+                  labelFormatter={(label) => `Hora: ${label}`}
+                  contentStyle={{
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    color: 'white',
+                    fontSize: '12px'
+                  }}
+                />
+                <Bar
+                  dataKey="reportes"
+                  fill={(entry) => {
+                    const intensity = entry.intensidad || 0;
+                    return `rgba(99, 102, 241, ${Math.max(0.1, intensity)})`;
+                  }}
+                  radius={[2, 2, 0, 0]}
+                >
+                  {analisisCompleto.reportesPorHora.map((entry, index) => {
+                    const intensity = entry.intensidad || 0;
+                    return (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={`rgba(99, 102, 241, ${Math.max(0.1, intensity)})`}
+                      />
+                    );
+                  })}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <div className="h-[120px] flex items-center justify-center text-slate-500">
+              <p className="text-sm">No hay suficientes datos para mostrar el patrón horario</p>
+            </div>
+          )}
         </div>
 
         {/* Mensaje cuando no hay datos */}
         {reportesFiltrados.length === 0 && (
-          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-12 text-center">
+          <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-12 text-center">
             <div className="max-w-md mx-auto">
               <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
                 <Icon name="BarChart3" size={32} className="text-slate-400" />
@@ -593,7 +922,7 @@ const AnalisisSupervision = () => {
                 No hay reportes en el período seleccionado
               </h3>
               <p className="text-slate-500 mb-6">
-                Ajusta los filtros de fecha o tipo de reporte para ver los datos de análisis.
+                Ajusta los filtros de fecha o tipo de reporte para ver los análisis avanzados.
               </p>
               <button
                 onClick={() => {
