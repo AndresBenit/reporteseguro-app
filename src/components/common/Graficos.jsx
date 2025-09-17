@@ -74,8 +74,8 @@ const Graficos = ({ reportes = [] }) => {
       hasta.setHours(23, 59, 59, 999); // Incluir todo el día
 
       return reportesValidos.filter(reporte => {
-        if (!reporte.fecha || !reporte.fecha.toDate) return false;
-        const fechaReporte = reporte.fecha.toDate();
+        if (!reporte.created_at) return false;
+        const fechaReporte = new Date(reporte.created_at);
         return fechaReporte >= desde && fechaReporte <= hasta;
       });
     }
@@ -106,8 +106,9 @@ const Graficos = ({ reportes = [] }) => {
     }
 
     return reportesValidos.filter(reporte => {
-      if (!reporte.fecha || !reporte.fecha.toDate) return false;
-      return reporte.fecha.toDate() >= fechaLimite;
+      if (!reporte.created_at) return false;
+      const fechaReporte = new Date(reporte.created_at);
+      return fechaReporte >= fechaLimite;
     });
   }, [reportesValidos, filtroTiempo, fechaDesde, fechaHasta, usarRangoPersonalizado]);
 
@@ -153,15 +154,15 @@ const Graficos = ({ reportes = [] }) => {
     // Solo procesar si hay reportes filtrados
     if (reportesFiltrados.length > 0) {
       reportesFiltrados.forEach(reporte => {
-        if (reporte.fecha && reporte.fecha.toDate) {
-          const reporteDate = reporte.fecha.toDate();
+        if (reporte.created_at) {
+          const reporteDate = new Date(reporte.created_at);
           const daysDiff = Math.floor((new Date() - reporteDate) / (1000 * 60 * 60 * 24));
-          
+
           if (daysDiff < diasMostrar && daysDiff >= 0) {
             const index = diasMostrar - 1 - daysDiff;
             if (datos[index]) {
               datos[index].reportes++;
-              if (reporte.severidad === "critica") {
+              if (reporte.severidad === "critica" || reporte.severidad === "alta") {
                 datos[index].criticos++;
               }
             }

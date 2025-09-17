@@ -12,6 +12,22 @@ const ReportesHistorialMejorado = () => {
     isUpdating
   } = useReportes();
 
+  // Debug logs
+  console.log('[HISTORIAL] Estado actual:', {
+    reportes: reportes,
+    reportesCount: reportes?.length || 0,
+    loading,
+    isArray: Array.isArray(reportes)
+  });
+
+  console.log('[HISTORIAL] Reportes filtrados:', {
+    total: reportesFiltrados.length,
+    incidencia: reportesPorTipo.incidencia.length,
+    recomendacion: reportesPorTipo.recomendacion.length,
+    abordaje: reportesPorTipo.abordaje.length,
+    epp: reportesPorTipo.epp.length
+  });
+
   const [filtroTipo, setFiltroTipo] = useState('todos');
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const [filtroFecha, setFiltroFecha] = useState({
@@ -53,18 +69,20 @@ const ReportesHistorialMejorado = () => {
   // Filtrar reportes
   const reportesFiltrados = reportes.filter(reporte => {
     const cumpleTipo = filtroTipo === 'todos' ||
-      reporte.tipoReporte === filtroTipo ||
+      reporte.tipo_reporte === filtroTipo ||
       reporte.tipo?.toLowerCase().includes(filtroTipo.toLowerCase());
 
     const cumpleEstado = filtroEstado === 'todos' ||
       reporte.estado === filtroEstado;
 
     let cumpleFecha = true;
-    if (filtroFecha.desde && reporte.fecha) {
-      cumpleFecha = cumpleFecha && reporte.fecha >= new Date(filtroFecha.desde);
+    if (filtroFecha.desde && reporte.created_at) {
+      const fechaReporte = new Date(reporte.created_at);
+      cumpleFecha = cumpleFecha && fechaReporte >= new Date(filtroFecha.desde);
     }
-    if (filtroFecha.hasta && reporte.fecha) {
-      cumpleFecha = cumpleFecha && reporte.fecha <= new Date(filtroFecha.hasta + 'T23:59:59');
+    if (filtroFecha.hasta && reporte.created_at) {
+      const fechaReporte = new Date(reporte.created_at);
+      cumpleFecha = cumpleFecha && fechaReporte <= new Date(filtroFecha.hasta + 'T23:59:59');
     }
 
     return cumpleTipo && cumpleEstado && cumpleFecha;
@@ -73,18 +91,21 @@ const ReportesHistorialMejorado = () => {
   // Agrupar reportes por tipo
   const reportesPorTipo = {
     incidencia: reportesFiltrados.filter(r =>
-      r.tipoReporte === 'incidencia' ||
-      r.tipo === 'Incidencia' ||
-      r.tipo === 'Acto Inseguro' ||
-      r.tipo === 'Condición Insegura'
+      r.tipo_reporte === 'incidencia' ||
+      r.tipo === 'incidencia' ||
+      r.subtipo?.includes('insegur')
     ),
     recomendacion: reportesFiltrados.filter(r =>
-      r.tipoReporte === 'recomendacion' ||
-      r.tipo === 'Recomendación'
+      r.tipo_reporte === 'recomendacion' ||
+      r.tipo === 'recomendacion'
     ),
     abordaje: reportesFiltrados.filter(r =>
-      r.tipoReporte === 'abordaje' ||
-      r.tipo === 'Abordaje'
+      r.tipo_reporte === 'abordaje' ||
+      r.tipo === 'abordaje'
+    ),
+    epp: reportesFiltrados.filter(r =>
+      r.tipo_reporte === 'epp' ||
+      r.tipo === 'epp'
     )
   };
 

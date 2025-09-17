@@ -14,17 +14,16 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   
   // Debug: verificar los datos que llegan (solo cuando hay cambios)
   if (reportesValidos.length > 0) {
-    console.log('📊 StatsOverview actualizado - Total reportes:', reportesValidos.length);
+    console.log('[STATS] StatsOverview actualizado - Total reportes:', reportesValidos.length);
   }
   
   // Calcular estadísticas básicas - CORREGIDO para estados reales
   const totalReportes = reportesValidos.length;
-  const reportesCriticos = reportesValidos.filter(r => r.severidad === 'critica' || r.severidad === 'crítica').length;
-  const reportesResueltos = reportesValidos.filter(r => r.estado === 'resuelto' || r.estado === 'cerrado').length;
+  const reportesCriticos = reportesValidos.filter(r => r.severidad === 'critica' || r.severidad === 'alta').length;
+  const reportesResueltos = reportesValidos.filter(r => r.estado === 'completado' || r.estado === 'resuelto').length;
   const reportesPendientes = reportesValidos.filter(r => r.estado === 'pendiente').length;
-  const reportesEnProceso = reportesValidos.filter(r => 
-    r.estado === 'proceso' || 
-    r.estado === 'en_proceso' || 
+  const reportesEnProceso = reportesValidos.filter(r =>
+    r.estado === 'en_proceso' ||
     r.estado === 'asignado' ||
     r.estado === 'en_revision'
   ).length;

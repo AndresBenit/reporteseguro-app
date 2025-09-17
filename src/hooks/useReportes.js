@@ -11,7 +11,7 @@ export const useReportes = () => {
   useEffect(() => {
     loadReportes();
     
-    // ✅ Suscripción en tiempo real SOLAMENTE (sin backup automático)
+    // Suscripción en tiempo real SOLAMENTE (sin backup automático)
     const subscription = supabase
       .channel('public:reportes')
       .on('postgres_changes', { 
@@ -19,25 +19,25 @@ export const useReportes = () => {
         schema: 'public', 
         table: 'reportes' 
       }, (payload) => {
-        console.log('🔄 Real-time update:', payload);
+        console.log('[REALTIME] Real-time update:', payload);
         
         switch (payload.eventType) {
           case 'INSERT':
             setReportes(prev => [payload.new, ...prev]);
-            console.log('✅ Reporte agregado en tiempo real');
+            console.log('[REALTIME] Reporte agregado en tiempo real');
             break;
           case 'UPDATE':
             setReportes(prev => prev.map(r => 
               r.id === payload.new.id ? { ...r, ...payload.new } : r
             ));
-            console.log('✅ Reporte actualizado en tiempo real');
+            console.log('[REALTIME] Reporte actualizado en tiempo real');
             break;
           case 'DELETE':
             setReportes(prev => prev.filter(r => r.id !== payload.old.id));
-            console.log('✅ Reporte eliminado en tiempo real');
+            console.log('[REALTIME] Reporte eliminado en tiempo real');
             break;
           default:
-            console.log('🔄 Evento no manejado:', payload.eventType);
+            console.log('[REALTIME] Evento no manejado:', payload.eventType);
             break;
         }
       })
@@ -51,18 +51,20 @@ export const useReportes = () => {
   const loadReportes = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Cargando reportes desde Supabase...');
-      
+      console.log('[REPORTES] Cargando reportes desde Supabase...');
+
       const data = await dbHelpers.getAll('reportes', {
         orderBy: 'created_at',
         ascending: false
       });
-      
-      console.log('✅ Reportes cargados:', data.length);
+
+      console.log('[REPORTES] Reportes cargados:', data.length);
+      console.log('[REPORTES] Datos completos:', data);
       setReportes(data);
       setError(null);
     } catch (err) {
-      console.error("❌ Error cargando reportes:", err);
+      console.error("[REPORTES] Error cargando reportes:", err);
+      console.error("[REPORTES] Detalles del error:", err.message, err.stack);
       setError("Error conectando con la base de datos");
     } finally {
       setLoading(false);
@@ -80,10 +82,10 @@ export const useReportes = () => {
         // Actualizar estado local inmediatamente
         setReportes(prev => prev.filter(reporte => reporte.id !== id));
         
-        console.log(`✅ Reporte ${id} eliminado exitosamente`);
+        console.log(`[REPORTES] Reporte ${id} eliminado exitosamente`);
         
       } catch (err) {
-        console.error("❌ Error eliminando reporte:", err);
+        console.error("[REPORTES] Error eliminando reporte:", err);
         console.error("Error al eliminar el reporte:", err.message);
       } finally {
         setUpdating(prev => {
@@ -99,7 +101,7 @@ export const useReportes = () => {
     try {
       // Normalizar el estado antes de enviarlo
       const estadoNormalizado = reporteUtils.normalizeEstado(estado);
-      console.log(`🔄 Actualizando reporte ${id} al estado: ${estado} (normalizado: ${estadoNormalizado})`);
+      console.log(`[REPORTES] Actualizando reporte ${id} al estado: ${estado} (normalizado: ${estadoNormalizado})`);
       
       setUpdating(prev => new Set([...prev, id]));
       
@@ -115,10 +117,10 @@ export const useReportes = () => {
         r.id === id ? { ...r, ...updatedReporte } : r
       ));
       
-      console.log(`✅ Estado actualizado exitosamente a ${estadoNormalizado}`);
+      console.log(`[REPORTES] Estado actualizado exitosamente a ${estadoNormalizado}`);
       
     } catch (err) {
-      console.error("❌ Error actualizando estado:", err);
+      console.error("[REPORTES] Error actualizando estado:", err);
       console.error("Error al actualizar el estado:", err.message);
     } finally {
       setUpdating(prev => {

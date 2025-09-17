@@ -8,13 +8,13 @@ import {
 
 const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => {
   
-  // 📊 CÁLCULOS AVANZADOS DE KPIs
+  // CALCULOS AVANZADOS DE KPIs
   const analytics = useMemo(() => {
     // Validar que reportes sea un array válido
     const reportesValidos = Array.isArray(reportes) ? reportes : [];
     const total = reportesValidos.length;
-    const resueltos = reportesValidos.filter(r => ['resuelto', 'cerrado'].includes(r?.estado)).length;
-    const criticos = reportesValidos.filter(r => r?.severidad === 'critica').length;
+    const resueltos = reportesValidos.filter(r => ['completado', 'resuelto', 'cerrado'].includes(r?.estado)).length;
+    const criticos = reportesValidos.filter(r => r?.severidad === 'critica' || r?.severidad === 'alta').length;
     const enProceso = reportesValidos.filter(r => ['en_proceso', 'asignado'].includes(r?.estado)).length;
     const pendientes = reportesValidos.filter(r => r?.estado === 'pendiente').length;
     
@@ -22,7 +22,7 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
     const ahora = new Date();
     const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
     const reportesRecientes = reportesValidos.filter(r => {
-      const fecha = r.fecha instanceof Date ? r.fecha : r.fecha?.toDate();
+      const fecha = r.created_at ? new Date(r.created_at) : null;
       return fecha && fecha >= hace30Dias;
     });
 
@@ -37,12 +37,14 @@ const AdvancedStatsOverview = ({ reportes = [], colaboradoresStats = null }) => 
 
     // Distribución por tipo
     const porTipo = {
-      incidencia: reportesValidos.filter(r => r?.tipoReporte === 'incidencia' || 
-        String(r?.tipo || '').toLowerCase().includes('acto')).length,
-      recomendacion: reportesValidos.filter(r => r?.tipoReporte === 'recomendacion' || 
+      incidencia: reportesValidos.filter(r => r?.tipo_reporte === 'incidencia' ||
+        String(r?.tipo || '').toLowerCase().includes('incidencia')).length,
+      recomendacion: reportesValidos.filter(r => r?.tipo_reporte === 'recomendacion' ||
         String(r?.tipo || '').toLowerCase().includes('recomenda')).length,
-      abordaje: reportesValidos.filter(r => r?.tipoReporte === 'abordaje' || 
-        String(r?.tipo || '').toLowerCase().includes('abordaj')).length
+      abordaje: reportesValidos.filter(r => r?.tipo_reporte === 'abordaje' ||
+        String(r?.tipo || '').toLowerCase().includes('abordaj')).length,
+      epp: reportesValidos.filter(r => r?.tipo_reporte === 'epp' ||
+        String(r?.tipo || '').toLowerCase().includes('epp')).length
     };
 
     // Distribución por área
