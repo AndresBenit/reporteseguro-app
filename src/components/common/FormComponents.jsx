@@ -231,3 +231,20 @@ export const SeverityBadge = ({ severity }) => {
     </span>
   );
 };
+
+// Agrupación de componentes para importación como objeto
+export const FormComponents = {
+  Container: FormContainer,
+  Header: FormHeader,
+  Section: FormSection,
+  Row: FormRow,
+  Field: FormField,
+  Input: FormInput,
+  Select: FormSelect,
+  Textarea: FormTextarea,
+  Button: FormButton,
+  ButtonGroup: FormButtonGroup,
+  Message: FormMessage,
+  Card: FormCard,
+  SeverityBadge: SeverityBadge
+};
