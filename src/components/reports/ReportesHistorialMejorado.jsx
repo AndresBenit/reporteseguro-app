@@ -90,10 +90,9 @@ const ReportesHistorialMejorado = () => {
     return cumpleTipo && cumpleEstado && cumpleFecha;
   });
 
-  // Agrupar reportes por tipo con lógica mejorada
+  // Agrupar reportes por tipo basado en los tipo_reporte REALES
   const reportesPorTipo = {
     incidencia: reportesFiltrados.filter(r => {
-      // Múltiples formas de identificar incidencias
       return r.tipo_reporte === 'incidencia' ||
              r.tipo === 'incidencia' ||
              r.subtipo?.toLowerCase().includes('insegur') ||
@@ -103,17 +102,23 @@ const ReportesHistorialMejorado = () => {
              r.subtipo?.toLowerCase().includes('incidente');
     }),
     recomendacion: reportesFiltrados.filter(r => {
-      return r.tipo_reporte === 'recomendacion' ||
+      // Los formularios REALES que crean recomendaciones
+      return r.tipo_reporte === 'observacion' ||
+             r.tipo_reporte === 'personal' ||
+             r.tipo_reporte === 'seguimiento' ||
              r.tipo === 'recomendacion' ||
              r.subtipo?.toLowerCase().includes('recomenda') ||
              r.subtipo?.toLowerCase().includes('mejora') ||
+             r.subtipo?.toLowerCase().includes('observacion') ||
              r.subtipo?.toLowerCase().includes('capacita');
     }),
     abordaje: reportesFiltrados.filter(r => {
+      // Por ahora los abordajes van a tabla separada, pero si hay alguno en reportes
       return r.tipo_reporte === 'abordaje' ||
              r.tipo === 'abordaje' ||
              r.subtipo?.toLowerCase().includes('abordaj') ||
-             r.subtipo?.toLowerCase().includes('conversation');
+             r.subtipo?.toLowerCase().includes('conversation') ||
+             r.subtipo?.toLowerCase().includes('personal');
     }),
     epp: reportesFiltrados.filter(r => {
       return r.tipo_reporte === 'epp' ||
@@ -399,7 +404,7 @@ const ReportesHistorialMejorado = () => {
                         }`}
                         title="Cambiar estado"
                       >
-                        <Icon name="Edit3" size={12} />
+                        <Icon name="Edit" size={12} />
                       </button>
                     </div>
                   </td>
