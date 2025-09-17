@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { authHelpers } from "../../services/supabase";
 import { Icon } from "../common/Icons";
-import logotipo from "../../assets/images/Logotipo.png";
 
 const LoginMejorado = () => {
   const [form, setForm] = useState({ email: "", password: "" });
@@ -68,16 +67,14 @@ const LoginMejorado = () => {
         {/* Login Card */}
         <div className="bg-white backdrop-blur-lg bg-opacity-95 rounded-2xl shadow-2xl border border-white/20 p-8 space-y-6 animate-fade-in">
 
-          {/* Header with Logo */}
+          {/* Header */}
           <div className="text-center space-y-4">
-            <div className="flex justify-center">
+            <div className="flex justify-center mb-6">
               <div className="relative">
-                <img
-                  src={logotipo}
-                  alt="AuditSafe"
-                  className="h-16 w-auto object-contain animate-float"
-                />
-                <div className="absolute inset-0 bg-blue-600/20 rounded-lg blur-xl animate-pulse"></div>
+                <div className="w-20 h-20 bg-gradient-to-br from-slate-700 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg animate-float">
+                  <Icon name="Shield" size={32} className="text-white" />
+                </div>
+                <div className="absolute inset-0 bg-blue-600/20 rounded-2xl blur-xl animate-pulse"></div>
               </div>
             </div>
 
