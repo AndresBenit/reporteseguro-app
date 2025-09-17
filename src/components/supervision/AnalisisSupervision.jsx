@@ -381,7 +381,7 @@ const AnalisisSupervision = () => {
           (reportesValidos.filter(r => ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')).length / reportesValidos.length) * 100
         ) : 0,
         promedioReportesDia: reportesValidos.length > 0 ? Math.round(reportesValidos.length / 30) : 0,
-        areasMasActivas: Math.max(...Object.values(reportesPorArea).map(v => v || 0)) || 0
+        areasMasActivas: areaData.length > 0 ? Math.max(...areaData.map(a => a.cantidad || 0)) : 0
       },
       estadoData,
       categoriaData,
