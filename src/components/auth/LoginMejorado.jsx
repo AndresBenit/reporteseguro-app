@@ -57,7 +57,7 @@ const LoginMejorado = () => {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-blue-600 via-purple-600 to-blue-800 relative overflow-hidden">
+    <div className="min-h-screen flex items-center justify-center px-4 py-8 bg-gradient-to-br from-slate-800 via-blue-900 to-slate-900 relative overflow-hidden">
       {/* Background decorations */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-1/4 left-1/4 w-64 h-64 bg-white rounded-full blur-3xl"></div>
@@ -74,19 +74,19 @@ const LoginMejorado = () => {
               <div className="relative">
                 <img
                   src={logotipo}
-                  alt="ReporteSeguro"
+                  alt="AuditSafe"
                   className="h-16 w-auto object-contain animate-float"
                 />
-                <div className="absolute inset-0 bg-blue-500/20 rounded-lg blur-xl animate-pulse"></div>
+                <div className="absolute inset-0 bg-blue-600/20 rounded-lg blur-xl animate-pulse"></div>
               </div>
             </div>
 
             <div className="space-y-2">
-              <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                Sistema de Gestión
+              <h1 className="text-3xl font-bold bg-gradient-to-r from-slate-700 to-blue-700 bg-clip-text text-transparent">
+                AuditSafe
               </h1>
               <p className="text-gray-600 font-medium">
-                {isMobile ? 'Seguridad Industrial' : 'Plataforma Profesional de Seguridad Industrial'}
+                {isMobile ? 'Plataforma de Auditoría' : 'Sistema Profesional de Gestión y Auditoría'}
               </p>
             </div>
           </div>
@@ -113,7 +113,7 @@ const LoginMejorado = () => {
                     placeholder="usuario@empresa.com"
                     value={form.email}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
                     required
                     autoComplete="email"
                     autoCapitalize="none"
@@ -136,7 +136,7 @@ const LoginMejorado = () => {
                     placeholder="••••••••"
                     value={form.password}
                     onChange={handleChange}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all duration-200 text-gray-900 placeholder-gray-500"
                     required
                     autoComplete="current-password"
                   />
@@ -150,7 +150,7 @@ const LoginMejorado = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
+              className="w-full bg-gradient-to-r from-slate-700 to-blue-700 hover:from-slate-800 hover:to-blue-800 text-white font-bold py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-105 hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2"
             >
               {loading ? (
                 <>
@@ -167,32 +167,32 @@ const LoginMejorado = () => {
           </form>
 
           {/* Features Section */}
-          <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg p-4 border border-blue-100">
+          <div className="bg-gradient-to-r from-slate-50 to-blue-50 rounded-lg p-4 border border-slate-200">
             <h4 className="text-sm font-semibold text-gray-700 mb-3 flex items-center space-x-2">
               <Icon name="Shield" size={16} className="text-blue-600" />
-              <span>Características del Sistema</span>
+              <span>Características de la Plataforma</span>
             </h4>
             <ul className="text-xs text-gray-600 space-y-1">
               <li className="flex items-center space-x-2">
-                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
-                <span>Gestión centralizada de reportes</span>
+                <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                <span>Gestión centralizada de auditorías</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                <div className="w-1 h-1 bg-blue-600 rounded-full"></div>
                 <span>Dashboard ejecutivo en tiempo real</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
-                <span>Seguimiento completo de incidencias</span>
+                <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                <span>Seguimiento completo de hallazgos</span>
               </li>
               <li className="flex items-center space-x-2">
-                <div className="w-1 h-1 bg-purple-500 rounded-full"></div>
+                <div className="w-1 h-1 bg-blue-600 rounded-full"></div>
                 <span>Interfaz optimizada para móviles</span>
               </li>
               {!isMobile && (
                 <li className="flex items-center space-x-2">
-                  <div className="w-1 h-1 bg-blue-500 rounded-full"></div>
-                  <span>Cumplimiento de normativas industriales</span>
+                  <div className="w-1 h-1 bg-slate-600 rounded-full"></div>
+                  <span>Cumplimiento de estándares corporativos</span>
                 </li>
               )}
             </ul>
@@ -213,7 +213,7 @@ const LoginMejorado = () => {
         {/* Version info */}
         <div className="text-center mt-6">
           <p className="text-white/70 text-xs">
-            ReporteSeguro Enterprise v2.0 • Powered by Supabase
+            AuditSafe Enterprise v2.0 • Powered by Supabase
           </p>
         </div>
       </div>
