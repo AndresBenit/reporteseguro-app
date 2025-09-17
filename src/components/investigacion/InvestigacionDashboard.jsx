@@ -19,7 +19,7 @@ const InvestigacionDashboard = () => {
   const cargarInvestigaciones = async () => {
     try {
       setLoading(true);
-      const data = await dbHelpers.getAll('investigacion_accidentes', {
+      const data = await dbHelpers.getAll('investigaciones_accidentes', {
         orderBy: 'created_at',
         ascending: false
       });

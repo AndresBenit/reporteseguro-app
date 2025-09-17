@@ -262,7 +262,7 @@ const InvestigacionForm = () => {
 
       console.log('Datos a enviar:', investigacionData);
 
-      await dbHelpers.create('investigacion_accidentes', investigacionData);
+      await dbHelpers.create('investigaciones_accidentes', investigacionData);
 
       setMensaje("¡Investigación registrada exitosamente!");
 
