@@ -26,6 +26,27 @@ const ReportesHistorialMejorado = () => {
       try {
         setLoadingSupervision(true);
 
+        // TEMPORAL: Actualizar abordajes con estado "completado" a "pendiente"
+        try {
+          const { data: abordajesCompletados } = await supabase
+            .from('abordajes_campo')
+            .select('id')
+            .eq('estado', 'completado');
+
+          if (abordajesCompletados && abordajesCompletados.length > 0) {
+            console.log('[HISTORIAL] Actualizando', abordajesCompletados.length, 'abordajes de completado a pendiente...');
+
+            await supabase
+              .from('abordajes_campo')
+              .update({ estado: 'pendiente' })
+              .eq('estado', 'completado');
+
+            console.log('[HISTORIAL] ✅ Abordajes actualizados a pendiente');
+          }
+        } catch (updateError) {
+          console.error('[HISTORIAL] Error actualizando abordajes:', updateError);
+        }
+
         // Cargar supervision_campo
         const supervisionData = await dbHelpers.getAll('supervision_campo', {
           orderBy: 'created_at',
