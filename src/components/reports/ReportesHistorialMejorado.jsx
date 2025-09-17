@@ -357,9 +357,9 @@ const ReportesHistorialMejorado = () => {
                       </span>
                       <button
                         onClick={() => abrirModalEstado(reporte)}
-                        disabled={updating === reporte.id}
+                        disabled={isUpdating(reporte.id)}
                         className={`p-1 bg-indigo-600 text-white rounded hover:bg-indigo-700 transition-colors ${
-                          updating === reporte.id ? 'opacity-50 cursor-not-allowed' : ''
+                          isUpdating(reporte.id) ? 'opacity-50 cursor-not-allowed' : ''
                         }`}
                         title="Cambiar estado"
                       >
