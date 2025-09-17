@@ -179,450 +179,370 @@ const AnalisisEPP = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ fontSize: '1.2rem', color: '#6b7280' }}>
-          Cargando análisis de EPP...
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="bg-white rounded-2xl p-8 shadow-xl">
+            <Icon name="Shield" size={64} className="mx-auto text-slate-400 mb-4" />
+            <h3 className="text-xl font-semibold text-slate-700 mb-2">Cargando Análisis EPP</h3>
+            <p className="text-slate-500">Procesando datos de elementos de protección...</p>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '30px' }}>
-        <h1 style={{ 
-          fontSize: '2.5rem', 
-          fontWeight: '700', 
-          color: '#1f2937',
-          marginBottom: '10px',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '15px'
-        }}>
-          🦺 Análisis Control EPP
-        </h1>
-        <p style={{ color: '#6b7280', fontSize: '1.1rem' }}>
-          Dashboard completo de gestión y distribución de Elementos de Protección Personal
-        </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
+      {/* Header Principal */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-emerald-600 to-emerald-700 rounded-2xl p-3 shadow-lg">
+                <Icon name="Shield" size={32} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-emerald-600 to-emerald-700 bg-clip-text text-transparent">
+                  Análisis Control EPP
+                </h1>
+                <p className="text-slate-600 font-medium">
+                  Dashboard Completo • Gestión EPP • Distribución • Análisis de Tendencias
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="font-medium">Sistema Activo</span>
+              </div>
+              <div className="w-px h-6 bg-slate-300"></div>
+              <span className="font-medium">
+                {new Date().toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Filtros de fecha */}
-      <div style={{ 
-        background: 'white',
-        padding: '20px',
-        borderRadius: '12px',
-        marginBottom: '30px',
-        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-        display: 'flex',
-        gap: '20px',
-        alignItems: 'center',
-        flexWrap: 'wrap'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontWeight: '600', color: '#374151', minWidth: '120px' }}>
-            📅 Fecha Inicio:
-          </label>
-          <input
-            type="date"
-            value={fechaInicio}
-            onChange={(e) => setFechaInicio(e.target.value)}
-            style={{
-              padding: '10px 12px',
-              border: '2px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              minWidth: '150px',
-              outline: 'none',
-              transition: 'border-color 0.3s ease'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-          />
+      <div className="max-w-7xl mx-auto px-6 py-8">
+
+        {/* Filtros y Controles */}
+        <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-8">
+          <div className="flex flex-wrap items-center gap-6">
+            <div className="flex items-center space-x-3">
+              <Icon name="Calendar" size={20} className="text-slate-500" />
+              <label className="text-sm font-semibold text-slate-700 min-w-fit">Fecha Inicio:</label>
+              <input
+                type="date"
+                value={fechaInicio}
+                onChange={(e) => setFechaInicio(e.target.value)}
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            <div className="flex items-center space-x-3">
+              <Icon name="Calendar" size={20} className="text-slate-500" />
+              <label className="text-sm font-semibold text-slate-700 min-w-fit">Fecha Fin:</label>
+              <input
+                type="date"
+                value={fechaFin}
+                onChange={(e) => setFechaFin(e.target.value)}
+                className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all"
+              />
+            </div>
+
+            {/* Botones período rápido */}
+            <div className="flex items-center space-x-2 ml-auto">
+              <span className="text-sm text-slate-500">Rápido:</span>
+              {[
+                { label: '7d', dias: 7 },
+                { label: '30d', dias: 30 },
+                { label: '90d', dias: 90 },
+                { label: '1a', dias: 365 }
+              ].map(periodo => (
+                <button
+                  key={periodo.dias}
+                  onClick={() => {
+                    const fin = new Date();
+                    const inicio = new Date();
+                    inicio.setDate(fin.getDate() - periodo.dias);
+                    setFechaInicio(inicio.toISOString().split('T')[0]);
+                    setFechaFin(fin.toISOString().split('T')[0]);
+                  }}
+                  className="px-3 py-1 text-xs font-medium text-slate-600 border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                >
+                  {periodo.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-4 border-t border-slate-200">
+            <div className="flex items-center justify-between text-sm">
+              <div className="flex items-center space-x-2">
+                <Icon name="BarChart3" size={16} className="text-emerald-500" />
+                <span className="text-slate-600">
+                  Analizando: <span className="font-medium">{new Date(fechaInicio).toLocaleDateString('es-ES')} - {new Date(fechaFin).toLocaleDateString('es-ES')}</span>
+                </span>
+              </div>
+              <div className="text-slate-500">
+                {reportesFiltrados.length} entregas EPP encontradas
+              </div>
+            </div>
+          </div>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <label style={{ fontWeight: '600', color: '#374151', minWidth: '120px' }}>
-            📅 Fecha Fin:
-          </label>
-          <input
-            type="date"
-            value={fechaFin}
-            onChange={(e) => setFechaFin(e.target.value)}
-            style={{
-              padding: '10px 12px',
-              border: '2px solid #d1d5db',
-              borderRadius: '8px',
-              fontSize: '0.9rem',
-              minWidth: '150px',
-              outline: 'none',
-              transition: 'border-color 0.3s ease'
-            }}
-            onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-            onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-          />
-        </div>
-
-        {/* Botones de período rápido */}
-        <div style={{ display: 'flex', gap: '8px', marginLeft: '20px' }}>
-          <span style={{ fontSize: '0.85rem', color: '#6b7280', alignSelf: 'center' }}>Rápido:</span>
+        {/* KPIs Principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
-            { label: '7d', dias: 7 },
-            { label: '30d', dias: 30 },
-            { label: '90d', dias: 90 },
-            { label: '1a', dias: 365 }
-          ].map(periodo => (
-            <button
-              key={periodo.dias}
-              onClick={() => {
-                const fin = new Date();
-                const inicio = new Date();
-                inicio.setDate(fin.getDate() - periodo.dias);
-                setFechaInicio(inicio.toISOString().split('T')[0]);
-                setFechaFin(fin.toISOString().split('T')[0]);
-              }}
-              style={{
-                padding: '6px 12px',
-                borderRadius: '4px',
-                border: '1px solid #d1d5db',
-                background: 'white',
-                color: '#374151',
-                cursor: 'pointer',
-                fontSize: '0.8rem',
-                fontWeight: '500',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.background = '#f3f4f6';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = 'white';
-              }}
-            >
-              {periodo.label}
-            </button>
+            {
+              titulo: 'Total Entregas',
+              valor: analisisEPP.estadisticas.totalEntregas,
+              icon: 'Package',
+              color: 'from-blue-500 to-blue-600',
+              bgColor: 'bg-blue-50',
+              textColor: 'text-blue-700'
+            },
+            {
+              titulo: 'Elementos Diferentes',
+              valor: analisisEPP.estadisticas.elementosUnicos,
+              icon: 'Shield',
+              color: 'from-emerald-500 to-emerald-600',
+              bgColor: 'bg-emerald-50',
+              textColor: 'text-emerald-700'
+            },
+            {
+              titulo: 'Personas Atendidas',
+              valor: analisisEPP.estadisticas.personasAtendidas,
+              icon: 'Users',
+              color: 'from-amber-500 to-amber-600',
+              bgColor: 'bg-amber-50',
+              textColor: 'text-amber-700'
+            },
+            {
+              titulo: 'Áreas Cubiertas',
+              valor: analisisEPP.estadisticas.areasAtendidas,
+              icon: 'Building2',
+              color: 'from-red-500 to-red-600',
+              bgColor: 'bg-red-50',
+              textColor: 'text-red-700'
+            }
+          ].map(stat => (
+            <div key={stat.titulo} className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 hover:shadow-xl transition-shadow">
+              <div className="flex items-center justify-between mb-4">
+                <div className={`w-12 h-12 rounded-xl ${stat.bgColor} flex items-center justify-center`}>
+                  <Icon name={stat.icon} size={24} className={stat.textColor} />
+                </div>
+                <div className={`text-3xl font-bold bg-gradient-to-r ${stat.color} bg-clip-text text-transparent`}>
+                  {stat.valor}
+                </div>
+              </div>
+              <h3 className="text-sm font-semibold text-slate-600">
+                {stat.titulo}
+              </h3>
+            </div>
           ))}
         </div>
 
-        {/* Mostrar período seleccionado */}
-        <div style={{
-          marginLeft: 'auto',
-          padding: '8px 12px',
-          background: '#f0f9ff',
-          border: '1px solid #bae6fd',
-          borderRadius: '6px',
-          fontSize: '0.85rem',
-          color: '#0369a1'
-        }}>
-          📊 Analizando: {new Date(fechaInicio).toLocaleDateString('es-ES')} - {new Date(fechaFin).toLocaleDateString('es-ES')}
-        </div>
-      </div>
-
-      {/* Estadísticas principales */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        {[
-          { 
-            titulo: 'Total Entregas',
-            valor: analisisEPP.estadisticas.totalEntregas,
-            icono: '📦',
-            color: '#3b82f6'
-          },
-          {
-            titulo: 'Elementos Diferentes',
-            valor: analisisEPP.estadisticas.elementosUnicos,
-            icono: '🦺',
-            color: '#10b981'
-          },
-          {
-            titulo: 'Personas Atendidas',
-            valor: analisisEPP.estadisticas.personasAtendidas,
-            icono: '👥',
-            color: '#f59e0b'
-          },
-          {
-            titulo: 'Áreas Cubiertas',
-            valor: analisisEPP.estadisticas.areasAtendidas,
-            icono: '🏭',
-            color: '#ef4444'
-          }
-        ].map(stat => (
-          <div key={stat.titulo} style={{
-            background: 'white',
-            padding: '25px',
-            borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-            borderLeft: `4px solid ${stat.color}`
-          }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: '10px'
-            }}>
-              <span style={{ fontSize: '2rem' }}>{stat.icono}</span>
-              <span style={{ 
-                fontSize: '2.5rem', 
-                fontWeight: '700',
-                color: stat.color
-              }}>
-                {stat.valor}
-              </span>
+        {/* Gráficos principales */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Top 5 EPP más pedidos */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <Icon name="Trophy" size={24} className="text-amber-600" />
+              <h3 className="text-xl font-bold text-slate-800">Top 5 EPP Más Pedidos</h3>
             </div>
-            <h3 style={{ 
-              fontSize: '1rem',
-              color: '#6b7280',
-              margin: 0
-            }}>
-              {stat.titulo}
-            </h3>
-          </div>
-        ))}
-      </div>
-
-      {/* Gráficos principales */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
-        gap: '30px',
-        marginBottom: '30px'
-      }}>
-        {/* Top 5 EPP más pedidos */}
-        <div style={{
-          background: 'white',
-          padding: '25px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            🏆 Top 5 EPP Más Pedidos
-          </h3>
-          {analisisEPP.top5Elementos && analisisEPP.top5Elementos.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={analisisEPP.top5Elementos}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis 
-                  dataKey="elemento" 
-                  tick={{ fontSize: 12 }}
-                  angle={-45}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis />
-                <Tooltip />
-                <Bar 
-                  dataKey="cantidad" 
-                  fill="#3b82f6"
-                  radius={[4, 4, 0, 0]}
-                />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ 
-              height: '300px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#6b7280',
-              fontSize: '0.9rem'
-            }}>
-              No hay datos de EPP para mostrar
-            </div>
-          )}
-        </div>
-
-        {/* Entregas por área */}
-        <div style={{
-          background: 'white',
-          padding: '25px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            🏭 Entregas por Área
-          </h3>
-          {analisisEPP.areasMasActivas && analisisEPP.areasMasActivas.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={analisisEPP.areasMasActivas}
-                  cx="50%"
-                  cy="50%"
-                  outerRadius={100}
-                  dataKey="cantidad"
-                  label={({area, percent}) => `${area}: ${(percent * 100).toFixed(0)}%`}
-                  labelLine={false}
-                >
-                  {analisisEPP.areasMasActivas.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={entry.color} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ 
-              height: '300px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#6b7280',
-              fontSize: '0.9rem'
-            }}>
-              No hay datos de áreas para mostrar
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Gráficos secundarios */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(500px, 1fr))',
-        gap: '30px'
-      }}>
-        {/* Entregas por mes */}
-        <div style={{
-          background: 'white',
-          padding: '25px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            📈 Entregas Mensuales
-          </h3>
-          {analisisEPP.entregasPorMes && analisisEPP.entregasPorMes.length > 0 ? (
-            <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={analisisEPP.entregasPorMes}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="mes" />
-                <YAxis />
-                <Tooltip />
-                <Area 
-                  type="monotone" 
-                  dataKey="entregas" 
-                  stroke="#10b981" 
-                  fill="#10b981"
-                  fillOpacity={0.3}
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          ) : (
-            <div style={{ 
-              height: '300px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#6b7280',
-              fontSize: '0.9rem'
-            }}>
-              No hay datos mensuales para mostrar
-            </div>
-          )}
-        </div>
-
-        {/* Top personas */}
-        <div style={{
-          background: 'white',
-          padding: '25px',
-          borderRadius: '12px',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
-        }}>
-          <h3 style={{ 
-            fontSize: '1.3rem',
-            fontWeight: '600',
-            color: '#1f2937',
-            marginBottom: '20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '10px'
-          }}>
-            👥 Personas que más EPP han recibido
-          </h3>
-          {analisisEPP.topPersonas && analisisEPP.topPersonas.length > 0 ? (
-            <div style={{ maxHeight: '300px', overflowY: 'auto' }}>
-              {analisisEPP.topPersonas.map((persona, index) => (
-                <div key={index} style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: '12px 0',
-                  borderBottom: '1px solid #f3f4f6'
-                }}>
-                  <span style={{ fontSize: '0.9rem', color: '#374151' }}>
-                    {persona.persona}
-                  </span>
-                  <span style={{ 
-                    fontSize: '1rem',
-                    fontWeight: '600',
-                    color: '#3b82f6'
-                  }}>
-                    {persona.cantidad}
-                  </span>
+            {analisisEPP.top5Elementos && analisisEPP.top5Elementos.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={analisisEPP.top5Elementos}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="elemento"
+                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    angle={-45}
+                    textAnchor="end"
+                    height={60}
+                    tickLine={{ stroke: '#cbd5e1' }}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Bar
+                    dataKey="cantidad"
+                    fill="#3b82f6"
+                    radius={[4, 4, 0, 0]}
+                  />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                <div className="text-center">
+                  <Icon name="Package" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p>No hay datos de EPP para mostrar</p>
                 </div>
-              ))}
+              </div>
+            )}
+        </div>
+
+          {/* Entregas por área */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <Icon name="Building2" size={24} className="text-blue-600" />
+              <h3 className="text-xl font-bold text-slate-800">Entregas por Área</h3>
             </div>
-          ) : (
-            <div style={{ 
-              height: '300px', 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              color: '#6b7280',
-              fontSize: '0.9rem'
-            }}>
-              No hay datos de personas para mostrar
-            </div>
-          )}
+            {analisisEPP.areasMasActivas && analisisEPP.areasMasActivas.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={analisisEPP.areasMasActivas}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={100}
+                    dataKey="cantidad"
+                    label={({area, percent}) => `${area}: ${(percent * 100).toFixed(0)}%`}
+                    labelLine={false}
+                  >
+                    {analisisEPP.areasMasActivas.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                <div className="text-center">
+                  <Icon name="Building2" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p>No hay datos de áreas para mostrar</p>
+                </div>
+              </div>
+            )}
         </div>
       </div>
 
-      {reportesFiltrados.length === 0 && (
-        <div style={{
-          background: 'white',
-          padding: '40px',
-          borderRadius: '12px',
-          textAlign: 'center',
-          boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
-          marginTop: '30px'
-        }}>
-          <div style={{ fontSize: '3rem', marginBottom: '15px' }}>📦</div>
-          <h3 style={{ color: '#6b7280', fontSize: '1.2rem' }}>
-            No hay registros de EPP en el período seleccionado
-          </h3>
-          <p style={{ color: '#9ca3af' }}>
-            Ajusta el filtro de fecha o registra algunas entregas de EPP
-          </p>
+        {/* Gráficos secundarios */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-8">
+          {/* Entregas por mes */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <Icon name="TrendingUp" size={24} className="text-emerald-600" />
+              <h3 className="text-xl font-bold text-slate-800">Entregas Mensuales</h3>
+            </div>
+            {analisisEPP.entregasPorMes && analisisEPP.entregasPorMes.length > 0 ? (
+              <ResponsiveContainer width="100%" height={300}>
+                <AreaChart data={analisisEPP.entregasPorMes}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                  <XAxis
+                    dataKey="mes"
+                    tick={{ fontSize: 12, fill: '#64748b' }}
+                    tickLine={{ stroke: '#cbd5e1' }}
+                  />
+                  <YAxis tick={{ fontSize: 12, fill: '#64748b' }} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'white',
+                      border: '1px solid #e2e8f0',
+                      borderRadius: '8px',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="entregas"
+                    stroke="#10b981"
+                    fill="#10b981"
+                    fillOpacity={0.3}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                <div className="text-center">
+                  <Icon name="TrendingUp" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p>No hay datos mensuales para mostrar</p>
+                </div>
+              </div>
+            )}
         </div>
-      )}
+
+          {/* Top personas */}
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-6">
+            <div className="flex items-center space-x-3 mb-6">
+              <Icon name="Users" size={24} className="text-indigo-600" />
+              <h3 className="text-xl font-bold text-slate-800">Personas que más EPP han recibido</h3>
+            </div>
+            {analisisEPP.topPersonas && analisisEPP.topPersonas.length > 0 ? (
+              <div className="max-h-[300px] overflow-y-auto">
+                {analisisEPP.topPersonas.map((persona, index) => (
+                  <div key={index} className="flex justify-between items-center py-3 border-b border-slate-100 last:border-b-0">
+                    <span className="text-sm text-slate-700 font-medium">
+                      {persona.persona}
+                    </span>
+                    <span className="text-lg font-bold text-blue-600">
+                      {persona.cantidad}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="h-[300px] flex items-center justify-center text-slate-500">
+                <div className="text-center">
+                  <Icon name="Users" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <p>No hay datos de personas para mostrar</p>
+                </div>
+              </div>
+            )}
+        </div>
+      </div>
+
+        {/* Mensaje cuando no hay datos */}
+        {reportesFiltrados.length === 0 && (
+          <div className="bg-white rounded-2xl shadow-lg border border-slate-200 p-12 text-center">
+            <div className="max-w-md mx-auto">
+              <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                <Icon name="Package" size={32} className="text-slate-400" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-700 mb-3">
+                No hay registros de EPP en el período seleccionado
+              </h3>
+              <p className="text-slate-500 mb-6">
+                Ajusta el filtro de fecha o registra algunas entregas de EPP
+              </p>
+              <button
+                onClick={() => {
+                  const fin = new Date();
+                  const inicio = new Date();
+                  inicio.setDate(fin.getDate() - 30);
+                  setFechaInicio(inicio.toISOString().split('T')[0]);
+                  setFechaFin(fin.toISOString().split('T')[0]);
+                }}
+                className="px-6 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+              >
+                Restablecer filtros
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
