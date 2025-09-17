@@ -381,7 +381,19 @@ const AnalisisSupervision = () => {
           (reportesValidos.filter(r => ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')).length / reportesValidos.length) * 100
         ) : 0,
         promedioReportesDia: reportesValidos.length > 0 ? Math.round(reportesValidos.length / 30) : 0,
-        areasMasActivas: areaData.length > 0 ? Math.max(...areaData.map(a => a.cantidad || 0)) : 0
+        areasMasActivas: (() => {
+          try {
+            if (!areaData || areaData.length === 0) return 0;
+            const cantidades = areaData.map(a => {
+              const cantidad = Number(a?.cantidad) || 0;
+              return isFinite(cantidad) ? cantidad : 0;
+            }).filter(c => c >= 0);
+            return cantidades.length > 0 ? Math.max(...cantidades) : 0;
+          } catch (e) {
+            console.error('Error calculando areasMasActivas:', e);
+            return 0;
+          }
+        })()
       },
       estadoData,
       categoriaData,
