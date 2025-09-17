@@ -225,40 +225,57 @@ const AnalisisSupervision = () => {
         abordajes: abordajesCount,
         total: reportesDelMes.length,
         eficiencia: eficiencia,
-        acumulado: tendenciaMensual.reduce((acc, curr) => acc + curr.total, 0) + reportesDelMes.length
+        acumulado: tendenciaMensual.length > 0 ?
+          tendenciaMensual.reduce((acc, curr) => acc + (curr.total || 0), 0) + reportesDelMes.length :
+          reportesDelMes.length
       });
     }
 
     // Análisis de eficiencia por categoría
+    const incidenciasData = {
+      reportes: reportesValidos.filter(r => r.categoria === 'incidencia').length,
+      resueltos: reportesValidos.filter(r =>
+        r.categoria === 'incidencia' &&
+        ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+      ).length
+    };
+
+    const supervisionData = {
+      reportes: reportesValidos.filter(r => r.categoria === 'supervision').length,
+      resueltos: reportesValidos.filter(r =>
+        r.categoria === 'supervision' &&
+        ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+      ).length
+    };
+
+    const abordajesData = {
+      reportes: reportesValidos.filter(r => r.categoria === 'abordaje').length,
+      resueltos: reportesValidos.filter(r =>
+        r.categoria === 'abordaje' &&
+        ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
+      ).length
+    };
+
     const eficienciaPorCategoria = [
       {
         categoria: 'Incidencias',
-        reportes: reportesValidos.filter(r => r.categoria === 'incidencia').length,
-        resueltos: reportesValidos.filter(r =>
-          r.categoria === 'incidencia' &&
-          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
-        ).length,
-        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        reportes: incidenciasData.reportes,
+        resueltos: incidenciasData.resueltos,
+        eficiencia: incidenciasData.reportes > 0 ? Math.round((incidenciasData.resueltos / incidenciasData.reportes) * 100) : 0,
         color: '#ef4444'
       },
       {
         categoria: 'Supervisión',
-        reportes: reportesValidos.filter(r => r.categoria === 'supervision').length,
-        resueltos: reportesValidos.filter(r =>
-          r.categoria === 'supervision' &&
-          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
-        ).length,
-        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        reportes: supervisionData.reportes,
+        resueltos: supervisionData.resueltos,
+        eficiencia: supervisionData.reportes > 0 ? Math.round((supervisionData.resueltos / supervisionData.reportes) * 100) : 0,
         color: '#3b82f6'
       },
       {
         categoria: 'Abordajes',
-        reportes: reportesValidos.filter(r => r.categoria === 'abordaje').length,
-        resueltos: reportesValidos.filter(r =>
-          r.categoria === 'abordaje' &&
-          ['resuelto', 'cerrado', 'completado'].includes(r.estado?.toLowerCase() || '')
-        ).length,
-        get eficiencia() { return this.reportes > 0 ? Math.round((this.resueltos / this.reportes) * 100) : 0; },
+        reportes: abordajesData.reportes,
+        resueltos: abordajesData.resueltos,
+        eficiencia: abordajesData.reportes > 0 ? Math.round((abordajesData.resueltos / abordajesData.reportes) * 100) : 0,
         color: '#10b981'
       }
     ];
@@ -600,7 +617,7 @@ const AnalisisSupervision = () => {
           <div className="bg-white rounded-lg shadow-sm border border-slate-200 p-6">
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center space-x-2">
-                <Icon name="Target" size={20} className="text-emerald-600" />
+                <Icon name="TrendingUp" size={20} className="text-emerald-600" />
                 <h3 className="text-lg font-bold text-slate-800">Eficiencia por Categoría</h3>
               </div>
               <div className="text-xs text-slate-500 bg-slate-50 px-2 py-1 rounded">
@@ -635,7 +652,6 @@ const AnalisisSupervision = () => {
                   />
                   <Bar
                     dataKey="eficiencia"
-                    fill={(entry) => entry.color}
                     radius={[0, 4, 4, 0]}
                     stroke="white"
                     strokeWidth={1}
@@ -649,7 +665,7 @@ const AnalisisSupervision = () => {
             ) : (
               <div className="h-[280px] flex items-center justify-center text-slate-500">
                 <div className="text-center">
-                  <Icon name="Target" size={48} className="mx-auto mb-3 text-slate-300" />
+                  <Icon name="TrendingUp" size={48} className="mx-auto mb-3 text-slate-300" />
                   <p className="text-sm">No hay datos de eficiencia</p>
                 </div>
               </div>
@@ -886,10 +902,6 @@ const AnalisisSupervision = () => {
                 />
                 <Bar
                   dataKey="reportes"
-                  fill={(entry) => {
-                    const intensity = entry.intensidad || 0;
-                    return `rgba(99, 102, 241, ${Math.max(0.1, intensity)})`;
-                  }}
                   radius={[2, 2, 0, 0]}
                 >
                   {analisisCompleto.reportesPorHora.map((entry, index) => {
