@@ -26,27 +26,23 @@ const areasAccidente = [
 ];
 
 const tiposAccidente = [
-  "Caída de personas a distinto nivel",
-  "Caída de personas al mismo nivel",
-  "Caída de objetos por manipulación",
-  "Caída de objetos desprendidos",
-  "Golpes por objetos o herramientas",
-  "Cortes por objetos o herramientas",
-  "Atrapamiento por vuelco de máquinas",
-  "Atrapamiento por derrumbamiento",
-  "Contacto con sustancias cáusticas",
-  "Exposición a radiaciones",
+  "Caída",
+  "Golpe",
+  "Corte",
+  "Atrapamiento",
+  "Contacto",
+  "Exposición",
   "Incendio",
   "Explosión",
-  "Accidente de trayecto",
-  "Otros"
+  "Tránsito",
+  "Otro"
 ];
 
 const nivelesGravedad = [
   "Leve",
   "Grave",
-  "Muy grave",
-  "Mortal"
+  "Mortal",
+  "Catastrófico"
 ];
 
 const metodologiasInvestigacion = [
@@ -60,9 +56,8 @@ const metodologiasInvestigacion = [
 ];
 
 const estadosInvestigacion = [
-  "iniciada",
-  "en_proceso",
-  "completada",
+  "abierta",
+  "en_investigacion",
   "cerrada",
   "reabierta"
 ];

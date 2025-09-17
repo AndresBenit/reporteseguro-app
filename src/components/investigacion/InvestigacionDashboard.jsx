@@ -78,6 +78,29 @@ const InvestigacionDashboard = () => {
     return filtradas;
   }, [investigaciones, filtroTiempo, filtroGravedad]);
 
+  // Función para obtener color por gravedad (debe estar antes del useMemo)
+  const getColorGravedad = (gravedad) => {
+    const colores = {
+      'Leve': '#10b981',
+      'Grave': '#f59e0b',
+      'Muy grave': '#ef4444',
+      'Mortal': '#7c2d12',
+      'Sin clasificar': '#6b7280'
+    };
+    return colores[gravedad] || '#6b7280';
+  };
+
+  const getEstadoColor = (estado) => {
+    const colores = {
+      'iniciada': '#f59e0b',
+      'en_proceso': '#3b82f6',
+      'completada': '#10b981',
+      'cerrada': '#6b7280',
+      'reabierta': '#ef4444'
+    };
+    return colores[estado] || '#6b7280';
+  };
+
   // Análisis estadístico con validación defensiva
   const analisisEstadistico = useMemo(() => {
     const investigacionesValidas = Array.isArray(investigacionesFiltradas) ? investigacionesFiltradas : [];
@@ -168,29 +191,6 @@ const InvestigacionDashboard = () => {
       tendenciaMensual
     };
   }, [investigacionesFiltradas]);
-
-  // Función para obtener color por gravedad
-  const getColorGravedad = (gravedad) => {
-    const colores = {
-      'Leve': '#10b981',
-      'Grave': '#f59e0b',
-      'Muy grave': '#ef4444',
-      'Mortal': '#7c2d12',
-      'Sin clasificar': '#6b7280'
-    };
-    return colores[gravedad] || '#6b7280';
-  };
-
-  const getEstadoColor = (estado) => {
-    const colores = {
-      'iniciada': '#f59e0b',
-      'en_proceso': '#3b82f6',
-      'completada': '#10b981',
-      'cerrada': '#6b7280',
-      'reabierta': '#ef4444'
-    };
-    return colores[estado] || '#6b7280';
-  };
 
   const formatearFecha = (fecha) => {
     if (!fecha) return 'No especificada';
