@@ -3,13 +3,39 @@ import { dbHelpers } from '../../services/supabase';
 import { Icon } from '../common/Icons';
 
 const COPASSTMain = () => {
-  const [activeTab, setActiveTab] = useState('miembros');
+  const [vistaActiva, setVistaActiva] = useState('dashboard');
   const [miembros, setMiembros] = useState([]);
   const [reuniones, setReuniones] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [mensaje, setMensaje] = useState('');
+
+  const vistas = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: 'BarChart3',
+      color: 'from-amber-600 to-amber-700',
+      description: 'Vista analítica del COPASST, reuniones y cumplimiento normativo'
+    },
+    {
+      id: 'miembros',
+      label: 'Miembros del Comité',
+      icon: 'Users',
+      color: 'from-yellow-600 to-yellow-700',
+      description: 'Gestión de miembros del Comité Paritario de Seguridad y Salud en el Trabajo'
+    },
+    {
+      id: 'reuniones',
+      label: 'Reuniones y Actas',
+      icon: 'Calendar',
+      color: 'from-orange-600 to-orange-700',
+      description: 'Registro de reuniones, actas y seguimiento de compromisos del COPASST'
+    }
+  ];
+
+  const vistaActual = vistas.find(v => v.id === vistaActiva);
 
   // Estados para formularios
   const [formDataMiembro, setFormDataMiembro] = useState({
@@ -41,14 +67,19 @@ const COPASSTMain = () => {
     desarrollo_reunion: '',
     compromisos: '',
     observaciones: '',
-    asistentes: '',
+    asistentes: [],
     acta_url: '',
-    aprobada: false
+    evidencias_urls: [],
+    aprobada: false,
+    fecha_aprobacion: '',
+    aprobada_por: '',
+    requiere_seguimiento: false,
+    fecha_seguimiento: ''
   });
 
   const tiposMiembro = [
     'Empleador',
-    'Trabajador', 
+    'Trabajador',
     'Presidente',
     'Secretario'
   ];
@@ -72,7 +103,7 @@ const COPASSTMain = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      
+
       const [miembrosData, reunionesData] = await Promise.all([
         dbHelpers.getAll('copasst_miembros', {
           orderBy: 'created_at',
@@ -96,10 +127,10 @@ const COPASSTMain = () => {
 
   const handleSubmitMiembro = async (e) => {
     e.preventDefault();
-    
-    if (!formDataMiembro.colaborador_nombre || !formDataMiembro.cedula || 
-        !formDataMiembro.cargo || !formDataMiembro.area || 
-        !formDataMiembro.tipo_miembro || !formDataMiembro.fecha_inicio || 
+
+    if (!formDataMiembro.colaborador_nombre || !formDataMiembro.cedula ||
+        !formDataMiembro.cargo || !formDataMiembro.area ||
+        !formDataMiembro.tipo_miembro || !formDataMiembro.fecha_inicio ||
         !formDataMiembro.fecha_fin) {
       setMensaje('Por favor complete los campos obligatorios');
       return;
@@ -108,7 +139,7 @@ const COPASSTMain = () => {
     // Validar fechas
     const fechaInicio = new Date(formDataMiembro.fecha_inicio);
     const fechaFin = new Date(formDataMiembro.fecha_fin);
-    
+
     if (fechaFin <= fechaInicio) {
       setMensaje('La fecha de fin debe ser posterior a la fecha de inicio');
       return;
@@ -143,8 +174,8 @@ const COPASSTMain = () => {
 
   const handleSubmitReunion = async (e) => {
     e.preventDefault();
-    
-    if (!formDataReunion.numero_reunion || !formDataReunion.fecha_reunion || 
+
+    if (!formDataReunion.numero_reunion || !formDataReunion.fecha_reunion ||
         !formDataReunion.hora_inicio || !formDataReunion.lugar ||
         !formDataReunion.presidente || !formDataReunion.secretario ||
         !formDataReunion.orden_dia || !formDataReunion.desarrollo_reunion) {
@@ -165,9 +196,10 @@ const COPASSTMain = () => {
         ...formDataReunion,
         numero_reunion: parseInt(formDataReunion.numero_reunion),
         hora_fin: formDataReunion.hora_fin || null,
-        asistentes: formDataReunion.asistentes ? 
-          JSON.parse(`[${formDataReunion.asistentes.split(',').map(a => `"${a.trim()}"`).join(',')}]`) : 
-          [],
+        asistentes: Array.isArray(formDataReunion.asistentes) ? formDataReunion.asistentes : [],
+        evidencias_urls: formDataReunion.evidencias_urls || [],
+        fecha_aprobacion: formDataReunion.aprobada ? formDataReunion.fecha_aprobacion || new Date().toISOString().split('T')[0] : null,
+        fecha_seguimiento: formDataReunion.requiere_seguimiento ? formDataReunion.fecha_seguimiento : null,
         created_at: editingItem ? undefined : new Date().toISOString()
       };
 
@@ -225,9 +257,14 @@ const COPASSTMain = () => {
       desarrollo_reunion: reunion.desarrollo_reunion || '',
       compromisos: reunion.compromisos || '',
       observaciones: reunion.observaciones || '',
-      asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes.join(', ') : '',
+      asistentes: Array.isArray(reunion.asistentes) ? reunion.asistentes : [],
       acta_url: reunion.acta_url || '',
-      aprobada: reunion.aprobada || false
+      evidencias_urls: reunion.evidencias_urls || [],
+      aprobada: reunion.aprobada || false,
+      fecha_aprobacion: reunion.fecha_aprobacion || '',
+      aprobada_por: reunion.aprobada_por || '',
+      requiere_seguimiento: reunion.requiere_seguimiento || false,
+      fecha_seguimiento: reunion.fecha_seguimiento || ''
     });
     setEditingItem(reunion);
     setShowForm(true);
@@ -279,9 +316,14 @@ const COPASSTMain = () => {
       desarrollo_reunion: '',
       compromisos: '',
       observaciones: '',
-      asistentes: '',
+      asistentes: [],
       acta_url: '',
-      aprobada: false
+      evidencias_urls: [],
+      aprobada: false,
+      fecha_aprobacion: '',
+      aprobada_por: '',
+      requiere_seguimiento: false,
+      fecha_seguimiento: ''
     });
   };
 
@@ -293,1163 +335,424 @@ const COPASSTMain = () => {
     setMensaje('');
   };
 
-  // Estadísticas
-  const miembrosActivos = miembros.filter(m => m.activo).length;
-  const miembrosPrincipales = miembros.filter(m => m.es_principal && m.activo).length;
-  const reunionesEsteAno = reuniones.filter(r => {
-    const fechaReunion = new Date(r.fecha_reunion);
-    return fechaReunion.getFullYear() === new Date().getFullYear();
-  }).length;
-  const actasAprobadas = reuniones.filter(r => r.aprobada).length;
-
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-        <div>Cargando...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 shadow-lg border border-slate-200 text-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+            <Icon name="Loader" size={24} className="text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Cargando Sistema COPASST</h3>
+          <p className="text-slate-600">Obteniendo datos del comité...</p>
+        </div>
       </div>
     );
   }
 
+  const renderContent = () => {
+    switch (vistaActiva) {
+      case 'dashboard':
+        return renderDashboard();
+      case 'miembros':
+        return renderMiembros();
+      case 'reuniones':
+        return renderReuniones();
+      default:
+        return renderDashboard();
+    }
+  };
+
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '30px'
-      }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '2rem', 
-            fontWeight: '700', 
-            color: '#1e293b',
-            margin: '0 0 8px 0'
-          }}>
-            COPASST - Comité Paritario SST
-          </h1>
-          <p style={{ 
-            color: '#64748b', 
-            margin: 0,
-            fontSize: '1rem'
-          }}>
-            Gestión del Comité Paritario de Seguridad y Salud en el Trabajo
-          </p>
-        </div>
-        
-        <button
-          onClick={() => {
-            setShowForm(true);
-            if (activeTab === 'miembros') {
-              resetFormMiembro();
-            } else {
-              resetFormReunion();
-            }
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#3b82f6',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          <Icon name="Plus" size={16} />
-          {activeTab === 'miembros' ? 'Nuevo Miembro' : 'Nueva Reunión'}
-        </button>
-      </div>
-
-      {/* Dashboard Estadísticas */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#3b82f6' }}>
-            {miembrosActivos}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Miembros Activos</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
-            {miembrosPrincipales}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Principales</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#7c3aed' }}>
-            {reunionesEsteAno}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Reuniones {new Date().getFullYear()}</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#dc2626' }}>
-            {actasAprobadas}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Actas Aprobadas</div>
-        </div>
-      </div>
-
-      {/* Mensaje */}
-      {mensaje && (
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '20px',
-          background: mensaje.includes('Error') ? '#fef2f2' : '#f0fdf4',
-          border: `1px solid ${mensaje.includes('Error') ? '#fecaca' : '#bbf7d0'}`,
-          color: mensaje.includes('Error') ? '#dc2626' : '#166534'
-        }}>
-          {mensaje}
-        </div>
-      )}
-
-      {/* Tabs */}
-      <div style={{
-        display: 'flex',
-        borderBottom: '1px solid #e2e8f0',
-        marginBottom: '20px'
-      }}>
-        <button
-          onClick={() => setActiveTab('miembros')}
-          style={{
-            padding: '12px 24px',
-            border: 'none',
-            background: 'transparent',
-            borderBottom: activeTab === 'miembros' ? '2px solid #3b82f6' : '2px solid transparent',
-            color: activeTab === 'miembros' ? '#3b82f6' : '#6b7280',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          Miembros del Comité
-        </button>
-        <button
-          onClick={() => setActiveTab('reuniones')}
-          style={{
-            padding: '12px 24px',
-            border: 'none',
-            background: 'transparent',
-            borderBottom: activeTab === 'reuniones' ? '2px solid #3b82f6' : '2px solid transparent',
-            color: activeTab === 'reuniones' ? '#3b82f6' : '#6b7280',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          Reuniones y Actas
-        </button>
-      </div>
-
-      {/* Formularios */}
-      {showForm && (
-        <div style={{
-          background: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-          marginBottom: '30px'
-        }}>
-          <h3 style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
-            color: '#1e293b',
-            marginBottom: '20px'
-          }}>
-            {activeTab === 'miembros' 
-              ? (editingItem ? 'Editar Miembro' : 'Nuevo Miembro del COPASST')
-              : (editingItem ? 'Editar Reunión' : 'Nueva Reunión del COPASST')
-            }
-          </h3>
-
-          {/* Formulario de Miembro */}
-          {activeTab === 'miembros' && (
-            <form onSubmit={handleSubmitMiembro}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Nombre del Colaborador *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataMiembro.colaborador_nombre}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, colaborador_nombre: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Nombre completo del miembro"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Cédula *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataMiembro.cedula}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, cedula: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Número de cédula"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Cargo *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataMiembro.cargo}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, cargo: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Cargo del colaborador"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Área *
-                  </label>
-                  <select
-                    value={formDataMiembro.area}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, area: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  >
-                    <option value="">Seleccionar área</option>
-                    {areas.map(area => (
-                      <option key={area} value={area}>{area}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Tipo de Miembro *
-                  </label>
-                  <select
-                    value={formDataMiembro.tipo_miembro}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, tipo_miembro: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  >
-                    <option value="">Seleccionar tipo</option>
-                    {tiposMiembro.map(tipo => (
-                      <option key={tipo} value={tipo}>{tipo}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Fecha de Inicio *
-                  </label>
-                  <input
-                    type="date"
-                    value={formDataMiembro.fecha_inicio}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_inicio: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Fecha de Fin *
-                  </label>
-                  <input
-                    type="date"
-                    value={formDataMiembro.fecha_fin}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_fin: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Teléfono
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataMiembro.telefono}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, telefono: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="+57 300 123-4567"
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={formDataMiembro.email}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, email: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="email@empresa.com"
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Fecha de Capacitación
-                  </label>
-                  <input
-                    type="date"
-                    value={formDataMiembro.fecha_capacitacion}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_capacitacion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Institución de Capacitación
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataMiembro.institucion_capacitacion}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, institucion_capacitacion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Nombre de la institución"
-                  />
-                </div>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-amber-50">
+      {/* Header Principal */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-amber-700 to-yellow-700 rounded-2xl p-3 shadow-lg">
+                <Icon name="Users" size={32} className="text-white" />
               </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  cursor: 'pointer'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={formDataMiembro.es_principal}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, es_principal: e.target.checked})}
-                  />
-                  Es miembro principal (no suplente)
-                </label>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-amber-700 to-yellow-700 bg-clip-text text-transparent">
+                  Sistema COPASST
+                </h1>
+                <p className="text-slate-600 font-medium">
+                  Comité Paritario SST • Gestión de Reuniones • Seguimiento de Acuerdos • Cumplimiento Normativo
+                </p>
               </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  cursor: 'pointer'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={formDataMiembro.capacitacion_copasst}
-                    onChange={(e) => setFormDataMiembro({...formDataMiembro, capacitacion_copasst: e.target.checked})}
-                  />
-                  Ha recibido capacitación específica para COPASST
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={cancelarForm}
-                  style={{
-                    padding: '10px 20px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    background: 'white',
-                    color: '#374151',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {editingItem ? 'Actualizar' : 'Guardar'}
-                </button>
-              </div>
-            </form>
-          )}
-
-          {/* Formulario de Reunión */}
-          {activeTab === 'reuniones' && (
-            <form onSubmit={handleSubmitReunion}>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Número de Reunión *
-                  </label>
-                  <input
-                    type="number"
-                    value={formDataReunion.numero_reunion}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, numero_reunion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="1"
-                    min="1"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Fecha de Reunión *
-                  </label>
-                  <input
-                    type="date"
-                    value={formDataReunion.fecha_reunion}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, fecha_reunion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Hora de Inicio *
-                  </label>
-                  <input
-                    type="time"
-                    value={formDataReunion.hora_inicio}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, hora_inicio: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Hora de Fin
-                  </label>
-                  <input
-                    type="time"
-                    value={formDataReunion.hora_fin}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, hora_fin: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Lugar *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataReunion.lugar}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, lugar: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Sala de reuniones, oficina, etc."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Tipo de Reunión
-                  </label>
-                  <select
-                    value={formDataReunion.tipo_reunion}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, tipo_reunion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  >
-                    {tiposReunion.map(tipo => (
-                      <option key={tipo} value={tipo}>{tipo}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Presidente *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataReunion.presidente}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, presidente: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Nombre del presidente"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Secretario *
-                  </label>
-                  <input
-                    type="text"
-                    value={formDataReunion.secretario}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, secretario: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="Nombre del secretario"
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    URL del Acta
-                  </label>
-                  <input
-                    type="url"
-                    value={formDataReunion.acta_url}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, acta_url: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                    placeholder="https://drive.google.com/..."
-                  />
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Orden del Día *
-                  </label>
-                  <textarea
-                    value={formDataReunion.orden_dia}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, orden_dia: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      minHeight: '100px',
-                      resize: 'vertical'
-                    }}
-                    placeholder="1. Verificación de quórum&#10;2. Lectura del orden del día&#10;3. ..."
-                    required
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Desarrollo de la Reunión *
-                  </label>
-                  <textarea
-                    value={formDataReunion.desarrollo_reunion}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, desarrollo_reunion: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      minHeight: '100px',
-                      resize: 'vertical'
-                    }}
-                    placeholder="Descripción detallada de los temas tratados..."
-                    required
-                  />
-                </div>
-              </div>
-
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '20px',
-                marginBottom: '20px'
-              }}>
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Compromisos
-                  </label>
-                  <textarea
-                    value={formDataReunion.compromisos}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, compromisos: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      resize: 'vertical'
-                    }}
-                    placeholder="Compromisos y responsables..."
-                  />
-                </div>
-
-                <div>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    color: '#374151',
-                    marginBottom: '6px'
-                  }}>
-                    Observaciones
-                  </label>
-                  <textarea
-                    value={formDataReunion.observaciones}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, observaciones: e.target.value})}
-                    style={{
-                      width: '100%',
-                      padding: '10px 12px',
-                      border: '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      minHeight: '80px',
-                      resize: 'vertical'
-                    }}
-                    placeholder="Observaciones adicionales..."
-                  />
-                </div>
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Asistentes (separados por comas)
-                </label>
-                <input
-                  type="text"
-                  value={formDataReunion.asistentes}
-                  onChange={(e) => setFormDataReunion({...formDataReunion, asistentes: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  placeholder="Juan Pérez, Ana García, Luis Rodríguez..."
-                />
-              </div>
-
-              <div style={{ marginBottom: '20px' }}>
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  cursor: 'pointer'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={formDataReunion.aprobada}
-                    onChange={(e) => setFormDataReunion({...formDataReunion, aprobada: e.target.checked})}
-                  />
-                  Acta aprobada
-                </label>
-              </div>
-
-              <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
-                <button
-                  type="button"
-                  onClick={cancelarForm}
-                  style={{
-                    padding: '10px 20px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    background: 'white',
-                    color: '#374151',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  style={{
-                    padding: '10px 20px',
-                    border: 'none',
-                    borderRadius: '8px',
-                    background: '#3b82f6',
-                    color: 'white',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  {editingItem ? 'Actualizar' : 'Guardar'}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* Contenido de las tabs */}
-      {activeTab === 'miembros' && (
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          overflow: 'hidden'
-        }}>
-          <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0' }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#1e293b',
-              margin: 0
-            }}>
-              Miembros del COPASST
-            </h3>
-          </div>
-
-          {miembros.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px', opacity: 0.3 }}>👥</div>
-              <h3 style={{ color: '#6b7280', marginBottom: '8px' }}>No hay miembros registrados</h3>
-              <p style={{ color: '#9ca3af', fontSize: '14px' }}>
-                Comience agregando el primer miembro del COPASST
-              </p>
             </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Miembro
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Cargo
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Tipo
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Período
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Estado
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'center', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Acciones
-                    </th>
+
+            <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-amber-500 rounded-full animate-pulse"></div>
+                <span className="font-medium">Sistema COPASST Activo</span>
+              </div>
+              <div className="w-px h-6 bg-slate-300"></div>
+              <span className="font-medium">
+                {new Date().toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex space-x-1">
+            {vistas.map(vista => (
+              <button
+                key={vista.id}
+                onClick={() => setVistaActiva(vista.id)}
+                className={`
+                  flex items-center space-x-3 px-6 py-4 rounded-t-xl font-semibold transition-all duration-300
+                  ${vistaActiva === vista.id
+                    ? `bg-gradient-to-r ${vista.color} text-white shadow-lg transform scale-105`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }
+                `}
+              >
+                <Icon
+                  name={vista.icon}
+                  size={20}
+                  className={vistaActiva === vista.id ? 'text-white' : 'text-slate-500'}
+                />
+                <span>{vista.label}</span>
+                {vistaActiva === vista.id && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Vista Activa Info */}
+      <div className="bg-gradient-to-r from-slate-50 to-amber-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <Icon name="Info" size={16} className="text-slate-500" />
+            <p className="text-slate-700 font-medium">
+              {vistaActual?.description}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Mensajes */}
+      {mensaje && (
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className={`p-4 rounded-lg border ${
+            mensaje.includes('Error')
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-green-50 border-green-200 text-green-800'
+          }`}>
+            <div className="flex items-center space-x-2">
+              <Icon
+                name={mensaje.includes('Error') ? 'AlertCircle' : 'CheckCircle'}
+                size={20}
+                className={mensaje.includes('Error') ? 'text-red-500' : 'text-green-500'}
+              />
+              <span className="font-medium">{mensaje}</span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Contenido Principal */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {renderContent()}
+      </div>
+    </div>
+  );
+
+  // Dashboard con estadísticas mejoradas
+  function renderDashboard() {
+    // Estadísticas mejoradas
+    const miembrosActivos = miembros.filter(m => m.activo).length;
+    const miembrosPrincipales = miembros.filter(m => m.es_principal && m.activo).length;
+    const reunionesEsteAno = reuniones.filter(r => {
+      const fechaReunion = new Date(r.fecha_reunion);
+      return fechaReunion.getFullYear() === new Date().getFullYear();
+    }).length;
+    const actasAprobadas = reuniones.filter(r => r.aprobada).length;
+    const reunionesPendientes = reuniones.filter(r => r.requiere_seguimiento).length;
+    const proximasReuniones = reuniones.filter(r => {
+      const fechaReunion = new Date(r.fecha_reunion);
+      const hoy = new Date();
+      return fechaReunion > hoy;
+    }).length;
+
+    return (
+      <div className="space-y-8">
+        {/* Estadísticas principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                <Icon name="Users" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{miembrosActivos}</p>
+                <p className="text-sm text-slate-600">Miembros Activos</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-green-500 to-green-600 rounded-lg">
+                <Icon name="Star" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{miembrosPrincipales}</p>
+                <p className="text-sm text-slate-600">Principales</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-purple-500 to-purple-600 rounded-lg">
+                <Icon name="Calendar" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{reunionesEsteAno}</p>
+                <p className="text-sm text-slate-600">Reuniones {new Date().getFullYear()}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg">
+                <Icon name="CheckSquare" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{actasAprobadas}</p>
+                <p className="text-sm text-slate-600">Actas Aprobadas</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-orange-500 to-orange-600 rounded-lg">
+                <Icon name="Clock" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{reunionesPendientes}</p>
+                <p className="text-sm text-slate-600">Seguimientos</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg">
+                <Icon name="Calendar" size={20} className="text-white" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold text-slate-900">{proximasReuniones}</p>
+                <p className="text-sm text-slate-600">Próximas</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Acciones rápidas */}
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+            <Icon name="Zap" size={20} className="text-amber-600" />
+            <span>Acciones Rápidas</span>
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <button
+              onClick={() => {
+                setVistaActiva('miembros');
+                setShowForm(true);
+                resetFormMiembro();
+              }}
+              className="flex items-center space-x-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              <Icon name="UserPlus" size={20} className="text-blue-600" />
+              <span className="font-medium text-slate-700">Agregar Miembro</span>
+            </button>
+
+            <button
+              onClick={() => {
+                setVistaActiva('reuniones');
+                setShowForm(true);
+                resetFormReunion();
+              }}
+              className="flex items-center space-x-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              <Icon name="Plus" size={20} className="text-green-600" />
+              <span className="font-medium text-slate-700">Nueva Reunión</span>
+            </button>
+
+            <button
+              onClick={() => setVistaActiva('reuniones')}
+              className="flex items-center space-x-3 p-4 border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors"
+            >
+              <Icon name="FileText" size={20} className="text-purple-600" />
+              <span className="font-medium text-slate-700">Ver Actas</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Reuniones recientes */}
+        {reuniones.length > 0 && (
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+              <Icon name="Clock" size={20} className="text-slate-600" />
+              <span>Reuniones Recientes</span>
+            </h3>
+            <div className="space-y-3">
+              {reuniones.slice(0, 5).map((reunion) => (
+                <div key={reunion.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <div className="w-10 h-10 bg-gradient-to-r from-amber-500 to-yellow-500 rounded-lg flex items-center justify-center">
+                      <span className="text-white font-semibold text-sm">#{reunion.numero_reunion}</span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900">{reunion.tipo_reunion}</p>
+                      <p className="text-sm text-slate-600">{reunion.fecha_reunion} - {reunion.lugar}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                      reunion.aprobada
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-yellow-100 text-yellow-800'
+                    }`}>
+                      {reunion.aprobada ? 'Aprobada' : 'Pendiente'}
+                    </span>
+                    <button
+                      onClick={() => setVistaActiva('reuniones')}
+                      className="p-1 text-slate-400 hover:text-slate-600"
+                    >
+                      <Icon name="ArrowRight" size={16} />
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Función para renderizar la sección de miembros
+  function renderMiembros() {
+    return (
+      <div className="space-y-6">
+        {/* Header con botón agregar */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Miembros del COPASST</h2>
+            <p className="text-slate-600">Gestión de miembros del Comité Paritario de Seguridad y Salud en el Trabajo</p>
+          </div>
+          <button
+            onClick={() => {
+              setShowForm(true);
+              resetFormMiembro();
+              setEditingItem(null);
+            }}
+            className="flex items-center space-x-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg"
+          >
+            <Icon name="UserPlus" size={20} />
+            <span>Nuevo Miembro</span>
+          </button>
+        </div>
+
+        {/* Formulario de miembro */}
+        {showForm && vistaActiva === 'miembros' && renderFormularioMiembro()}
+
+        {/* Lista de miembros */}
+        {miembros.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="Users" size={24} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay miembros registrados</h3>
+            <p className="text-slate-600 mb-4">Comience agregando el primer miembro del COPASST</p>
+            <button
+              onClick={() => {
+                setShowForm(true);
+                resetFormMiembro();
+              }}
+              className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-2 rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all"
+            >
+              Agregar Primer Miembro
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Miembro</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Cargo</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Tipo</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Período</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Estado</th>
+                    <th className="text-center py-4 px-6 font-semibold text-slate-900">Acciones</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-200">
                   {miembros.map((miembro) => (
-                    <tr key={miembro.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                    <tr key={miembro.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-4 px-6">
                         <div>
-                          <div style={{ fontWeight: '500', color: '#1e293b' }}>
-                            {miembro.colaborador_nombre}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            {miembro.cedula} • {miembro.area}
-                          </div>
+                          <p className="font-semibold text-slate-900">{miembro.colaborador_nombre}</p>
+                          <p className="text-sm text-slate-600">{miembro.cedula} • {miembro.area}</p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
-                        {miembro.cargo}
-                      </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                      <td className="py-4 px-6 text-slate-700">{miembro.cargo}</td>
+                      <td className="py-4 px-6">
                         <div>
-                          <div style={{ fontWeight: '500' }}>{miembro.tipo_miembro}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            {miembro.es_principal ? 'Principal' : 'Suplente'}
-                          </div>
+                          <p className="font-medium text-slate-900">{miembro.tipo_miembro}</p>
+                          <p className="text-sm text-slate-600">{miembro.es_principal ? 'Principal' : 'Suplente'}</p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                      <td className="py-4 px-6">
                         <div>
-                          <div>{miembro.fecha_inicio}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            hasta {miembro.fecha_fin}
-                          </div>
+                          <p className="text-slate-900">{miembro.fecha_inicio}</p>
+                          <p className="text-sm text-slate-600">hasta {miembro.fecha_fin}</p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', fontSize: '14px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          background: miembro.activo ? '#f0fdf4' : '#fef2f2',
-                          color: miembro.activo ? '#166534' : '#dc2626',
-                          border: `1px solid ${miembro.activo ? '#bbf7d0' : '#fecaca'}`
-                        }}>
+                      <td className="py-4 px-6">
+                        <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          miembro.activo
+                            ? 'bg-green-100 text-green-800'
+                            : 'bg-red-100 text-red-800'
+                        }`}>
                           {miembro.activo ? 'Activo' : 'Inactivo'}
                         </span>
                       </td>
-                      <td style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center justify-center space-x-2">
                           <button
                             onClick={() => editarMiembro(miembro)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '32px',
-                              height: '32px',
-                              border: 'none',
-                              borderRadius: '6px',
-                              background: '#f3f4f6',
-                              color: '#374151',
-                              cursor: 'pointer'
-                            }}
+                            className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                             title="Editar miembro"
                           >
-                            <Icon name="Edit" size={14} />
+                            <Icon name="Edit" size={16} />
                           </button>
                           <button
                             onClick={() => eliminar(miembro.id, 'copasst_miembros', 'miembro')}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '32px',
-                              height: '32px',
-                              border: 'none',
-                              borderRadius: '6px',
-                              background: '#fef2f2',
-                              color: '#dc2626',
-                              cursor: 'pointer'
-                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Eliminar miembro"
                           >
-                            <Icon name="Trash2" size={14} />
+                            <Icon name="Trash2" size={16} />
                           </button>
                         </div>
                       </td>
@@ -1458,169 +761,136 @@ const COPASSTMain = () => {
                 </tbody>
               </table>
             </div>
-          )}
-        </div>
-      )}
-
-      {activeTab === 'reuniones' && (
-        <div style={{
-          background: 'white',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          overflow: 'hidden'
-        }}>
-          <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0' }}>
-            <h3 style={{
-              fontSize: '1.125rem',
-              fontWeight: '600',
-              color: '#1e293b',
-              margin: 0
-            }}>
-              Reuniones y Actas del COPASST
-            </h3>
           </div>
+        )}
+      </div>
+    );
+  }
 
-          {reuniones.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-              <div style={{ fontSize: '3rem', marginBottom: '16px', opacity: 0.3 }}>📋</div>
-              <h3 style={{ color: '#6b7280', marginBottom: '8px' }}>No hay reuniones registradas</h3>
-              <p style={{ color: '#9ca3af', fontSize: '14px' }}>
-                Comience registrando la primera reunión del COPASST
-              </p>
+  // Función para renderizar la sección de reuniones
+  function renderReuniones() {
+    return (
+      <div className="space-y-6">
+        {/* Header con botón agregar */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Reuniones y Actas del COPASST</h2>
+            <p className="text-slate-600">Registro de reuniones, actas y seguimiento de compromisos</p>
+          </div>
+          <button
+            onClick={() => {
+              setShowForm(true);
+              resetFormReunion();
+              setEditingItem(null);
+            }}
+            className="flex items-center space-x-2 bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg"
+          >
+            <Icon name="Plus" size={20} />
+            <span>Nueva Reunión</span>
+          </button>
+        </div>
+
+        {/* Formulario de reunión */}
+        {showForm && vistaActiva === 'reuniones' && renderFormularioReunion()}
+
+        {/* Lista de reuniones */}
+        {reuniones.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="Calendar" size={24} className="text-slate-400" />
             </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Reunión
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Fecha y Hora
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Lugar
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Presidida por
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Estado
-                    </th>
-                    <th style={{ padding: '16px', textAlign: 'center', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                      Acciones
-                    </th>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay reuniones registradas</h3>
+            <p className="text-slate-600 mb-4">Comience registrando la primera reunión del COPASST</p>
+            <button
+              onClick={() => {
+                setShowForm(true);
+                resetFormReunion();
+              }}
+              className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 py-2 rounded-lg hover:from-green-700 hover:to-green-800 transition-all"
+            >
+              Registrar Primera Reunión
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50 border-b border-slate-200">
+                  <tr>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Reunión</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Fecha y Hora</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Lugar</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Presidida por</th>
+                    <th className="text-left py-4 px-6 font-semibold text-slate-900">Estado</th>
+                    <th className="text-center py-4 px-6 font-semibold text-slate-900">Acciones</th>
                   </tr>
                 </thead>
-                <tbody>
+                <tbody className="divide-y divide-slate-200">
                   {reuniones.map((reunion) => (
-                    <tr key={reunion.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                    <tr key={reunion.id} className="hover:bg-slate-50 transition-colors">
+                      <td className="py-4 px-6">
                         <div>
-                          <div style={{ fontWeight: '500', color: '#1e293b' }}>
-                            Reunión #{reunion.numero_reunion}
-                          </div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            {reunion.tipo_reunion}
-                          </div>
+                          <p className="font-semibold text-slate-900">Reunión #{reunion.numero_reunion}</p>
+                          <p className="text-sm text-slate-600">{reunion.tipo_reunion}</p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                      <td className="py-4 px-6">
                         <div>
-                          <div>{reunion.fecha_reunion}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                          <p className="text-slate-900">{reunion.fecha_reunion}</p>
+                          <p className="text-sm text-slate-600">
                             {reunion.hora_inicio} {reunion.hora_fin && `- ${reunion.hora_fin}`}
-                          </div>
+                          </p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
-                        {reunion.lugar}
-                      </td>
-                      <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
+                      <td className="py-4 px-6 text-slate-700">{reunion.lugar}</td>
+                      <td className="py-4 px-6">
                         <div>
-                          <div style={{ fontWeight: '500' }}>{reunion.presidente}</div>
-                          <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                            Sec: {reunion.secretario}
-                          </div>
+                          <p className="font-medium text-slate-900">{reunion.presidente}</p>
+                          <p className="text-sm text-slate-600">Sec: {reunion.secretario}</p>
                         </div>
                       </td>
-                      <td style={{ padding: '16px', fontSize: '14px' }}>
-                        <span style={{
-                          display: 'inline-flex',
-                          alignItems: 'center',
-                          padding: '4px 8px',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          background: reunion.aprobada ? '#f0fdf4' : '#fef3c7',
-                          color: reunion.aprobada ? '#166534' : '#92400e',
-                          border: `1px solid ${reunion.aprobada ? '#bbf7d0' : '#fcd34d'}`
-                        }}>
-                          {reunion.aprobada ? 'Aprobada' : 'Pendiente'}
-                        </span>
+                      <td className="py-4 px-6">
+                        <div className="space-y-1">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            reunion.aprobada
+                              ? 'bg-green-100 text-green-800'
+                              : 'bg-yellow-100 text-yellow-800'
+                          }`}>
+                            {reunion.aprobada ? 'Aprobada' : 'Pendiente'}
+                          </span>
+                          {reunion.requiere_seguimiento && (
+                            <span className="block px-3 py-1 rounded-full text-sm font-medium bg-orange-100 text-orange-800">
+                              Seguimiento
+                            </span>
+                          )}
+                        </div>
                       </td>
-                      <td style={{ padding: '16px', textAlign: 'center' }}>
-                        <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                      <td className="py-4 px-6">
+                        <div className="flex items-center justify-center space-x-2">
                           {reunion.acta_url && (
                             <a
                               href={reunion.acta_url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              style={{
-                                display: 'flex',
-                                alignItems: 'center',
-                                justifyContent: 'center',
-                                width: '32px',
-                                height: '32px',
-                                border: 'none',
-                                borderRadius: '6px',
-                                background: '#eff6ff',
-                                color: '#2563eb',
-                                cursor: 'pointer',
-                                textDecoration: 'none'
-                              }}
+                              className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                               title="Ver acta"
                             >
-                              <Icon name="ExternalLink" size={14} />
+                              <Icon name="ExternalLink" size={16} />
                             </a>
                           )}
                           <button
                             onClick={() => editarReunion(reunion)}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '32px',
-                              height: '32px',
-                              border: 'none',
-                              borderRadius: '6px',
-                              background: '#f3f4f6',
-                              color: '#374151',
-                              cursor: 'pointer'
-                            }}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
                             title="Editar reunión"
                           >
-                            <Icon name="Edit" size={14} />
+                            <Icon name="Edit" size={16} />
                           </button>
                           <button
                             onClick={() => eliminar(reunion.id, 'copasst_reuniones', 'reunión')}
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '32px',
-                              height: '32px',
-                              border: 'none',
-                              borderRadius: '6px',
-                              background: '#fef2f2',
-                              color: '#dc2626',
-                              cursor: 'pointer'
-                            }}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                             title="Eliminar reunión"
                           >
-                            <Icon name="Trash2" size={14} />
+                            <Icon name="Trash2" size={16} />
                           </button>
                         </div>
                       </td>
@@ -1629,11 +899,529 @@ const COPASSTMain = () => {
                 </tbody>
               </table>
             </div>
-          )}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Función para renderizar formulario de miembro
+  function renderFormularioMiembro() {
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-slate-900">
+            {editingItem ? 'Editar Miembro del COPASST' : 'Nuevo Miembro del COPASST'}
+          </h3>
+          <button
+            onClick={cancelarForm}
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <Icon name="X" size={20} />
+          </button>
         </div>
-      )}
-    </div>
-  );
+
+        <form onSubmit={handleSubmitMiembro} className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Nombre del Colaborador *
+              </label>
+              <input
+                type="text"
+                value={formDataMiembro.colaborador_nombre}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, colaborador_nombre: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Nombre completo del miembro"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Cédula *
+              </label>
+              <input
+                type="text"
+                value={formDataMiembro.cedula}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, cedula: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Número de cédula"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Cargo *
+              </label>
+              <input
+                type="text"
+                value={formDataMiembro.cargo}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, cargo: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Cargo del colaborador"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Área *
+              </label>
+              <select
+                value={formDataMiembro.area}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, area: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+              >
+                <option value="">Seleccionar área</option>
+                {areas.map(area => (
+                  <option key={area} value={area}>{area}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Tipo de Miembro *
+              </label>
+              <select
+                value={formDataMiembro.tipo_miembro}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, tipo_miembro: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+              >
+                <option value="">Seleccionar tipo</option>
+                {tiposMiembro.map(tipo => (
+                  <option key={tipo} value={tipo}>{tipo}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Fecha de Inicio *
+              </label>
+              <input
+                type="date"
+                value={formDataMiembro.fecha_inicio}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_inicio: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Fecha de Fin *
+              </label>
+              <input
+                type="date"
+                value={formDataMiembro.fecha_fin}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_fin: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Teléfono
+              </label>
+              <input
+                type="text"
+                value={formDataMiembro.telefono}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, telefono: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="+57 300 123-4567"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Email
+              </label>
+              <input
+                type="email"
+                value={formDataMiembro.email}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, email: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="email@empresa.com"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Fecha de Capacitación
+              </label>
+              <input
+                type="date"
+                value={formDataMiembro.fecha_capacitacion}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, fecha_capacitacion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Institución de Capacitación
+              </label>
+              <input
+                type="text"
+                value={formDataMiembro.institucion_capacitacion}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, institucion_capacitacion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors"
+                placeholder="Nombre de la institución"
+              />
+            </div>
+          </div>
+
+          <div className="flex flex-col space-y-4">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formDataMiembro.es_principal}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, es_principal: e.target.checked})}
+                className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-slate-700">Es miembro principal (no suplente)</span>
+            </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formDataMiembro.capacitacion_copasst}
+                onChange={(e) => setFormDataMiembro({...formDataMiembro, capacitacion_copasst: e.target.checked})}
+                className="w-5 h-5 text-blue-600 border-slate-300 rounded focus:ring-blue-500"
+              />
+              <span className="text-sm font-medium text-slate-700">Ha recibido capacitación específica para COPASST</span>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={cancelarForm}
+              className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-lg font-medium"
+            >
+              {editingItem ? 'Actualizar Miembro' : 'Guardar Miembro'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
+
+  // Función para renderizar formulario de reunión mejorado
+  function renderFormularioReunion() {
+    return (
+      <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 mb-6">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-slate-900">
+            {editingItem ? 'Editar Reunión del COPASST' : 'Nueva Reunión del COPASST'}
+          </h3>
+          <button
+            onClick={cancelarForm}
+            className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+          >
+            <Icon name="X" size={20} />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmitReunion} className="space-y-6">
+          {/* Información básica */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Número de Reunión *
+              </label>
+              <input
+                type="number"
+                value={formDataReunion.numero_reunion}
+                onChange={(e) => setFormDataReunion({...formDataReunion, numero_reunion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="1"
+                min="1"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Fecha de Reunión *
+              </label>
+              <input
+                type="date"
+                value={formDataReunion.fecha_reunion}
+                onChange={(e) => setFormDataReunion({...formDataReunion, fecha_reunion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Tipo de Reunión
+              </label>
+              <select
+                value={formDataReunion.tipo_reunion}
+                onChange={(e) => setFormDataReunion({...formDataReunion, tipo_reunion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              >
+                {tiposReunion.map(tipo => (
+                  <option key={tipo} value={tipo}>{tipo}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Hora de Inicio *
+              </label>
+              <input
+                type="time"
+                value={formDataReunion.hora_inicio}
+                onChange={(e) => setFormDataReunion({...formDataReunion, hora_inicio: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Hora de Fin
+              </label>
+              <input
+                type="time"
+                value={formDataReunion.hora_fin}
+                onChange={(e) => setFormDataReunion({...formDataReunion, hora_fin: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Lugar *
+              </label>
+              <input
+                type="text"
+                value={formDataReunion.lugar}
+                onChange={(e) => setFormDataReunion({...formDataReunion, lugar: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Sala de reuniones, oficina, etc."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Presidente *
+              </label>
+              <input
+                type="text"
+                value={formDataReunion.presidente}
+                onChange={(e) => setFormDataReunion({...formDataReunion, presidente: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Nombre del presidente"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Secretario *
+              </label>
+              <input
+                type="text"
+                value={formDataReunion.secretario}
+                onChange={(e) => setFormDataReunion({...formDataReunion, secretario: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Nombre del secretario"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                URL del Acta
+              </label>
+              <input
+                type="url"
+                value={formDataReunion.acta_url}
+                onChange={(e) => setFormDataReunion({...formDataReunion, acta_url: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="https://drive.google.com/..."
+              />
+            </div>
+          </div>
+
+          {/* Desarrollo de la reunión */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Orden del Día *
+              </label>
+              <textarea
+                value={formDataReunion.orden_dia}
+                onChange={(e) => setFormDataReunion({...formDataReunion, orden_dia: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                rows="4"
+                placeholder="1. Verificación de quórum&#10;2. Lectura del orden del día&#10;3. ..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Desarrollo de la Reunión *
+              </label>
+              <textarea
+                value={formDataReunion.desarrollo_reunion}
+                onChange={(e) => setFormDataReunion({...formDataReunion, desarrollo_reunion: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                rows="4"
+                placeholder="Descripción detallada de los temas tratados..."
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Compromisos
+              </label>
+              <textarea
+                value={formDataReunion.compromisos}
+                onChange={(e) => setFormDataReunion({...formDataReunion, compromisos: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                rows="3"
+                placeholder="Compromisos y responsables..."
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Observaciones
+              </label>
+              <textarea
+                value={formDataReunion.observaciones}
+                onChange={(e) => setFormDataReunion({...formDataReunion, observaciones: e.target.value})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                rows="3"
+                placeholder="Observaciones adicionales..."
+              />
+            </div>
+          </div>
+
+          {/* Campos de seguimiento y aprobación */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 mb-2">
+                Asistentes (separados por comas)
+              </label>
+              <input
+                type="text"
+                value={Array.isArray(formDataReunion.asistentes) ? formDataReunion.asistentes.join(', ') : ''}
+                onChange={(e) => setFormDataReunion({...formDataReunion, asistentes: e.target.value.split(',').map(a => a.trim()).filter(a => a)})}
+                className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                placeholder="Juan Pérez, Ana García, Luis Rodríguez..."
+              />
+            </div>
+
+            {formDataReunion.aprobada && (
+              <>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Fecha de Aprobación
+                  </label>
+                  <input
+                    type="date"
+                    value={formDataReunion.fecha_aprobacion}
+                    onChange={(e) => setFormDataReunion({...formDataReunion, fecha_aprobacion: e.target.value})}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-sm font-semibold text-slate-700 mb-2">
+                    Aprobada por
+                  </label>
+                  <input
+                    type="text"
+                    value={formDataReunion.aprobada_por}
+                    onChange={(e) => setFormDataReunion({...formDataReunion, aprobada_por: e.target.value})}
+                    className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                    placeholder="Nombre del aprobador"
+                  />
+                </div>
+              </>
+            )}
+
+            {formDataReunion.requiere_seguimiento && (
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">
+                  Fecha de Seguimiento
+                </label>
+                <input
+                  type="date"
+                  value={formDataReunion.fecha_seguimiento}
+                  onChange={(e) => setFormDataReunion({...formDataReunion, fecha_seguimiento: e.target.value})}
+                  className="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Checkboxes */}
+          <div className="flex flex-col space-y-4">
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formDataReunion.aprobada}
+                onChange={(e) => setFormDataReunion({...formDataReunion, aprobada: e.target.checked})}
+                className="w-5 h-5 text-green-600 border-slate-300 rounded focus:ring-green-500"
+              />
+              <span className="text-sm font-medium text-slate-700">Acta aprobada</span>
+            </label>
+
+            <label className="flex items-center space-x-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={formDataReunion.requiere_seguimiento}
+                onChange={(e) => setFormDataReunion({...formDataReunion, requiere_seguimiento: e.target.checked})}
+                className="w-5 h-5 text-orange-600 border-slate-300 rounded focus:ring-orange-500"
+              />
+              <span className="text-sm font-medium text-slate-700">Requiere seguimiento</span>
+            </label>
+          </div>
+
+          <div className="flex items-center justify-end space-x-4 pt-6 border-t border-slate-200">
+            <button
+              type="button"
+              onClick={cancelarForm}
+              className="px-6 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors font-medium"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              className="px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all shadow-lg font-medium"
+            >
+              {editingItem ? 'Actualizar Reunión' : 'Guardar Reunión'}
+            </button>
+          </div>
+        </form>
+      </div>
+    );
+  }
 };
 
 export default COPASSTMain;
