@@ -157,7 +157,7 @@ const SeguimientoForm = () => {
       const fechaProgramada = new Date();
       fechaProgramada.setDate(fechaProgramada.getDate() + 7);
 
-      let fechaVencimiento = new Date();
+      const fechaVencimiento = new Date();
       switch (tipoExamen) {
         case 'periódico':
           fechaVencimiento.setFullYear(fechaVencimiento.getFullYear() + 1);
