@@ -1356,7 +1356,7 @@ const PlanesEmergenciaMain = () => {
                     </button>
                   </div>
                 </form>
-              )
+              )}
 
               {currentForm === 'simulacro' && (
                 <form onSubmit={handleSubmitSimulacro} className="p-6">
@@ -1710,7 +1710,7 @@ const PlanesEmergenciaMain = () => {
                     </button>
                   </div>
                 </form>
-              )
+              )}
 
               {currentForm === 'brigada' && (
                 <form onSubmit={handleSubmitBrigada} className="p-6">
@@ -2014,16 +2014,11 @@ const PlanesEmergenciaMain = () => {
                     </button>
                   </div>
                 </form>
-              )
+              )}
             </div>
           </div>
         </div>
       )}
-    </div>
-  );
-};
-
-export default PlanesEmergenciaMain;
     </div>
   );
 };
