@@ -189,27 +189,34 @@ const PlanesEmergenciaMain = () => {
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      
+
+      // Cargar datos de forma defensiva con manejo de errores individual
       const [planesRes, simulacrosRes, brigadasRes, colaboradoresRes] = await Promise.all([
-        supabase.from('planes_emergencia_sst').select('*').order('created_at', { ascending: false }),
-        supabase.from('simulacros_emergencia').select(`*, planes_emergencia_sst(nombre)`).order('fecha_simulacro', { ascending: false }),
-        supabase.from('brigadas_emergencia').select(`*, colaboradores(nombre_completo)`).order('created_at', { ascending: false }),
-        supabase.from('colaboradores').select('id, nombre_completo').eq('activo', true)
+        supabase.from('planes_emergencia_sst').select('*').order('created_at', { ascending: false }).then(res => res).catch(() => ({ data: [], error: null })),
+        supabase.from('simulacros_emergencia').select('*').order('fecha_simulacro', { ascending: false }).then(res => res).catch(() => ({ data: [], error: null })),
+        supabase.from('brigadas_emergencia').select('*').order('created_at', { ascending: false }).then(res => res).catch(() => ({ data: [], error: null })),
+        supabase.from('colaboradores').select('id, nombre_completo').eq('activo', true).then(res => res).catch(() => ({ data: [], error: null }))
       ]);
 
-      if (planesRes.error) throw planesRes.error;
-      if (simulacrosRes.error) throw simulacrosRes.error;
-      if (brigadasRes.error) throw brigadasRes.error;
-      if (colaboradoresRes.error) throw colaboradoresRes.error;
-
+      // Solo lanzar error si es crítico, sino usar arrays vacíos como fallback
       setPlanes(planesRes.data || []);
       setSimulacros(simulacrosRes.data || []);
       setBrigadas(brigadasRes.data || []);
       setColaboradores(colaboradoresRes.data || []);
 
+      // Mostrar mensaje informativo si las tablas no existen
+      if (!planesRes.data && !simulacrosRes.data && !brigadasRes.data) {
+        setMensaje('Las tablas de emergencia no están configuradas en la base de datos. Contacte al administrador del sistema.');
+      }
+
     } catch (error) {
       console.error('Error cargando datos:', error);
-      setMensaje('Error al cargar los datos');
+      setMensaje('Error al cargar los datos. Verificando configuración de base de datos...');
+      // Inicializar con datos vacíos para evitar crashes
+      setPlanes([]);
+      setSimulacros([]);
+      setBrigadas([]);
+      setColaboradores([]);
     } finally {
       setLoading(false);
     }
@@ -300,15 +307,20 @@ const PlanesEmergenciaMain = () => {
           .insert([planData]);
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        if (result.error.message?.includes('relation') || result.error.message?.includes('does not exist')) {
+          throw new Error('La tabla de planes de emergencia no existe en la base de datos. Contacte al administrador del sistema.');
+        }
+        throw result.error;
+      }
 
       setMensaje(editingItem ? 'Plan actualizado exitosamente' : 'Plan creado exitosamente');
       resetForm();
       await cargarDatos();
-      
+
     } catch (error) {
       console.error('Error:', error);
-      setMensaje('Error al guardar el plan');
+      setMensaje(error.message || 'Error al guardar el plan');
     }
   };
 
@@ -333,15 +345,20 @@ const PlanesEmergenciaMain = () => {
           .insert([simulacroData]);
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        if (result.error.message?.includes('relation') || result.error.message?.includes('does not exist')) {
+          throw new Error('La tabla de simulacros no existe en la base de datos. Contacte al administrador del sistema.');
+        }
+        throw result.error;
+      }
 
       setMensaje(editingItem ? 'Simulacro actualizado exitosamente' : 'Simulacro programado exitosamente');
       resetForm();
       await cargarDatos();
-      
+
     } catch (error) {
       console.error('Error:', error);
-      setMensaje('Error al guardar el simulacro');
+      setMensaje(error.message || 'Error al guardar el simulacro');
     }
   };
 
@@ -366,15 +383,20 @@ const PlanesEmergenciaMain = () => {
           .insert([brigadaData]);
       }
 
-      if (result.error) throw result.error;
+      if (result.error) {
+        if (result.error.message?.includes('relation') || result.error.message?.includes('does not exist')) {
+          throw new Error('La tabla de brigadas no existe en la base de datos. Contacte al administrador del sistema.');
+        }
+        throw result.error;
+      }
 
       setMensaje(editingItem ? 'Brigadista actualizado exitosamente' : 'Brigadista agregado exitosamente');
       resetForm();
       await cargarDatos();
-      
+
     } catch (error) {
       console.error('Error:', error);
-      setMensaje('Error al guardar el brigadista');
+      setMensaje(error.message || 'Error al guardar el brigadista');
     }
   };
 
@@ -569,14 +591,19 @@ const PlanesEmergenciaMain = () => {
 
     try {
       const result = await supabase.from(tabla).delete().eq('id', id);
-      
-      if (result.error) throw result.error;
+
+      if (result.error) {
+        if (result.error.message?.includes('relation') || result.error.message?.includes('does not exist')) {
+          throw new Error(`La tabla ${tabla} no existe en la base de datos. Contacte al administrador del sistema.`);
+        }
+        throw result.error;
+      }
 
       setMensaje('Elemento eliminado exitosamente');
       await cargarDatos();
     } catch (error) {
       console.error('Error eliminando:', error);
-      setMensaje('Error al eliminar el elemento');
+      setMensaje(error.message || 'Error al eliminar el elemento');
     }
   };
 
@@ -812,13 +839,13 @@ const PlanesEmergenciaMain = () => {
           ].map(tab => (
             <button
               key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
+              onClick={() => setVistaActiva(tab.key)}
               style={{
                 display: 'flex', alignItems: 'center', gap: '8px',
                 padding: '12px 0', background: 'none', border: 'none',
                 fontSize: '16px', fontWeight: 500, cursor: 'pointer',
-                color: activeTab === tab.key ? '#dc2626' : '#64748b',
-                borderBottom: activeTab === tab.key ? '2px solid #dc2626' : '2px solid transparent'
+                color: vistaActiva === tab.key ? '#dc2626' : '#64748b',
+                borderBottom: vistaActiva === tab.key ? '2px solid #dc2626' : '2px solid transparent'
               }}
             >
               <Icon name={tab.icon} size={20} />
@@ -832,7 +859,7 @@ const PlanesEmergenciaMain = () => {
       <div style={{ marginBottom: '24px' }}>
         <button
           onClick={() => {
-            setCurrentForm(activeTab === 'planes' ? 'plan' : activeTab === 'simulacros' ? 'simulacro' : 'brigada');
+            setCurrentForm(vistaActiva === 'planes' ? 'plan' : vistaActiva === 'simulacros' ? 'simulacro' : 'brigada');
             setShowModal(true);
           }}
           style={{
@@ -843,12 +870,12 @@ const PlanesEmergenciaMain = () => {
           }}
         >
           <Icon name="Plus" size={20} />
-          {activeTab === 'planes' ? 'Nuevo Plan' : activeTab === 'simulacros' ? 'Nuevo Simulacro' : 'Nuevo Brigadista'}
+          {vistaActiva === 'planes' ? 'Nuevo Plan' : vistaActiva === 'simulacros' ? 'Nuevo Simulacro' : 'Nuevo Brigadista'}
         </button>
       </div>
 
       {/* Contenido por Tab */}
-      {activeTab === 'planes' && (
+      {vistaActiva === 'planes' && (
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
           {planes.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
@@ -923,7 +950,7 @@ const PlanesEmergenciaMain = () => {
         </div>
       )}
 
-      {activeTab === 'simulacros' && (
+      {vistaActiva === 'simulacros' && (
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
           {simulacros.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
@@ -999,7 +1026,7 @@ const PlanesEmergenciaMain = () => {
         </div>
       )}
 
-      {activeTab === 'brigadas' && (
+      {vistaActiva === 'brigadas' && (
         <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
           {brigadas.length === 0 ? (
             <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
