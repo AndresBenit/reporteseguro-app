@@ -143,7 +143,7 @@ const MatrizRiesgosMain = () => {
 
       const [riesgosRes, controlesRes, evaluacionesRes] = await Promise.all([
         supabase.from('matriz_riesgos').select('*').order('nivel_riesgo', { ascending: false }),
-        supabase.from('controles_riesgos').select('*').order('created_at', { ascending: false }),
+        supabase.from('controles_riesgo').select('*').order('created_at', { ascending: false }),
         supabase.from('matriz_riesgos').select('*').order('fecha_evaluacion', { ascending: false })
       ]);
 
@@ -156,7 +156,6 @@ const MatrizRiesgosMain = () => {
       setEvaluaciones(evaluacionesRes.data || []);
 
     } catch (error) {
-      console.error('Error cargando datos:', error);
       setMensaje('Error al cargar los datos');
     } finally {
       setLoading(false);
@@ -208,6 +207,111 @@ const MatrizRiesgosMain = () => {
       riesgosMedios,
       riesgosBajos
     };
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (currentForm === 'control') {
+      // Validaciones para controles
+      if (!controlData.tipo_control || !controlData.descripcion_control.trim()) {
+        setMensaje('Tipo de control y descripción son obligatorios');
+        return;
+      }
+
+      try {
+        const controlToSave = {
+          ...controlData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        if (editingItem) {
+          const { error } = await supabase
+            .from('controles_riesgo')
+            .update(controlToSave)
+            .eq('id', editingItem.id);
+
+          if (error) throw error;
+          setMensaje('Control actualizado exitosamente');
+        } else {
+          const { error } = await supabase
+            .from('controles_riesgo')
+            .insert([controlToSave]);
+
+          if (error) throw error;
+          setMensaje('Control guardado exitosamente');
+        }
+
+        resetForm();
+        await cargarDatos();
+
+      } catch (error) {
+        setMensaje('Error al guardar el control');
+      }
+      return;
+    }
+
+    // Validaciones de campos obligatorios para riesgos
+    if (!formData.codigo_riesgo.trim()) {
+      setMensaje('El código de riesgo es obligatorio');
+      return;
+    }
+    if (!formData.proceso.trim()) {
+      setMensaje('El proceso es obligatorio');
+      return;
+    }
+    if (!formData.actividad.trim()) {
+      setMensaje('La actividad es obligatoria');
+      return;
+    }
+    if (!formData.descripcion_riesgo.trim()) {
+      setMensaje('La descripción del riesgo es obligatoria');
+      return;
+    }
+
+    try {
+      // Cálculos automáticos GTC-45
+      const nivelProbabilidad = calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion);
+      const interpretacionProbabilidad = interpretarProbabilidad(nivelProbabilidad);
+      const nivelRiesgo = calcularNivelRiesgo(nivelProbabilidad, formData.nivel_consecuencia);
+      const interpretacionRiesgo = interpretarRiesgo(nivelRiesgo);
+      const aceptabilidadRiesgo = getAceptabilidadRiesgo(interpretacionRiesgo);
+
+      const riesgoToSave = {
+        ...formData,
+        nivel_probabilidad: nivelProbabilidad,
+        interpretacion_probabilidad: interpretacionProbabilidad,
+        nivel_riesgo: nivelRiesgo,
+        interpretacion_riesgo: interpretacionRiesgo,
+        aceptabilidad_riesgo: aceptabilidadRiesgo,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      if (editingItem) {
+        const { error } = await supabase
+          .from('matriz_riesgos')
+          .update(riesgoToSave)
+          .eq('id', editingItem.id);
+
+        if (error) throw error;
+        setMensaje('Riesgo actualizado exitosamente');
+      } else {
+        const { error } = await supabase
+          .from('matriz_riesgos')
+          .insert([riesgoToSave]);
+
+        if (error) throw error;
+        setMensaje('Riesgo guardado exitosamente');
+      }
+
+      resetForm();
+      await cargarDatos();
+
+    } catch (error) {
+      setMensaje('Error al guardar el riesgo');
+    }
   };
 
   const resetForm = () => {
@@ -456,7 +560,7 @@ const MatrizRiesgosMain = () => {
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 flex items-center justify-center">
         <div className="bg-white rounded-xl p-8 shadow-lg border border-slate-200 text-center">
           <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
-            <Icon name="Loader" size={24} className="text-white" />
+            <Icon name="Refresh" size={24} className="text-white" />
           </div>
           <h3 className="text-lg font-semibold text-slate-900 mb-2">Cargando Matriz de Riesgos SST</h3>
           <p className="text-slate-600">Obteniendo datos de riesgos...</p>
@@ -551,6 +655,353 @@ const MatrizRiesgosMain = () => {
       <div>
         {renderContent()}
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Icon name="AlertTriangle" size={24} className="text-white" />
+                  <h2 className="text-xl font-bold text-white">
+                    {editingItem ? 'Editar' : 'Nuevo'} {currentForm === 'control' ? 'Control de Riesgo' : 'Riesgo - Metodología GTC 45'}
+                  </h2>
+                </div>
+                <button
+                  onClick={resetForm}
+                  className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <Icon name="X" size={20} />
+                </button>
+              </div>
+              <p className="text-red-100 mt-2">
+                {currentForm === 'control'
+                  ? 'Gestión de controles según jerarquía de prevención'
+                  : 'Los cálculos de nivel de riesgo se realizan automáticamente según la metodología colombiana.'
+                }
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-120px)] overflow-y-auto">
+              <div className="p-6 space-y-8">
+                {currentForm === 'control' ? (
+                  <>
+                    {/* Formulario de Control */}
+                    <div className="bg-slate-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="Shield" size={20} className="text-red-600" />
+                        <span>Información del Control</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Tipo de Control *
+                          </label>
+                          <select
+                            value={controlData.tipo_control}
+                            onChange={(e) => setControlData({...controlData, tipo_control: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            required
+                          >
+                            <option value="Eliminación">Eliminación</option>
+                            <option value="Sustitución">Sustitución</option>
+                            <option value="Controles de Ingeniería">Controles de Ingeniería</option>
+                            <option value="Controles Administrativos">Controles Administrativos</option>
+                            <option value="Equipos de Protección Personal">Equipos de Protección Personal</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Eficacia del Control
+                          </label>
+                          <select
+                            value={controlData.eficacia}
+                            onChange={(e) => setControlData({...controlData, eficacia: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            <option value="Baja">Baja</option>
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Descripción del Control *
+                          </label>
+                          <textarea
+                            value={controlData.descripcion_control}
+                            onChange={(e) => setControlData({...controlData, descripcion_control: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            rows={3}
+                            placeholder="Describe detalladamente el control a implementar..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Responsable
+                          </label>
+                          <input
+                            type="text"
+                            value={controlData.responsable}
+                            onChange={(e) => setControlData({...controlData, responsable: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Persona responsable de la implementación"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Fecha de Implementación
+                          </label>
+                          <input
+                            type="date"
+                            value={controlData.fecha_implementacion}
+                            onChange={(e) => setControlData({...controlData, fecha_implementacion: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botones para Control */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 font-medium transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        {editingItem ? 'Actualizar Control' : 'Guardar Control'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Formulario de Riesgo */}
+                    <div className="bg-slate-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="FileText" size={20} className="text-red-600" />
+                        <span>Información Básica</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Código del Riesgo *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.codigo_riesgo}
+                            onChange={(e) => setFormData({...formData, codigo_riesgo: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="RG-2024-001"
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Proceso *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.proceso}
+                            onChange={(e) => setFormData({...formData, proceso: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Ej: Producción, Mantenimiento..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Actividad *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.actividad}
+                            onChange={(e) => setFormData({...formData, actividad: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Actividad específica..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Peligro Identificado *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.peligro_identificado}
+                            onChange={(e) => setFormData({...formData, peligro_identificado: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Descripción del peligro..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Clasificación del Peligro
+                          </label>
+                          <select
+                            value={formData.clasificacion_peligro}
+                            onChange={(e) => setFormData({...formData, clasificacion_peligro: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            {clasificacionesPeligro.map(clasificacion => (
+                              <option key={clasificacion} value={clasificacion}>
+                                {clasificacion}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Área
+                          </label>
+                          <select
+                            value={formData.area}
+                            onChange={(e) => setFormData({...formData, area: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            {areas.map(area => (
+                              <option key={area} value={area}>
+                                {area}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Descripción del Riesgo *
+                          </label>
+                          <textarea
+                            value={formData.descripcion_riesgo}
+                            onChange={(e) => setFormData({...formData, descripcion_riesgo: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            rows={3}
+                            placeholder="Describe detalladamente el riesgo..."
+                            required
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Evaluación GTC-45 */}
+                    <div className="bg-blue-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="BarChart3" size={20} className="text-blue-600" />
+                        <span>Evaluación GTC-45</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Deficiencia
+                          </label>
+                          <select
+                            value={formData.nivel_deficiencia}
+                            onChange={(e) => setFormData({...formData, nivel_deficiencia: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesDeficiencia.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Exposición
+                          </label>
+                          <select
+                            value={formData.nivel_exposicion}
+                            onChange={(e) => setFormData({...formData, nivel_exposicion: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesExposicion.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Consecuencia
+                          </label>
+                          <select
+                            value={formData.nivel_consecuencia}
+                            onChange={(e) => setFormData({...formData, nivel_consecuencia: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesConsecuencia.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      {/* Cálculos automáticos */}
+                      <div className="mt-6 p-4 bg-white rounded-lg border border-blue-200">
+                        <h4 className="text-sm font-semibold text-slate-900 mb-3">Cálculos Automáticos</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">
+                              {calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion)}
+                            </div>
+                            <div className="text-xs text-slate-600">Nivel Probabilidad</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">
+                              {interpretarProbabilidad(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion))}
+                            </div>
+                            <div className="text-xs text-slate-600">Interpretación</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-red-600">
+                              {calcularNivelRiesgo(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion), formData.nivel_consecuencia)}
+                            </div>
+                            <div className="text-xs text-slate-600">Nivel Riesgo</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">
+                              {interpretarRiesgo(calcularNivelRiesgo(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion), formData.nivel_consecuencia))}
+                            </div>
+                            <div className="text-xs text-slate-600">Aceptabilidad</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botones */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
+                      >
+                        {editingItem ? 'Actualizar' : 'Guardar'} Riesgo
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
 
       {/* Mensaje de estado */}
       {mensaje && (
