@@ -1,8 +1,5 @@
 import React, { useState } from 'react';
 import { Icon } from '../common/Icons';
-import RiesgosDashboard from './RiesgosDashboard';
-import EvaluacionForm from './EvaluacionForm';
-import ControlesForm from './ControlesForm';
 
 const MatrizRiesgosMain = () => {
   const [vistaActiva, setVistaActiva] = useState('dashboard');
@@ -37,13 +34,73 @@ const MatrizRiesgosMain = () => {
   const renderContent = () => {
     switch (vistaActiva) {
       case 'dashboard':
-        return <RiesgosDashboard />;
+        return (
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-red-100 to-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="BarChart3" size={32} className="text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Dashboard de Riesgos</h3>
+              <p className="text-slate-600 mb-4">
+                Vista analítica de matriz de riesgos, evaluaciones GTC-45 y controles implementados
+              </p>
+              <div className="text-sm text-slate-500">
+                Componente en desarrollo - Próximamente disponible
+              </div>
+            </div>
+          </div>
+        );
       case 'evaluacion':
-        return <EvaluacionForm />;
+        return (
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-amber-100 to-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="AlertTriangle" size={32} className="text-amber-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Evaluación de Riesgos</h3>
+              <p className="text-slate-600 mb-4">
+                Identificación y evaluación de peligros según metodología GTC-45
+              </p>
+              <div className="text-sm text-slate-500">
+                Componente en desarrollo - Próximamente disponible
+              </div>
+            </div>
+          </div>
+        );
       case 'controles':
-        return <ControlesForm />;
+        return (
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-emerald-100 to-emerald-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="Shield" size={32} className="text-emerald-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Controles de Riesgos</h3>
+              <p className="text-slate-600 mb-4">
+                Gestión de medidas de control según jerarquía de controles SST
+              </p>
+              <div className="text-sm text-slate-500">
+                Componente en desarrollo - Próximamente disponible
+              </div>
+            </div>
+          </div>
+        );
       default:
-        return <RiesgosDashboard />;
+        return (
+          <div className="max-w-7xl mx-auto px-6 py-8">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-red-100 to-amber-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="BarChart3" size={32} className="text-red-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Dashboard de Riesgos</h3>
+              <p className="text-slate-600 mb-4">
+                Vista analítica de matriz de riesgos, evaluaciones GTC-45 y controles implementados
+              </p>
+              <div className="text-sm text-slate-500">
+                Componente en desarrollo - Próximamente disponible
+              </div>
+            </div>
+          </div>
+        );
     }
   };
 
