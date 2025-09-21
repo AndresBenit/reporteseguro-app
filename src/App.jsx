@@ -286,7 +286,7 @@ function App() {
                   <Route path="/auditorias" element={<AuditoriasMain />} />
                   
                   {/* Módulo de Matriz de Riesgos */}
-                  <Route path="/riesgos" element={<MatrizRiesgosMain />} />
+                  <Route path="/matriz-riesgos" element={<MatrizRiesgosMain />} />
                   
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
