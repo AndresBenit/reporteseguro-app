@@ -1450,7 +1450,6 @@ const MatrizRiesgosMain = () => {
                     </div>
                   </div>
                 </div>
-              </div>
 
               {/* Footer del formulario */}
               <div className="flex justify-end space-x-4 p-6 bg-slate-50 border-t border-slate-200">
@@ -1470,6 +1469,7 @@ const MatrizRiesgosMain = () => {
               </div>
                   </>
                 )}
+              </div>
             </form>
           </div>
         </div>
