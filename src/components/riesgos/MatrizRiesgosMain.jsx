@@ -190,8 +190,33 @@ const MatrizRiesgosMain = () => {
 
       {/* Contenido Principal */}
       <div>
-        {renderContent()}
+        {loading ? (
+          <div className="max-w-7xl mx-auto px-6 py-8 flex items-center justify-center">
+            <div className="bg-white rounded-xl p-8 shadow-lg border border-slate-200 text-center">
+              <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+                <Icon name="Loader" size={24} className="text-white" />
+              </div>
+              <h3 className="text-lg font-semibold text-slate-900 mb-2">Cargando Matriz de Riesgos SST</h3>
+              <p className="text-slate-600">Obteniendo datos de riesgos...</p>
+            </div>
+          </div>
+        ) : (
+          renderContent()
+        )}
       </div>
+
+      {/* Mensaje de estado */}
+      {mensaje && (
+        <div className="fixed bottom-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+          {mensaje}
+          <button
+            onClick={() => setMensaje('')}
+            className="ml-2 text-white/80 hover:text-white"
+          >
+            ×
+          </button>
+        </div>
+      )}
 
     </div>
   );
