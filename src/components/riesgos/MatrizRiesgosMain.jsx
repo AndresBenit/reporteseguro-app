@@ -4,6 +4,9 @@ import { Icon } from '../common/Icons';
 
 const MatrizRiesgosMain = () => {
   const [activeTab, setActiveTab] = useState('matriz');
+
+  // Debug temporal
+  console.log('MatrizRiesgosMain - activeTab:', activeTab);
   const [riesgos, setRiesgos] = useState([]);
   const [controles, setControles] = useState([]);
   const [evaluaciones, setEvaluaciones] = useState([]);
