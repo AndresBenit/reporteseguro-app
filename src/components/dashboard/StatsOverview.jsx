@@ -189,251 +189,333 @@ const StatsOverview = ({ reportes = [], colaboradoresStats = {} }) => {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header estratégico */}
-      <div className="text-center">
-        <div className="bg-white rounded-lg p-6 shadow-sm border border-gray-200">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <div className="p-2 bg-blue-600 rounded-lg">
-              <Icon name="TrendingUp" size={24} color="white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-gray-50 to-slate-100">
+      {/* Header Executive */}
+      <div className="bg-white border-b border-gray-200 shadow-sm sticky top-0 z-50">
+        <div className="px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg shadow-lg">
+                  <Icon name="TrendingUp" size={24} color="white" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-900">Dashboard Ejecutivo SST</h1>
+                  <p className="text-sm text-gray-500">Sistema Integral de Gestión • {lastUpdate.toLocaleDateString('es-ES')}</p>
+                </div>
+              </div>
             </div>
-            <h2 className="text-2xl font-bold text-gray-900">
-              Dashboard Estratégico SST
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+                <span className="text-xs text-green-600 font-semibold">ONLINE</span>
+              </div>
+              <div className="text-right">
+                <div className="text-xs text-gray-500">Última actualización</div>
+                <div className="text-sm font-medium text-gray-700">{lastUpdate.toLocaleTimeString('es-ES')}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div className="flex">
+        {/* Sidebar Executive */}
+        <div className="w-80 bg-white border-r border-gray-200 shadow-sm min-h-screen">
+          <div className="p-6">
+            <h2 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Icon name="BarChart3" size={20} className="text-blue-600" />
+              Indicadores Críticos
             </h2>
-          </div>
-          <p className="text-gray-600 font-medium">
-            Sistema Integral de Gestión de Seguridad Industrial • {lastUpdate.toLocaleDateString('es-ES')}
-          </p>
-          <div className="flex items-center justify-center gap-2 mt-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-            <span className="text-xs text-green-600 font-semibold">SISTEMA ACTIVO</span>
-          </div>
-        </div>
-      </div>
 
-      {/* Métricas Estratégicas Principales */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
-        {statsEstrategicas.map((stat) => (
-          <div
-            key={stat.id}
-            className="bg-white rounded-xl p-6 shadow-sm border border-gray-200 hover:shadow-lg transition-all duration-300"
-          >
-            <div className="flex items-center gap-4 mb-4">
-              <div className={`p-3 rounded-lg ${
-                stat.color === 'blue' ? 'bg-blue-600' :
-                stat.color === 'green' ? 'bg-emerald-600' :
-                stat.color === 'red' ? 'bg-red-600' :
-                stat.color === 'amber' ? 'bg-amber-600' : 'bg-gray-600'
+            <div className="space-y-4">
+              {/* Alertas Críticas - Prioridad Alta */}
+              <div className={`p-4 rounded-lg border-l-4 ${
+                alertasCriticas === 0
+                  ? 'bg-green-50 border-green-500 border border-green-200'
+                  : 'bg-red-50 border-red-500 border border-red-200'
               }`}>
-                <Icon name={stat.icon} size={20} color="white" />
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Icon name="AlertTriangle" size={16} className={alertasCriticas === 0 ? "text-green-600" : "text-red-600"} />
+                    <span className="text-sm font-semibold text-gray-900">Alertas Críticas</span>
+                  </div>
+                  <span className={`text-xl font-bold ${alertasCriticas === 0 ? "text-green-600" : "text-red-600"}`}>
+                    {alertasCriticas}
+                  </span>
+                </div>
+                <p className={`text-xs ${alertasCriticas === 0 ? "text-green-700" : "text-red-700"}`}>
+                  {alertasCriticas === 0 ? 'Sistema bajo control' : 'Requieren atención inmediata'}
+                </p>
               </div>
-              <div className="flex-1">
-                <div className="text-2xl font-bold text-gray-900">{stat.value}</div>
-                <div className="text-sm font-medium text-gray-500 uppercase tracking-wide">{stat.title}</div>
-              </div>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">{stat.subtitle}</span>
-              <span className={`text-xs font-semibold px-2 py-1 rounded-full ${
-                stat.changeType === 'positive' ? 'bg-green-100 text-green-800' :
-                stat.changeType === 'negative' ? 'bg-red-100 text-red-800' :
-                'bg-blue-100 text-blue-800'
-              }`}>
-                {stat.change}
-              </span>
-            </div>
-          </div>
-        ))}
-      </div>
 
-      {/* Estado Operacional por Módulos */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="p-2 bg-slate-600 rounded-lg">
-              <Icon name="Grid" size={20} color="white" />
-            </div>
-            <h3 className="text-lg font-bold text-gray-900">Estado Operacional por Módulos</h3>
-          </div>
-          <p className="text-gray-600 text-sm">
-            Monitoreo en tiempo real de todos los sistemas SST
-          </p>
-        </div>
+              {/* Cumplimiento General */}
+              <div className="p-4 bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg border border-blue-200">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Target" size={16} className="text-blue-600" />
+                    <span className="text-sm font-semibold text-gray-900">Cumplimiento</span>
+                  </div>
+                  <span className="text-xl font-bold text-blue-600">{cumplimientoGeneral}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2 mb-2">
+                  <div
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${cumplimientoGeneral}%` }}
+                  ></div>
+                </div>
+                <p className="text-xs text-blue-700">
+                  {cumplimientoGeneral >= 85 ? 'Excelente' : cumplimientoGeneral >= 70 ? 'Bueno' : 'Requiere mejora'}
+                </p>
+              </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-          {/* Matriz de Riesgos */}
-          <div className="bg-gradient-to-br from-red-50 to-red-100 rounded-lg p-4 border border-red-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="AlertTriangle" size={20} className="text-red-600" />
-              <span className="font-semibold text-red-900">Matriz Riesgos</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-red-700">Total:</span>
-                <span className="font-semibold text-red-900">{moduleStats.riesgos?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-red-700">Críticos:</span>
-                <span className="font-semibold text-red-900">{moduleStats.riesgos?.criticos || 0}</span>
-              </div>
-            </div>
-          </div>
+              {/* KPIs Operacionales */}
+              <div className="space-y-3">
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Users" size={14} className="text-gray-600" />
+                    <span className="text-sm text-gray-700">Colaboradores</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{moduleStats.colaboradores?.activos || 0}</span>
+                </div>
 
-          {/* Exámenes Médicos */}
-          <div className="bg-gradient-to-br from-rose-50 to-rose-100 rounded-lg p-4 border border-rose-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="Heart" size={20} className="text-rose-600" />
-              <span className="font-semibold text-rose-900">Exámenes</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-rose-700">Total:</span>
-                <span className="font-semibold text-rose-900">{moduleStats.examenes?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-rose-700">Vencidos:</span>
-                <span className="font-semibold text-rose-900">{moduleStats.examenes?.vencidos || 0}</span>
-              </div>
-            </div>
-          </div>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon name="FileText" size={14} className="text-gray-600" />
+                    <span className="text-sm text-gray-700">Reportes Activos</span>
+                  </div>
+                  <span className="font-semibold text-gray-900">{reportesPendientes}</span>
+                </div>
 
-          {/* Capacitaciones */}
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="BookOpen" size={20} className="text-blue-600" />
-              <span className="font-semibold text-blue-900">Capacitaciones</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-700">Total:</span>
-                <span className="font-semibold text-blue-900">{moduleStats.capacitaciones?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-blue-700">Vencidas:</span>
-                <span className="font-semibold text-blue-900">{moduleStats.capacitaciones?.vencidas || 0}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Inventario EPP */}
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="Shield" size={20} className="text-green-600" />
-              <span className="font-semibold text-green-900">Inventario EPP</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-green-700">Items:</span>
-                <span className="font-semibold text-green-900">{moduleStats.inventario?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-green-700">Crítico:</span>
-                <span className="font-semibold text-green-900">{moduleStats.inventario?.critico || 0}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Inspecciones */}
-          <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 border border-purple-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="Search" size={20} className="text-purple-600" />
-              <span className="font-semibold text-purple-900">Inspecciones</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-purple-700">Total:</span>
-                <span className="font-semibold text-purple-900">{moduleStats.inspecciones?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-purple-700">Pendientes:</span>
-                <span className="font-semibold text-purple-900">{moduleStats.inspecciones?.pendientes || 0}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Auditorías */}
-          <div className="bg-gradient-to-br from-indigo-50 to-indigo-100 rounded-lg p-4 border border-indigo-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="FileCheck" size={20} className="text-indigo-600" />
-              <span className="font-semibold text-indigo-900">Auditorías</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-indigo-700">Total:</span>
-                <span className="font-semibold text-indigo-900">{moduleStats.auditorias?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-indigo-700">Cumplimiento:</span>
-                <span className="font-semibold text-indigo-900">{Math.round(moduleStats.auditorias?.cumplimientoPromedio || 0)}%</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Controles */}
-          <div className="bg-gradient-to-br from-emerald-50 to-emerald-100 rounded-lg p-4 border border-emerald-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="ShieldCheck" size={20} className="text-emerald-600" />
-              <span className="font-semibold text-emerald-900">Controles</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-emerald-700">Total:</span>
-                <span className="font-semibold text-emerald-900">{moduleStats.controles?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-emerald-700">Implementados:</span>
-                <span className="font-semibold text-emerald-900">{moduleStats.controles?.implementados || 0}</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Planes de Emergencia */}
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-4 border border-orange-200">
-            <div className="flex items-center gap-3 mb-3">
-              <Icon name="Siren" size={20} className="text-orange-600" />
-              <span className="font-semibold text-orange-900">Emergencias</span>
-            </div>
-            <div className="space-y-1">
-              <div className="flex justify-between text-sm">
-                <span className="text-orange-700">Planes:</span>
-                <span className="font-semibold text-orange-900">{moduleStats.emergencias?.total || 0}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-orange-700">Actualizados:</span>
-                <span className="font-semibold text-orange-900">{moduleStats.emergencias?.actualizados || 0}</span>
+                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <Icon name="Shield" size={14} className="text-gray-600" />
+                    <span className="text-sm text-gray-700">EPP Crítico</span>
+                  </div>
+                  <span className="font-semibold text-red-600">{moduleStats.inventario?.critico || 0}</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Actividad de Reportes */}
-      <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-200">
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-2 mb-2">
-            <div className="p-2 bg-amber-600 rounded-lg">
-              <Icon name="Activity" size={20} color="white" />
+        {/* Main Content Area */}
+        <div className="flex-1 p-6">
+          {/* Command Center Table */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Icon name="Monitor" size={20} className="text-slate-600" />
+                Centro de Control Operacional
+              </h3>
+              <p className="text-sm text-gray-600">Estado en tiempo real de todos los módulos SST</p>
             </div>
-            <h3 className="text-lg font-bold text-gray-900">Estado de Reportes</h3>
-          </div>
-        </div>
 
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <div className="text-2xl font-bold text-blue-600">{totalReportes}</div>
-            <div className="text-sm text-blue-700 font-medium">Total Reportes</div>
+            <div className="p-6">
+              <div className="overflow-hidden">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200">
+                      <th className="text-left py-3 px-4 font-semibold text-gray-900">Módulo</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-900">Total</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-900">Estado Crítico</th>
+                      <th className="text-center py-3 px-4 font-semibold text-gray-900">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    <tr className="hover:bg-red-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="AlertTriangle" size={18} className="text-red-600" />
+                          <span className="font-medium text-gray-900">Matriz de Riesgos</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.riesgos?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                          {moduleStats.riesgos?.criticos || 0} críticos
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.riesgos?.criticos || 0) > 0 ? 'bg-red-500' : 'bg-green-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-rose-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="Heart" size={18} className="text-rose-600" />
+                          <span className="font-medium text-gray-900">Exámenes Médicos</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.examenes?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-100 text-rose-800">
+                          {moduleStats.examenes?.vencidos || 0} vencidos
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.examenes?.vencidos || 0) > 0 ? 'bg-rose-500' : 'bg-green-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-blue-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="BookOpen" size={18} className="text-blue-600" />
+                          <span className="font-medium text-gray-900">Capacitaciones</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.capacitaciones?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          {moduleStats.capacitaciones?.vencidas || 0} vencidas
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.capacitaciones?.vencidas || 0) > 0 ? 'bg-blue-500' : 'bg-green-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-green-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="Shield" size={18} className="text-green-600" />
+                          <span className="font-medium text-gray-900">Inventario EPP</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.inventario?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
+                          {moduleStats.inventario?.critico || 0} stock bajo
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.inventario?.critico || 0) > 0 ? 'bg-amber-500' : 'bg-green-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-purple-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="Search" size={18} className="text-purple-600" />
+                          <span className="font-medium text-gray-900">Inspecciones</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.inspecciones?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
+                          {moduleStats.inspecciones?.pendientes || 0} pendientes
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.inspecciones?.pendientes || 0) > 0 ? 'bg-purple-500' : 'bg-green-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-indigo-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="FileCheck" size={18} className="text-indigo-600" />
+                          <span className="font-medium text-gray-900">Auditorías</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.auditorias?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
+                          {Math.round(moduleStats.auditorias?.cumplimientoPromedio || 0)}% cumplimiento
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.auditorias?.cumplimientoPromedio || 0) >= 85 ? 'bg-green-500' : 'bg-amber-500'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-emerald-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="ShieldCheck" size={18} className="text-emerald-600" />
+                          <span className="font-medium text-gray-900">Controles de Riesgo</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.controles?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                          {moduleStats.controles?.implementados || 0} implementados
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.controles?.implementados || 0) > 0 ? 'bg-green-500' : 'bg-gray-400'}`}></div>
+                      </td>
+                    </tr>
+
+                    <tr className="hover:bg-orange-25 transition-colors">
+                      <td className="py-4 px-4">
+                        <div className="flex items-center gap-3">
+                          <Icon name="Siren" size={18} className="text-orange-600" />
+                          <span className="font-medium text-gray-900">Planes de Emergencia</span>
+                        </div>
+                      </td>
+                      <td className="text-center py-4 px-4 font-semibold">{moduleStats.emergencias?.total || 0}</td>
+                      <td className="text-center py-4 px-4">
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          {moduleStats.emergencias?.actualizados || 0} actualizados
+                        </span>
+                      </td>
+                      <td className="text-center py-4 px-4">
+                        <div className={`w-3 h-3 rounded-full mx-auto ${(moduleStats.emergencias?.actualizados || 0) > 0 ? 'bg-green-500' : 'bg-orange-500'}`}></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
-          <div className="text-center p-4 bg-amber-50 rounded-lg border border-amber-200">
-            <div className="text-2xl font-bold text-amber-600">{reportesPendientes}</div>
-            <div className="text-sm text-amber-700 font-medium">Pendientes</div>
-          </div>
-          <div className="text-center p-4 bg-red-50 rounded-lg border border-red-200">
-            <div className="text-2xl font-bold text-red-600">{reportesCriticos}</div>
-            <div className="text-sm text-red-700 font-medium">Críticos</div>
-          </div>
-          <div className="text-center p-4 bg-green-50 rounded-lg border border-green-200">
-            <div className="text-2xl font-bold text-green-600">{reportesResueltos}</div>
-            <div className="text-sm text-green-700 font-medium">Resueltos</div>
+
+          {/* Footer Analytics */}
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
+                <Icon name="Activity" size={20} className="text-amber-600" />
+                Analytics de Reportes
+              </h3>
+            </div>
+
+            <div className="p-6">
+              <div className="grid grid-cols-4 gap-6">
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-slate-700 mb-1">{totalReportes}</div>
+                  <div className="text-sm font-medium text-slate-600 uppercase tracking-wide">Total</div>
+                  <div className="w-full bg-slate-200 rounded-full h-1 mt-2">
+                    <div className="bg-slate-600 h-1 rounded-full" style={{ width: '100%' }}></div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-amber-600 mb-1">{reportesPendientes}</div>
+                  <div className="text-sm font-medium text-amber-700 uppercase tracking-wide">Pendientes</div>
+                  <div className="w-full bg-amber-200 rounded-full h-1 mt-2">
+                    <div className="bg-amber-600 h-1 rounded-full" style={{ width: `${totalReportes > 0 ? (reportesPendientes / totalReportes) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-red-600 mb-1">{reportesCriticos}</div>
+                  <div className="text-sm font-medium text-red-700 uppercase tracking-wide">Críticos</div>
+                  <div className="w-full bg-red-200 rounded-full h-1 mt-2">
+                    <div className="bg-red-600 h-1 rounded-full" style={{ width: `${totalReportes > 0 ? (reportesCriticos / totalReportes) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+
+                <div className="text-center">
+                  <div className="text-3xl font-bold text-green-600 mb-1">{reportesResueltos}</div>
+                  <div className="text-sm font-medium text-green-700 uppercase tracking-wide">Resueltos</div>
+                  <div className="w-full bg-green-200 rounded-full h-1 mt-2">
+                    <div className="bg-green-600 h-1 rounded-full" style={{ width: `${totalReportes > 0 ? (reportesResueltos / totalReportes) * 100 : 0}%` }}></div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
