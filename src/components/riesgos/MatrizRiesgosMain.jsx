@@ -133,8 +133,8 @@ const MatrizRiesgosMain = () => {
       
       const [riesgosRes, controlesRes, evaluacionesRes] = await Promise.all([
         supabase.from('matriz_riesgos').select('*').order('nivel_riesgo', { ascending: false }),
-        supabase.from('controles_riesgo').select('*, matriz_riesgos(codigo_riesgo)').order('created_at', { ascending: false }),
-        supabase.from('evaluaciones_riesgo').select('*').order('fecha_evaluacion', { ascending: false })
+        supabase.from('controles_riesgos').select('*').order('created_at', { ascending: false }),
+        supabase.from('matriz_riesgos').select('*').order('fecha_evaluacion', { ascending: false })
       ]);
 
       if (riesgosRes.error) throw riesgosRes.error;
@@ -256,7 +256,48 @@ const MatrizRiesgosMain = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validaciones de campos obligatorios
+    if (currentForm === 'control') {
+      // Validaciones para controles
+      if (!controlData.tipo_control || !controlData.descripcion_control.trim()) {
+        setMensaje('Tipo de control y descripción son obligatorios');
+        return;
+      }
+
+      try {
+        const controlToSave = {
+          ...controlData,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        if (editingItem) {
+          const { error } = await supabase
+            .from('controles_riesgos')
+            .update(controlToSave)
+            .eq('id', editingItem.id);
+
+          if (error) throw error;
+          setMensaje('Control actualizado exitosamente');
+        } else {
+          const { error } = await supabase
+            .from('controles_riesgos')
+            .insert([controlToSave]);
+
+          if (error) throw error;
+          setMensaje('Control guardado exitosamente');
+        }
+
+        resetForm();
+        await cargarDatos();
+
+      } catch (error) {
+        console.error('Error:', error);
+        setMensaje('Error al guardar el control');
+      }
+      return;
+    }
+
+    // Validaciones de campos obligatorios para riesgos
     if (!formData.codigo_riesgo.trim()) {
       setMensaje('El código de riesgo es obligatorio');
       return;
@@ -654,11 +695,91 @@ const MatrizRiesgosMain = () => {
               <p className="text-slate-600 mb-6">
                 Jerarquía de controles: Eliminación, Sustitución, Ingeniería, Administrativos, EPP
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm">
-                  🚧 Módulo en desarrollo - Próximamente disponible
-                </p>
+
+              <div className="mb-6">
+                <button
+                  onClick={() => { setCurrentForm('control'); setShowModal(true); }}
+                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+                >
+                  <Icon name="Plus" size={20} />
+                  <span>Nuevo Control</span>
+                </button>
               </div>
+
+              {controles.length > 0 ? (
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
+                    <thead className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+                      <tr>
+                        <th className="px-6 py-4 text-left font-semibold">Tipo Control</th>
+                        <th className="px-6 py-4 text-left font-semibold">Descripción</th>
+                        <th className="px-6 py-4 text-left font-semibold">Responsable</th>
+                        <th className="px-6 py-4 text-left font-semibold">Eficacia</th>
+                        <th className="px-6 py-4 text-left font-semibold">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {controles.map((control, index) => (
+                        <tr key={control.id || index} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                          <td className="px-6 py-4">
+                            <span className="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
+                              {control.tipo_control}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4 text-slate-900 max-w-xs truncate">
+                            {control.descripcion_control}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700">
+                            {control.responsable || 'No asignado'}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                              control.eficacia === 'Alta' ? 'bg-green-100 text-green-800' :
+                              control.eficacia === 'Media' ? 'bg-yellow-100 text-yellow-800' :
+                              'bg-red-100 text-red-800'
+                            }`}>
+                              {control.eficacia}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex space-x-2">
+                              <button
+                                onClick={() => handleEdit(control, 'control')}
+                                className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                                title="Editar"
+                              >
+                                <Icon name="Edit" size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(control.id, 'controles_riesgos')}
+                                className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                                title="Eliminar"
+                              >
+                                <Icon name="Trash2" size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Icon name="Shield" size={32} className="text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay controles registrados</h3>
+                  <p className="text-slate-600 mb-6">Comienza agregando controles para gestionar los riesgos identificados</p>
+                  <button
+                    onClick={() => { setCurrentForm('control'); setShowModal(true); }}
+                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
+                  >
+                    <Icon name="Plus" size={20} />
+                    <span>Agregar Primer Control</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -675,11 +796,112 @@ const MatrizRiesgosMain = () => {
               <p className="text-slate-600 mb-6">
                 Historial de evaluaciones con metodología GTC 45
               </p>
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                <p className="text-blue-800 text-sm">
-                  🚧 Módulo en desarrollo - Próximamente disponible
-                </p>
-              </div>
+
+              {evaluaciones.length > 0 ? (
+                <div className="space-y-6">
+                  {evaluaciones.map((evaluacion, index) => (
+                    <div key={evaluacion.id || index} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+                      <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center space-x-3">
+                          <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                            <Icon name="BarChart3" size={20} className="text-purple-600" />
+                          </div>
+                          <div>
+                            <h4 className="text-lg font-semibold text-slate-900">
+                              {evaluacion.codigo_riesgo || `Evaluación ${index + 1}`}
+                            </h4>
+                            <p className="text-slate-600 text-sm">
+                              {evaluacion.fecha_evaluacion ? new Date(evaluacion.fecha_evaluacion).toLocaleDateString() : 'Sin fecha'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                            evaluacion.aceptabilidad_riesgo === 'Aceptable' ? 'bg-green-100 text-green-800' :
+                            evaluacion.aceptabilidad_riesgo === 'Aceptable con controles' ? 'bg-yellow-100 text-yellow-800' :
+                            'bg-red-100 text-red-800'
+                          }`}>
+                            {evaluacion.aceptabilidad_riesgo || 'Sin evaluar'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                        <div className="bg-slate-50 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-blue-600">
+                            {evaluacion.nivel_probabilidad || 'N/A'}
+                          </div>
+                          <div className="text-xs text-slate-600">Nivel Probabilidad</div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-orange-600">
+                            {evaluacion.nivel_consecuencia || 'N/A'}
+                          </div>
+                          <div className="text-xs text-slate-600">Nivel Consecuencia</div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 text-center">
+                          <div className="text-2xl font-bold text-red-600">
+                            {evaluacion.nivel_riesgo || 'N/A'}
+                          </div>
+                          <div className="text-xs text-slate-600">Nivel Riesgo</div>
+                        </div>
+                        <div className="bg-slate-50 rounded-lg p-3 text-center">
+                          <div className="text-sm font-semibold text-slate-900">
+                            {evaluacion.interpretacion_riesgo || 'Sin interpretar'}
+                          </div>
+                          <div className="text-xs text-slate-600">Interpretación</div>
+                        </div>
+                      </div>
+
+                      <div className="border-t border-slate-200 pt-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          <div>
+                            <span className="font-medium text-slate-700">Proceso:</span>
+                            <span className="ml-2 text-slate-900">{evaluacion.proceso || 'No especificado'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-slate-700">Área:</span>
+                            <span className="ml-2 text-slate-900">{evaluacion.area || 'No especificada'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-slate-700">Peligro:</span>
+                            <span className="ml-2 text-slate-900">{evaluacion.peligro_identificado || 'No identificado'}</span>
+                          </div>
+                          <div>
+                            <span className="font-medium text-slate-700">Clasificación:</span>
+                            <span className="ml-2 text-slate-900">{evaluacion.clasificacion_peligro || 'Sin clasificar'}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex justify-end mt-4 pt-4 border-t border-slate-200">
+                        <button
+                          onClick={() => handleEdit(evaluacion, 'riesgo')}
+                          className="text-purple-600 hover:text-purple-800 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm flex items-center space-x-2"
+                        >
+                          <Icon name="Eye" size={16} />
+                          <span>Ver Detalles</span>
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+                    <Icon name="BarChart3" size={32} className="text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay evaluaciones registradas</h3>
+                  <p className="text-slate-600 mb-6">Las evaluaciones aparecerán aquí una vez que registres riesgos en la matriz</p>
+                  <button
+                    onClick={() => setActiveTab('matriz')}
+                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
+                  >
+                    <Icon name="Plus" size={20} />
+                    <span>Ir a Matriz de Riesgos</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -694,7 +916,7 @@ const MatrizRiesgosMain = () => {
                 <div className="flex items-center space-x-3">
                   <Icon name="AlertTriangle" size={24} className="text-white" />
                   <h2 className="text-xl font-bold text-white">
-                    {editingItem ? 'Editar' : 'Nuevo'} Riesgo - Metodología GTC 45
+                    {editingItem ? 'Editar' : 'Nuevo'} {currentForm === 'control' ? 'Control de Riesgo' : 'Riesgo - Metodología GTC 45'}
                   </h2>
                 </div>
                 <button
@@ -711,6 +933,130 @@ const MatrizRiesgosMain = () => {
 
             <form onSubmit={handleSubmit} className="max-h-[calc(90vh-120px)] overflow-y-auto">
               <div className="p-6 space-y-8">
+                {currentForm === 'control' ? (
+                  <>
+                    {/* Formulario de Control */}
+                    <div className="bg-slate-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="Shield" size={20} className="text-red-600" />
+                        <span>Información del Control</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Tipo de Control *
+                          </label>
+                          <select
+                            value={controlData.tipo_control}
+                            onChange={(e) => setControlData({...controlData, tipo_control: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            required
+                          >
+                            <option value="Eliminación">Eliminación</option>
+                            <option value="Sustitución">Sustitución</option>
+                            <option value="Controles de Ingeniería">Controles de Ingeniería</option>
+                            <option value="Controles Administrativos">Controles Administrativos</option>
+                            <option value="Equipos de Protección Personal">Equipos de Protección Personal</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Eficacia del Control
+                          </label>
+                          <select
+                            value={controlData.eficacia}
+                            onChange={(e) => setControlData({...controlData, eficacia: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            <option value="Baja">Baja</option>
+                            <option value="Media">Media</option>
+                            <option value="Alta">Alta</option>
+                          </select>
+                        </div>
+                        <div className="md:col-span-2">
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Descripción del Control *
+                          </label>
+                          <textarea
+                            value={controlData.descripcion_control}
+                            onChange={(e) => setControlData({...controlData, descripcion_control: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            rows={3}
+                            placeholder="Describe detalladamente el control a implementar..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Responsable
+                          </label>
+                          <input
+                            type="text"
+                            value={controlData.responsable}
+                            onChange={(e) => setControlData({...controlData, responsable: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Persona responsable de la implementación"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Fecha de Implementación
+                          </label>
+                          <input
+                            type="date"
+                            value={controlData.fecha_implementacion}
+                            onChange={(e) => setControlData({...controlData, fecha_implementacion: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Costo Estimado (COP)
+                          </label>
+                          <input
+                            type="number"
+                            value={controlData.costo_estimado}
+                            onChange={(e) => setControlData({...controlData, costo_estimado: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="0"
+                            min="0"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Recursos Necesarios
+                          </label>
+                          <textarea
+                            value={controlData.recursos_necesarios}
+                            onChange={(e) => setControlData({...controlData, recursos_necesarios: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            rows={2}
+                            placeholder="Recursos humanos, técnicos, financieros..."
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Botones para Control */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="px-6 py-3 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50 font-medium transition-colors"
+                      >
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-8 py-3 bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        {editingItem ? 'Actualizar Control' : 'Guardar Control'}
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    {/* Formulario de Riesgo existente */}
                 {/* Información Básica */}
                 <div className="bg-slate-50 rounded-xl p-6">
                   <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
@@ -1122,6 +1468,8 @@ const MatrizRiesgosMain = () => {
                   {editingItem ? 'Actualizar' : 'Guardar'} Riesgo
                 </button>
               </div>
+                  </>
+                )}
             </form>
           </div>
         </div>
