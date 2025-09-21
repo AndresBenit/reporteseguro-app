@@ -739,6 +739,314 @@ const PlanesEmergenciaMain = () => {
     );
   };
 
+  const renderPlanesTab = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Planes de Emergencia</h2>
+            <p className="text-slate-600">Gestión de planes de emergencia por tipo y área</p>
+          </div>
+          <button
+            onClick={() => {
+              setCurrentForm('plan');
+              setShowModal(true);
+              setEditingItem(null);
+            }}
+            className="flex items-center space-x-2 bg-gradient-to-r from-rose-600 to-rose-700 text-white px-4 py-2 rounded-lg hover:from-rose-700 hover:to-rose-800 transition-all shadow-lg"
+          >
+            <Icon name="Plus" size={20} />
+            <span>Nuevo Plan</span>
+          </button>
+        </div>
+
+        {planes.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="Shield" size={24} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay planes de emergencia</h3>
+            <p className="text-slate-600 mb-6">Crea el primer plan de emergencia para tu organización</p>
+            <button
+              onClick={() => {
+                setCurrentForm('plan');
+                setShowModal(true);
+                setEditingItem(null);
+              }}
+              className="bg-gradient-to-r from-rose-600 to-rose-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-rose-700 hover:to-rose-800 transition-all"
+            >
+              Crear Primer Plan
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tipo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Área</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Estado</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Versión</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {planes.map((plan) => (
+                    <tr key={plan.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="font-semibold text-slate-900">{plan.nombre}</div>
+                          {plan.alcance && <div className="text-sm text-slate-600">{plan.alcance}</div>}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{plan.tipo_emergencia}</td>
+                      <td className="px-6 py-4 text-slate-700">{plan.area_aplicacion}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          plan.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {plan.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{plan.version}</td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(plan, 'plan')}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                            title="Editar"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(plan.id, 'planes_emergencia_sst')}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Eliminar"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderSimulacrosTab = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Simulacros de Emergencia</h2>
+            <p className="text-slate-600">Programación y seguimiento de simulacros</p>
+          </div>
+          <button
+            onClick={() => {
+              setCurrentForm('simulacro');
+              setShowModal(true);
+              setEditingItem(null);
+            }}
+            className="flex items-center space-x-2 bg-gradient-to-r from-red-600 to-red-700 text-white px-4 py-2 rounded-lg hover:from-red-700 hover:to-red-800 transition-all shadow-lg"
+          >
+            <Icon name="Plus" size={20} />
+            <span>Nuevo Simulacro</span>
+          </button>
+        </div>
+
+        {simulacros.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="Clock" size={24} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay simulacros registrados</h3>
+            <p className="text-slate-600 mb-6">Programa el primer simulacro de emergencia</p>
+            <button
+              onClick={() => {
+                setCurrentForm('simulacro');
+                setShowModal(true);
+                setEditingItem(null);
+              }}
+              className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all"
+            >
+              Programar Primer Simulacro
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Plan</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Fecha</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tipo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Estado</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Responsable</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {simulacros.map((simulacro) => (
+                    <tr key={simulacro.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div className="font-semibold text-slate-900">
+                          {simulacro.planes_emergencia_sst?.nombre || 'Plan no encontrado'}
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">
+                        {new Date(simulacro.fecha_simulacro).toLocaleDateString()}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{simulacro.tipo_simulacro}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          simulacro.estado === 'ejecutado' ? 'bg-green-100 text-green-800' :
+                          simulacro.estado === 'programado' ? 'bg-yellow-100 text-yellow-800' :
+                          'bg-purple-100 text-purple-800'
+                        }`}>
+                          {simulacro.estado.charAt(0).toUpperCase() + simulacro.estado.slice(1)}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{simulacro.responsable_simulacro}</td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(simulacro, 'simulacro')}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                            title="Editar"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(simulacro.id, 'simulacros_emergencia')}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Eliminar"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderBrigadasTab = () => {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-bold text-slate-900">Brigadas de Emergencia</h2>
+            <p className="text-slate-600">Gestión de brigadistas y responsabilidades</p>
+          </div>
+          <button
+            onClick={() => {
+              setCurrentForm('brigada');
+              setShowModal(true);
+              setEditingItem(null);
+            }}
+            className="flex items-center space-x-2 bg-gradient-to-r from-pink-600 to-pink-700 text-white px-4 py-2 rounded-lg hover:from-pink-700 hover:to-pink-800 transition-all shadow-lg"
+          >
+            <Icon name="Plus" size={20} />
+            <span>Nuevo Brigadista</span>
+          </button>
+        </div>
+
+        {brigadas.length === 0 ? (
+          <div className="bg-white rounded-xl p-12 text-center border border-slate-200">
+            <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+              <Icon name="Users" size={24} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay brigadistas registrados</h3>
+            <p className="text-slate-600 mb-6">Registra el primer miembro de la brigada de emergencia</p>
+            <button
+              onClick={() => {
+                setCurrentForm('brigada');
+                setShowModal(true);
+                setEditingItem(null);
+              }}
+              className="bg-gradient-to-r from-pink-600 to-pink-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-pink-700 hover:to-pink-800 transition-all"
+            >
+              Registrar Primer Brigadista
+            </button>
+          </div>
+        ) : (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-slate-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Brigadista</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Tipo Brigada</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Cargo</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Área</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Estado</th>
+                    <th className="px-6 py-3 text-center text-xs font-medium text-slate-500 uppercase">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200">
+                  {brigadas.map((brigada) => (
+                    <tr key={brigada.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4">
+                        <div>
+                          <div className="font-semibold text-slate-900">
+                            {brigada.colaboradores?.nombre_completo || 'Colaborador no encontrado'}
+                          </div>
+                          <div className="text-sm text-slate-600">{brigada.nombre}</div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">{brigada.tipo_brigada}</td>
+                      <td className="px-6 py-4 text-slate-700">{brigada.cargo_brigada}</td>
+                      <td className="px-6 py-4 text-slate-700">{brigada.area_responsabilidad}</td>
+                      <td className="px-6 py-4">
+                        <span className={`inline-flex px-2 py-1 text-xs font-medium rounded-full ${
+                          brigada.activo ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                        }`}>
+                          {brigada.activo ? 'Activo' : 'Inactivo'}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 text-center">
+                        <div className="flex justify-center space-x-2">
+                          <button
+                            onClick={() => handleEdit(brigada, 'brigada')}
+                            className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg"
+                            title="Editar"
+                          >
+                            <Icon name="Edit" size={16} />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(brigada.id, 'brigadas_emergencia')}
+                            className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                            title="Eliminar"
+                          >
+                            <Icon name="Trash2" size={16} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderContent = () => {
     switch (vistaActiva) {
       case 'dashboard':
