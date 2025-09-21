@@ -3,7 +3,7 @@ import { supabase } from '../../services/supabase';
 import { Icon } from '../common/Icons';
 
 const MatrizRiesgosMain = () => {
-  const [activeTab, setActiveTab] = useState('matriz');
+  const [vistaActiva, setVistaActiva] = useState('matriz');
   const [riesgos, setRiesgos] = useState([]);
   const [controles, setControles] = useState([]);
   const [evaluaciones, setEvaluaciones] = useState([]);
@@ -48,15 +48,13 @@ const MatrizRiesgosMain = () => {
       ingenieria: [],
       eliminacion: [],
       sustitucion: [],
-      administrativas: []
+      administrativos: []
     },
     responsable_implementacion: '',
     fecha_implementacion: '',
-    nivel_riesgo_residual: null,
-    aceptabilidad_residual: '',
-    seguimiento_medicion: '',
-    fecha_revision: '',
-    responsable_revision: '',
+    costo_estimado: 0,
+    recursos_necesarios: '',
+    seguimiento_fecha: '',
     estado_riesgo: 'identificado',
     observaciones: ''
   });
@@ -71,6 +69,32 @@ const MatrizRiesgosMain = () => {
     costo_estimado: 0,
     recursos_necesarios: ''
   });
+
+  const vistas = [
+    {
+      id: 'matriz',
+      label: 'Matriz de Riesgos',
+      icon: 'AlertTriangle',
+      color: 'from-red-600 to-red-700',
+      description: 'Identificación y evaluación de riesgos según metodología GTC-45'
+    },
+    {
+      id: 'controles',
+      label: 'Controles de Riesgo',
+      icon: 'Shield',
+      color: 'from-orange-600 to-orange-700',
+      description: 'Gestión de controles y medidas preventivas por jerarquía'
+    },
+    {
+      id: 'evaluaciones',
+      label: 'Evaluaciones',
+      icon: 'BarChart3',
+      color: 'from-purple-600 to-purple-700',
+      description: 'Historial y seguimiento de evaluaciones realizadas'
+    }
+  ];
+
+  const vistaActual = vistas.find(v => v.id === vistaActiva);
 
   const clasificacionesPeligro = [
     'Biológico', 'Físico', 'Químico', 'Psicosocial', 'Biomecánico',
@@ -87,27 +111,23 @@ const MatrizRiesgosMain = () => {
   ];
 
   const efectosSalud = [
-    'Lesiones musculoesqueléticas', 'Enfermedades respiratorias',
-    'Dermatitis/Alergias', 'Intoxicaciones', 'Quemaduras', 'Traumatismos',
-    'Estrés/Ansiedad', 'Fatiga', 'Pérdida auditiva', 'Problemas visuales'
-  ];
-
-  const tiposControl = [
-    'Eliminación', 'Sustitución', 'Controles de Ingeniería',
-    'Controles Administrativos', 'EPP'
+    'Lesiones traumáticas', 'Enfermedades respiratorias', 'Enfermedades de la piel',
+    'Enfermedades musculoesqueléticas', 'Enfermedades cardiovasculares',
+    'Trastornos mentales', 'Pérdida auditiva', 'Trastornos visuales'
   ];
 
   const nivelesDeficiencia = [
-    { valor: 10, texto: 'Muy Alto (MA)' },
-    { valor: 6, texto: 'Alto (A)' },
-    { valor: 2, texto: 'Medio (M)' }
+    { valor: 10, texto: 'Muy Alto (MA): Se han detectado factores de riesgo significativos' },
+    { valor: 6, texto: 'Alto (A): Se han detectado algunos factores de riesgo importantes' },
+    { valor: 2, texto: 'Medio (M): Se han detectado factores de riesgo de menor importancia' },
+    { valor: 0, texto: 'Bajo (B): No se han detectado anomalías destacables' }
   ];
 
   const nivelesExposicion = [
-    { valor: 4, texto: 'Continua (EC)' },
-    { valor: 3, texto: 'Frecuente (EF)' },
-    { valor: 2, texto: 'Ocasional (EO)' },
-    { valor: 1, texto: 'Esporádica (EE)' }
+    { valor: 4, texto: 'Continua (EC): Continuamente. Varias veces en su jornada laboral con tiempo prolongado' },
+    { valor: 3, texto: 'Frecuente (EF): Varias veces en su jornada laboral aunque sea con tiempos cortos' },
+    { valor: 2, texto: 'Ocasional (EO): Alguna vez en su jornada laboral y por un período de tiempo corto' },
+    { valor: 1, texto: 'Esporádica (EE): Irregularmente' }
   ];
 
   const nivelesConsecuencia = [
@@ -122,15 +142,15 @@ const MatrizRiesgosMain = () => {
   }, []);
 
   useEffect(() => {
-    if (!formData.codigo_riesgo && activeTab === 'matriz') {
+    if (!formData.codigo_riesgo && vistaActiva === 'matriz') {
       generarCodigoRiesgo();
     }
-  }, [activeTab]);
+  }, [vistaActiva]);
 
   const cargarDatos = async () => {
     try {
       setLoading(true);
-      
+
       const [riesgosRes, controlesRes, evaluacionesRes] = await Promise.all([
         supabase.from('matriz_riesgos').select('*').order('nivel_riesgo', { ascending: false }),
         supabase.from('controles_riesgos').select('*').order('created_at', { ascending: false }),
@@ -155,102 +175,49 @@ const MatrizRiesgosMain = () => {
 
   const generarCodigoRiesgo = () => {
     const año = new Date().getFullYear();
-    const timestamp = Date.now().toString().slice(-4);
-    const codigo = `RG-${año}-${timestamp}`;
-    setFormData(prev => ({ ...prev, codigo_riesgo: codigo }));
+    const numero = String(riesgos.length + 1).padStart(3, '0');
+    setFormData({ ...formData, codigo_riesgo: `RG-${año}-${numero}` });
   };
 
-  // Funciones de cálculo según metodología GTC-45
-  const calcularNivelProbabilidad = (deficiencia, exposicion) => {
-    return deficiencia * exposicion;
+  const calcularNivelProbabilidad = (nd, ne) => nd * ne;
+
+  const interpretarProbabilidad = (np) => {
+    if (np >= 20) return 'Muy Alto (MA)';
+    if (np >= 8) return 'Alto (A)';
+    if (np >= 2) return 'Medio (M)';
+    return 'Bajo (B)';
   };
 
-  const interpretarProbabilidad = (nivelProbabilidad) => {
-    if (nivelProbabilidad >= 40) return 'Muy Alta (MA)';
-    if (nivelProbabilidad >= 20) return 'Alta (A)';
-    if (nivelProbabilidad >= 10) return 'Media (M)';
-    return 'Baja (B)';
+  const calcularNivelRiesgo = (np, nc) => np * nc;
+
+  const interpretarRiesgo = (nr) => {
+    if (nr >= 600) return 'I - No Aceptable';
+    if (nr >= 150) return 'II - No Aceptable o Aceptable con Control';
+    if (nr >= 40) return 'III - Mejorable';
+    return 'IV - Aceptable';
   };
 
-  const interpretarConsecuencia = (nivelConsecuencia) => {
-    if (nivelConsecuencia >= 100) return 'Mortal o Catastrófico (M)';
-    if (nivelConsecuencia >= 60) return 'Muy Grave (MG)';
-    if (nivelConsecuencia >= 25) return 'Grave (G)';
-    if (nivelConsecuencia >= 10) return 'Leve (L)';
-    return 'Sin Lesión (SL)';
-  };
-
-  const calcularNivelRiesgo = (probabilidad, consecuencia) => {
-    return probabilidad * consecuencia;
-  };
-
-  const interpretarRiesgo = (nivelRiesgo) => {
-    if (nivelRiesgo >= 4000) return 'Crítico (I)';
-    if (nivelRiesgo >= 600) return 'Alto (II)';
-    if (nivelRiesgo >= 150) return 'Medio (III)';
-    return 'Bajo (IV)';
-  };
-
-  const determinarAceptabilidad = (interpretacionRiesgo) => {
-    if (interpretacionRiesgo.includes('Crítico') || interpretacionRiesgo.includes('Alto')) {
-      return 'No Aceptable';
-    }
-    if (interpretacionRiesgo.includes('Medio')) {
-      return 'Aceptable con Control Específico';
-    }
+  const getAceptabilidadRiesgo = (interpretacion) => {
+    if (interpretacion.includes('No Aceptable')) return 'No Aceptable';
+    if (interpretacion.includes('Control')) return 'Aceptable con Control';
+    if (interpretacion.includes('Mejorable')) return 'Mejorable';
     return 'Aceptable';
-  };
-
-  const actualizarCalculosRiesgo = (newFormData) => {
-    const deficiencia = parseInt(newFormData.nivel_deficiencia) || 0;
-    const exposicion = parseInt(newFormData.nivel_exposicion) || 0;
-    const consecuencia = parseInt(newFormData.nivel_consecuencia) || 0;
-
-    const probabilidad = calcularNivelProbabilidad(deficiencia, exposicion);
-    const interpretacionProbabilidad = interpretarProbabilidad(probabilidad);
-    const interpretacionConsecuencia = interpretarConsecuencia(consecuencia);
-    const riesgo = calcularNivelRiesgo(probabilidad, consecuencia);
-    const interpretacionRiesgo = interpretarRiesgo(riesgo);
-    const aceptabilidad = determinarAceptabilidad(interpretacionRiesgo);
-
-    return {
-      ...newFormData,
-      nivel_probabilidad: probabilidad,
-      interpretacion_probabilidad: interpretacionProbabilidad,
-      interpretacion_consecuencia: interpretacionConsecuencia,
-      nivel_riesgo: riesgo,
-      interpretacion_riesgo: interpretacionRiesgo,
-      aceptabilidad_riesgo: aceptabilidad
-    };
   };
 
   const getEstadisticas = () => {
     const totalRiesgos = riesgos.length;
-    const riesgosCriticos = riesgos.filter(r => r.interpretacion_riesgo?.includes('Crítico')).length;
-    const riesgosAltos = riesgos.filter(r => r.interpretacion_riesgo?.includes('Alto')).length;
-    const riesgosNoAceptables = riesgos.filter(r => r.aceptabilidad_riesgo === 'No Aceptable').length;
+    const riesgosCriticos = riesgos.filter(r => r.nivel_riesgo >= 600).length;
+    const riesgosAltos = riesgos.filter(r => r.nivel_riesgo >= 150 && r.nivel_riesgo < 600).length;
+    const riesgosMedios = riesgos.filter(r => r.nivel_riesgo >= 40 && r.nivel_riesgo < 150).length;
+    const riesgosBajos = riesgos.filter(r => r.nivel_riesgo < 40).length;
 
-    return { totalRiesgos, riesgosCriticos, riesgosAltos, riesgosNoAceptables };
-  };
-
-  const getRiesgoColor = (interpretacion) => {
-    if (!interpretacion) return { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' };
-    
-    if (interpretacion.includes('Crítico')) return { bg: '#1e1b4b', color: '#ffffff', border: '#312e81' };
-    if (interpretacion.includes('Alto')) return { bg: '#fef2f2', color: '#dc2626', border: '#fecaca' };
-    if (interpretacion.includes('Medio')) return { bg: '#fef3c7', color: '#d97706', border: '#fde68a' };
-    if (interpretacion.includes('Bajo')) return { bg: '#f0fdf4', color: '#166534', border: '#bbf7d0' };
-    
-    return { bg: '#f8fafc', color: '#64748b', border: '#e2e8f0' };
-  };
-
-  const getAceptabilidadColor = (aceptabilidad) => {
-    switch (aceptabilidad) {
-      case 'No Aceptable': return { bg: '#fef2f2', color: '#dc2626' };
-      case 'Aceptable con Control': return { bg: '#fef3c7', color: '#d97706' };
-      case 'Aceptable': return { bg: '#f0fdf4', color: '#166534' };
-      default: return { bg: '#f8fafc', color: '#64748b' };
-    }
+    return {
+      totalRiesgos,
+      riesgosCriticos,
+      riesgosAltos,
+      riesgosMedios,
+      riesgosBajos
+    };
   };
 
   const handleSubmit = async (e) => {
@@ -310,37 +277,49 @@ const MatrizRiesgosMain = () => {
       setMensaje('La actividad es obligatoria');
       return;
     }
-    if (!formData.peligro_identificado.trim()) {
-      setMensaje('El peligro identificado es obligatorio');
-      return;
-    }
-    if (!formData.descripcion_riesgo.trim()) {
-      setMensaje('La descripción del riesgo es obligatoria');
-      return;
-    }
 
     try {
-      // Recalcular automáticamente antes de guardar
-      const riesgoData = actualizarCalculosRiesgo(formData);
+      // Cálculos automáticos GTC-45
+      const nivelProbabilidad = calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion);
+      const interpretacionProbabilidad = interpretarProbabilidad(nivelProbabilidad);
+      const nivelRiesgo = calcularNivelRiesgo(nivelProbabilidad, formData.nivel_consecuencia);
+      const interpretacionRiesgo = interpretarRiesgo(nivelRiesgo);
+      const aceptabilidadRiesgo = getAceptabilidadRiesgo(interpretacionRiesgo);
 
-      let result;
+      const riesgoToSave = {
+        ...formData,
+        efectos_salud: Array.isArray(formData.efectos_salud)
+          ? formData.efectos_salud
+          : formData.efectos_salud.split(',').map(e => e.trim()).filter(e => e),
+        nivel_probabilidad: nivelProbabilidad,
+        interpretacion_probabilidad: interpretacionProbabilidad,
+        nivel_riesgo: nivelRiesgo,
+        interpretacion_riesgo: interpretacionRiesgo,
+        aceptabilidad_riesgo: aceptabilidadRiesgo,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
       if (editingItem) {
-        result = await supabase
+        const { error } = await supabase
           .from('matriz_riesgos')
-          .update(riesgoData)
+          .update(riesgoToSave)
           .eq('id', editingItem.id);
+
+        if (error) throw error;
+        setMensaje('Riesgo actualizado exitosamente');
       } else {
-        result = await supabase
+        const { error } = await supabase
           .from('matriz_riesgos')
-          .insert([riesgoData]);
+          .insert([riesgoToSave]);
+
+        if (error) throw error;
+        setMensaje('Riesgo guardado exitosamente');
       }
 
-      if (result.error) throw result.error;
-
-      setMensaje(editingItem ? 'Riesgo actualizado exitosamente' : 'Riesgo identificado exitosamente');
       resetForm();
       await cargarDatos();
-      
+
     } catch (error) {
       console.error('Error:', error);
       setMensaje('Error al guardar el riesgo');
@@ -364,7 +343,7 @@ const MatrizRiesgosMain = () => {
     setEditingItem(null);
     setShowModal(false);
     setMensaje('');
-    if (activeTab === 'matriz') {
+    if (vistaActiva === 'matriz') {
       generarCodigoRiesgo();
     }
   };
@@ -372,7 +351,7 @@ const MatrizRiesgosMain = () => {
   const handleEdit = (item, tipo) => {
     setEditingItem(item);
     setCurrentForm(tipo);
-    
+
     if (tipo === 'riesgo') {
       setFormData({
         ...item,
@@ -381,7 +360,7 @@ const MatrizRiesgosMain = () => {
     } else if (tipo === 'control') {
       setControlData(item);
     }
-    
+
     setShowModal(true);
   };
 
@@ -390,7 +369,7 @@ const MatrizRiesgosMain = () => {
 
     try {
       const result = await supabase.from(tabla).delete().eq('id', id);
-      
+
       if (result.error) throw result.error;
 
       setMensaje('Elemento eliminado exitosamente');
@@ -402,6 +381,404 @@ const MatrizRiesgosMain = () => {
   };
 
   const estadisticas = getEstadisticas();
+
+  const renderContent = () => {
+    switch (vistaActiva) {
+      case 'matriz':
+        return renderMatrizView();
+      case 'controles':
+        return renderControlesView();
+      case 'evaluaciones':
+        return renderEvaluacionesView();
+      default:
+        return renderMatrizView();
+    }
+  };
+
+  const renderMatrizView = () => (
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      {/* Estadísticas Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600">Total Riesgos</p>
+              <p className="text-3xl font-bold text-blue-600">{estadisticas.totalRiesgos}</p>
+              <p className="text-xs text-slate-500 mt-1">registrados</p>
+            </div>
+            <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3">
+              <Icon name="FileText" size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600">Riesgos Críticos</p>
+              <p className="text-3xl font-bold text-red-600">{estadisticas.riesgosCriticos}</p>
+              <p className="text-xs text-slate-500 mt-1">requieren acción inmediata</p>
+            </div>
+            <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-3">
+              <Icon name="AlertTriangle" size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600">Riesgos Altos</p>
+              <p className="text-3xl font-bold text-orange-600">{estadisticas.riesgosAltos}</p>
+              <p className="text-xs text-slate-500 mt-1">necesitan control</p>
+            </div>
+            <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3">
+              <Icon name="AlertCircle" size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+
+        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-slate-600">Controles Activos</p>
+              <p className="text-3xl font-bold text-green-600">{controles.length}</p>
+              <p className="text-xs text-slate-500 mt-1">implementados</p>
+            </div>
+            <div className="bg-gradient-to-br from-green-500 to-green-600 rounded-lg p-3">
+              <Icon name="Shield" size={24} className="text-white" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Botón para agregar nuevo riesgo */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Matriz de Riesgos - Metodología GTC 45</h2>
+          <p className="text-slate-600 mt-1">Identificación, evaluación y control de riesgos laborales</p>
+        </div>
+        <button
+          onClick={() => { setCurrentForm('riesgo'); setShowModal(true); }}
+          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+        >
+          <Icon name="Plus" size={20} />
+          <span>Nuevo Riesgo</span>
+        </button>
+      </div>
+
+      {/* Tabla de riesgos */}
+      {riesgos.length > 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-red-500 to-red-600 text-white">
+                <tr>
+                  <th className="px-6 py-4 text-left font-semibold">Código</th>
+                  <th className="px-6 py-4 text-left font-semibold">Proceso</th>
+                  <th className="px-6 py-4 text-left font-semibold">Peligro</th>
+                  <th className="px-6 py-4 text-left font-semibold">Clasificación</th>
+                  <th className="px-6 py-4 text-left font-semibold">Nivel Riesgo</th>
+                  <th className="px-6 py-4 text-left font-semibold">Aceptabilidad</th>
+                  <th className="px-6 py-4 text-left font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {riesgos.map((riesgo, index) => (
+                  <tr key={riesgo.id || index} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4 font-medium text-slate-900">
+                      {riesgo.codigo_riesgo}
+                    </td>
+                    <td className="px-6 py-4 text-slate-700 max-w-xs truncate">
+                      {riesgo.proceso}
+                    </td>
+                    <td className="px-6 py-4 text-slate-700 max-w-xs truncate">
+                      {riesgo.peligro_identificado}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="inline-block bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {riesgo.clasificacion_peligro}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center space-x-2">
+                        <span className="font-bold text-lg text-red-600">
+                          {riesgo.nivel_riesgo || 'N/A'}
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          ({riesgo.interpretacion_riesgo})
+                        </span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        riesgo.aceptabilidad_riesgo === 'Aceptable' ? 'bg-green-100 text-green-800' :
+                        riesgo.aceptabilidad_riesgo === 'Aceptable con controles' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {riesgo.aceptabilidad_riesgo || 'Sin evaluar'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(riesgo, 'riesgo')}
+                          className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                          title="Editar"
+                        >
+                          <Icon name="Edit" size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(riesgo.id, 'matriz_riesgos')}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Icon name="Trash2" size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 py-16">
+          <div className="text-center">
+            <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <Icon name="AlertTriangle" size={32} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay riesgos registrados</h3>
+            <p className="text-slate-600 mb-6">Comienza creando tu primera evaluación de riesgo siguiendo la metodología GTC-45</p>
+            <button
+              onClick={() => { setCurrentForm('riesgo'); setShowModal(true); }}
+              className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
+            >
+              <Icon name="Plus" size={20} />
+              <span>Crear Primer Riesgo</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderControlesView = () => (
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Controles de Riesgo</h2>
+          <p className="text-slate-600 mt-1">Gestión de controles según jerarquía: Eliminación, Sustitución, Ingeniería, Administrativos, EPP</p>
+        </div>
+        <button
+          onClick={() => { setCurrentForm('control'); setShowModal(true); }}
+          className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
+        >
+          <Icon name="Plus" size={20} />
+          <span>Nuevo Control</span>
+        </button>
+      </div>
+
+      {controles.length > 0 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gradient-to-r from-orange-500 to-orange-600 text-white">
+                <tr>
+                  <th className="px-6 py-4 text-left font-semibold">Tipo Control</th>
+                  <th className="px-6 py-4 text-left font-semibold">Descripción</th>
+                  <th className="px-6 py-4 text-left font-semibold">Responsable</th>
+                  <th className="px-6 py-4 text-left font-semibold">Eficacia</th>
+                  <th className="px-6 py-4 text-left font-semibold">Acciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                {controles.map((control, index) => (
+                  <tr key={control.id || index} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
+                    <td className="px-6 py-4">
+                      <span className="inline-block bg-orange-100 text-orange-800 px-3 py-1 rounded-full text-sm font-medium">
+                        {control.tipo_control}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-900 max-w-xs truncate">
+                      {control.descripcion_control}
+                    </td>
+                    <td className="px-6 py-4 text-slate-700">
+                      {control.responsable || 'No asignado'}
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
+                        control.eficacia === 'Alta' ? 'bg-green-100 text-green-800' :
+                        control.eficacia === 'Media' ? 'bg-yellow-100 text-yellow-800' :
+                        'bg-red-100 text-red-800'
+                      }`}>
+                        {control.eficacia}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex space-x-2">
+                        <button
+                          onClick={() => handleEdit(control, 'control')}
+                          className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
+                          title="Editar"
+                        >
+                          <Icon name="Edit" size={16} />
+                        </button>
+                        <button
+                          onClick={() => handleDelete(control.id, 'controles_riesgos')}
+                          className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
+                          title="Eliminar"
+                        >
+                          <Icon name="Trash2" size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 py-16">
+          <div className="text-center">
+            <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <Icon name="Shield" size={32} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay controles registrados</h3>
+            <p className="text-slate-600 mb-6">Comienza agregando controles para gestionar los riesgos identificados</p>
+            <button
+              onClick={() => { setCurrentForm('control'); setShowModal(true); }}
+              className="bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
+            >
+              <Icon name="Plus" size={20} />
+              <span>Agregar Primer Control</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+
+  const renderEvaluacionesView = () => (
+    <div className="max-w-7xl mx-auto px-6 py-8 space-y-8">
+      <div className="flex justify-between items-center">
+        <div>
+          <h2 className="text-2xl font-bold text-slate-900">Evaluaciones de Riesgo</h2>
+          <p className="text-slate-600 mt-1">Historial y seguimiento de evaluaciones realizadas con metodología GTC 45</p>
+        </div>
+      </div>
+
+      {evaluaciones.length > 0 ? (
+        <div className="space-y-6">
+          {evaluaciones.map((evaluacion, index) => (
+            <div key={evaluacion.id || index} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center space-x-3">
+                  <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
+                    <Icon name="BarChart3" size={20} className="text-purple-600" />
+                  </div>
+                  <div>
+                    <h4 className="text-lg font-semibold text-slate-900">
+                      {evaluacion.codigo_riesgo || `Evaluación ${index + 1}`}
+                    </h4>
+                    <p className="text-slate-600 text-sm">
+                      {evaluacion.fecha_evaluacion ? new Date(evaluacion.fecha_evaluacion).toLocaleDateString() : 'Sin fecha'}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center space-x-2">
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    evaluacion.aceptabilidad_riesgo === 'Aceptable' ? 'bg-green-100 text-green-800' :
+                    evaluacion.aceptabilidad_riesgo === 'Aceptable con controles' ? 'bg-yellow-100 text-yellow-800' :
+                    'bg-red-100 text-red-800'
+                  }`}>
+                    {evaluacion.aceptabilidad_riesgo || 'Sin evaluar'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-blue-600">
+                    {evaluacion.nivel_probabilidad || 'N/A'}
+                  </div>
+                  <div className="text-xs text-slate-600">Nivel Probabilidad</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-orange-600">
+                    {evaluacion.nivel_consecuencia || 'N/A'}
+                  </div>
+                  <div className="text-xs text-slate-600">Nivel Consecuencia</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                  <div className="text-2xl font-bold text-red-600">
+                    {evaluacion.nivel_riesgo || 'N/A'}
+                  </div>
+                  <div className="text-xs text-slate-600">Nivel Riesgo</div>
+                </div>
+                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                  <div className="text-sm font-semibold text-slate-900">
+                    {evaluacion.interpretacion_riesgo || 'Sin interpretar'}
+                  </div>
+                  <div className="text-xs text-slate-600">Interpretación</div>
+                </div>
+              </div>
+
+              <div className="border-t border-slate-200 pt-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="font-medium text-slate-700">Proceso:</span>
+                    <span className="ml-2 text-slate-900">{evaluacion.proceso || 'No especificado'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-700">Área:</span>
+                    <span className="ml-2 text-slate-900">{evaluacion.area || 'No especificada'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-700">Peligro:</span>
+                    <span className="ml-2 text-slate-900">{evaluacion.peligro_identificado || 'No identificado'}</span>
+                  </div>
+                  <div>
+                    <span className="font-medium text-slate-700">Clasificación:</span>
+                    <span className="ml-2 text-slate-900">{evaluacion.clasificacion_peligro || 'Sin clasificar'}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex justify-end mt-4 pt-4 border-t border-slate-200">
+                <button
+                  onClick={() => handleEdit(evaluacion, 'riesgo')}
+                  className="text-purple-600 hover:text-purple-800 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm flex items-center space-x-2"
+                >
+                  <Icon name="Eye" size={16} />
+                  <span>Ver Detalles</span>
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-slate-200 py-16">
+          <div className="text-center">
+            <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
+              <Icon name="BarChart3" size={32} className="text-slate-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay evaluaciones registradas</h3>
+            <p className="text-slate-600 mb-6">Las evaluaciones aparecerán aquí una vez que registres riesgos en la matriz</p>
+            <button
+              onClick={() => setVistaActiva('matriz')}
+              className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
+            >
+              <Icon name="Plus" size={20} />
+              <span>Ir a Matriz de Riesgos</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 
   if (loading) {
     return (
@@ -424,490 +801,71 @@ const MatrizRiesgosMain = () => {
         <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-4">
-              <div className="bg-gradient-to-br from-red-700 to-red-700 rounded-2xl p-3 shadow-lg">
+              <div className="bg-gradient-to-br from-red-600 to-red-700 rounded-2xl p-3 shadow-lg">
                 <Icon name="AlertTriangle" size={32} className="text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-700 to-red-700 bg-clip-text text-transparent">
-                  Matriz de Riesgos SST
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-600 to-red-700 bg-clip-text text-transparent">
+                  Sistema de Matriz de Riesgos SST
                 </h1>
                 <p className="text-slate-600 font-medium">
-                  Identificación • Evaluación • Control de Riesgos • Metodología GTC 45
+                  Identificación • Evaluación • Control de Riesgos • Metodología GTC 45 • Jerarquía de Controles
                 </p>
               </div>
             </div>
 
             <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
-              <div className="text-right">
-                <p className="font-medium">Total de Riesgos</p>
-                <p className="text-2xl font-bold text-red-600">{estadisticas.totalRiesgos}</p>
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                <span className="font-medium">Sistema de Riesgos Activo</span>
               </div>
+              <div className="w-px h-6 bg-slate-300"></div>
+              <span className="font-medium">
+                {new Date().toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
             </div>
           </div>
         </div>
       </div>
-
-
-      {/* Estadísticas Dashboard */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Total Riesgos</p>
-                <p className="text-3xl font-bold text-blue-600">{estadisticas.totalRiesgos}</p>
-                <p className="text-xs text-slate-500 mt-1">registrados</p>
-              </div>
-              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3">
-                <Icon name="FileText" size={24} className="text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Riesgos Críticos</p>
-                <p className="text-3xl font-bold text-indigo-900">{estadisticas.riesgosCriticos}</p>
-                <p className="text-xs text-slate-500 mt-1">requieren acción inmediata</p>
-              </div>
-              <div className="bg-gradient-to-br from-indigo-800 to-indigo-900 rounded-lg p-3">
-                <Icon name="AlertTriangle" size={24} className="text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">Riesgos Altos</p>
-                <p className="text-3xl font-bold text-red-600">{estadisticas.riesgosAltos}</p>
-                <p className="text-xs text-slate-500 mt-1">prioritarios</p>
-              </div>
-              <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-3">
-                <Icon name="AlertCircle" size={24} className="text-white" />
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-sm font-medium text-slate-600">No Aceptables</p>
-                <p className="text-3xl font-bold text-orange-600">{estadisticas.riesgosNoAceptables}</p>
-                <p className="text-xs text-slate-500 mt-1">requieren control</p>
-              </div>
-              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3">
-                <Icon name="XCircle" size={24} className="text-white" />
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {mensaje && (
-        <div className="max-w-7xl mx-auto px-6">
-          <div className={`${
-            mensaje.includes('Error')
-              ? 'bg-red-50 border-red-200 text-red-800'
-              : 'bg-green-50 border-green-200 text-green-800'
-          } border rounded-lg p-4 mb-6 flex items-center space-x-3`}>
-            <Icon
-              name={mensaje.includes('Error') ? 'AlertCircle' : 'CheckCircle'}
-              size={20}
-              className={mensaje.includes('Error') ? 'text-red-500' : 'text-green-500'}
-            />
-            <span className="font-medium">{mensaje}</span>
-          </div>
-        </div>
-      )}
 
       {/* Navigation Tabs */}
       <div className="bg-white border-b border-slate-200">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex space-x-1">
-            {[
-              { key: 'matriz', label: 'Matriz de Riesgos', icon: 'AlertTriangle', color: 'from-red-600 to-red-700' },
-              { key: 'controles', label: 'Controles', icon: 'Shield', color: 'from-red-700 to-red-800' },
-              { key: 'evaluaciones', label: 'Evaluaciones', icon: 'BarChart3', color: 'from-orange-600 to-red-600' }
-            ].map(tab => (
+            {vistas.map(vista => (
               <button
-                key={tab.key}
-                onClick={() => setActiveTab(tab.key)}
+                key={vista.id}
+                onClick={() => setVistaActiva(vista.id)}
                 className={`
                   flex items-center space-x-3 px-6 py-4 rounded-t-xl font-semibold transition-all duration-300
-                  ${
-                    activeTab === tab.key
-                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105`
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  ${vistaActiva === vista.id
+                    ? `bg-gradient-to-r ${vista.color} text-white shadow-lg transform scale-105`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
                   }
                 `}
               >
-                <Icon
-                  name={tab.icon}
-                  size={20}
-                  className={activeTab === tab.key ? 'text-white' : 'text-slate-500'}
-                />
-                <span>{tab.label}</span>
-                {activeTab === tab.key && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
-                )}
+                <Icon name={vista.icon} size={20} />
+                <div className="text-left">
+                  <div className="font-semibold">{vista.label}</div>
+                  <div className={`text-xs mt-1 ${vistaActiva === vista.id ? 'text-white/80' : 'text-slate-500'}`}>
+                    {vista.description}
+                  </div>
+                </div>
               </button>
             ))}
           </div>
         </div>
       </div>
 
-      {/* Botón Nuevo */}
-      <div className="max-w-7xl mx-auto px-6 py-6">
-        <button
-          onClick={() => {
-            const formMap = { 'matriz': 'riesgo', 'controles': 'control', 'evaluaciones': 'evaluacion' };
-            setCurrentForm(formMap[activeTab]);
-            setShowModal(true);
-          }}
-          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
-        >
-          <Icon name="Plus" size={20} className="text-white" />
-          <span>
-            {activeTab === 'matriz' ? 'Nuevo Riesgo' :
-             activeTab === 'controles' ? 'Nuevo Control' : 'Nueva Evaluación'}
-          </span>
-        </button>
-      </div>
+      {/* Content */}
+      {renderContent()}
 
-      {/* Contenido por Tab */}
-      <div className="max-w-7xl mx-auto px-6 pb-8">
-        {activeTab === 'matriz' && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200">
-            {riesgos.length === 0 ? (
-              <div className="text-center py-20">
-                <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
-                  <Icon name="AlertTriangle" size={32} className="text-slate-400" />
-                </div>
-                <h3 className="text-xl font-semibold text-slate-900 mb-2">No hay riesgos identificados</h3>
-                <p className="text-slate-600 mb-6">Comienza la identificación del primer riesgo</p>
-                <button
-                  onClick={() => {
-                    setCurrentForm('riesgo');
-                    setShowModal(true);
-                  }}
-                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
-                >
-                  Identificar Primer Riesgo
-                </button>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-slate-50 border-b border-slate-200">
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Riesgo</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Proceso</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Clasificación</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Nivel de Riesgo</th>
-                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Aceptabilidad</th>
-                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {riesgos.map((riesgo) => {
-                      const riesgoColor = getRiesgoColor(riesgo.interpretacion_riesgo);
-                      const aceptabilidadColor = getAceptabilidadColor(riesgo.aceptabilidad_riesgo);
-                      return (
-                        <tr key={riesgo.id} className="hover:bg-slate-50 transition-colors duration-200">
-                          <td className="px-6 py-4">
-                            <div>
-                              <div className="font-semibold text-slate-900 mb-1">
-                                {riesgo.codigo_riesgo}
-                              </div>
-                              <div className="text-sm text-slate-600">
-                                {riesgo.peligro_identificado}
-                              </div>
-                            </div>
-                          </td>
-                          <td className="px-6 py-4 text-slate-700">{riesgo.proceso}</td>
-                          <td className="px-6 py-4 text-slate-700">{riesgo.clasificacion_peligro}</td>
-                          <td className="px-6 py-4">
-                            <span
-                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                              style={{
-                                backgroundColor: riesgoColor.bg,
-                                color: riesgoColor.color,
-                                border: `1px solid ${riesgoColor.border}`
-                              }}
-                            >
-                              {riesgo.interpretacion_riesgo || 'No Evaluado'}
-                            </span>
-                            <div className="text-xs text-slate-500 mt-1">
-                              NR: {riesgo.nivel_riesgo || 'N/A'}
-                            </div>
-                          </td>
-                          <td className="px-6 py-4">
-                            <span
-                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
-                              style={{
-                                backgroundColor: aceptabilidadColor.bg,
-                                color: aceptabilidadColor.color
-                              }}
-                            >
-                              {riesgo.aceptabilidad_riesgo || 'No Evaluado'}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex justify-center space-x-2">
-                              <button
-                                onClick={() => handleEdit(riesgo, 'riesgo')}
-                                className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
-                                title="Editar"
-                              >
-                                <Icon name="Edit" size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(riesgo.id, 'matriz_riesgos')}
-                                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
-                                title="Eliminar"
-                              >
-                                <Icon name="Trash2" size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Contenido simplificado para otros tabs */}
-        {activeTab === 'controles' && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-4">
-                <Icon name="Shield" size={24} className="text-green-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                Controles de Riesgo - {controles.length} controles
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Jerarquía de controles: Eliminación, Sustitución, Ingeniería, Administrativos, EPP
-              </p>
-
-              <div className="mb-6">
-                <button
-                  onClick={() => { setCurrentForm('control'); setShowModal(true); }}
-                  className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2"
-                >
-                  <Icon name="Plus" size={20} />
-                  <span>Nuevo Control</span>
-                </button>
-              </div>
-
-              {controles.length > 0 ? (
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse bg-white rounded-lg overflow-hidden shadow-sm">
-                    <thead className="bg-gradient-to-r from-red-500 to-red-600 text-white">
-                      <tr>
-                        <th className="px-6 py-4 text-left font-semibold">Tipo Control</th>
-                        <th className="px-6 py-4 text-left font-semibold">Descripción</th>
-                        <th className="px-6 py-4 text-left font-semibold">Responsable</th>
-                        <th className="px-6 py-4 text-left font-semibold">Eficacia</th>
-                        <th className="px-6 py-4 text-left font-semibold">Acciones</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {controles.map((control, index) => (
-                        <tr key={control.id || index} className="border-t border-slate-200 hover:bg-slate-50 transition-colors">
-                          <td className="px-6 py-4">
-                            <span className="inline-block bg-red-100 text-red-800 px-3 py-1 rounded-full text-sm font-medium">
-                              {control.tipo_control}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-slate-900 max-w-xs truncate">
-                            {control.descripcion_control}
-                          </td>
-                          <td className="px-6 py-4 text-slate-700">
-                            {control.responsable || 'No asignado'}
-                          </td>
-                          <td className="px-6 py-4">
-                            <span className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                              control.eficacia === 'Alta' ? 'bg-green-100 text-green-800' :
-                              control.eficacia === 'Media' ? 'bg-yellow-100 text-yellow-800' :
-                              'bg-red-100 text-red-800'
-                            }`}>
-                              {control.eficacia}
-                            </span>
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="flex space-x-2">
-                              <button
-                                onClick={() => handleEdit(control, 'control')}
-                                className="text-blue-600 hover:text-blue-800 p-2 rounded-lg hover:bg-blue-50 transition-colors"
-                                title="Editar"
-                              >
-                                <Icon name="Edit" size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(control.id, 'controles_riesgos')}
-                                className="text-red-600 hover:text-red-800 p-2 rounded-lg hover:bg-red-50 transition-colors"
-                                title="Eliminar"
-                              >
-                                <Icon name="Trash2" size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <Icon name="Shield" size={32} className="text-slate-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay controles registrados</h3>
-                  <p className="text-slate-600 mb-6">Comienza agregando controles para gestionar los riesgos identificados</p>
-                  <button
-                    onClick={() => { setCurrentForm('control'); setShowModal(true); }}
-                    className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
-                  >
-                    <Icon name="Plus" size={20} />
-                    <span>Agregar Primer Control</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {activeTab === 'evaluaciones' && (
-          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
-            <div className="text-center">
-              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-4">
-                <Icon name="BarChart3" size={24} className="text-purple-600" />
-              </div>
-              <h3 className="text-xl font-semibold text-slate-900 mb-2">
-                Evaluaciones de Riesgo - {evaluaciones.length} evaluaciones
-              </h3>
-              <p className="text-slate-600 mb-6">
-                Historial de evaluaciones con metodología GTC 45
-              </p>
-
-              {evaluaciones.length > 0 ? (
-                <div className="space-y-6">
-                  {evaluaciones.map((evaluacion, index) => (
-                    <div key={evaluacion.id || index} className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm hover:shadow-md transition-shadow">
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center space-x-3">
-                          <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center">
-                            <Icon name="BarChart3" size={20} className="text-purple-600" />
-                          </div>
-                          <div>
-                            <h4 className="text-lg font-semibold text-slate-900">
-                              {evaluacion.codigo_riesgo || `Evaluación ${index + 1}`}
-                            </h4>
-                            <p className="text-slate-600 text-sm">
-                              {evaluacion.fecha_evaluacion ? new Date(evaluacion.fecha_evaluacion).toLocaleDateString() : 'Sin fecha'}
-                            </p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                            evaluacion.aceptabilidad_riesgo === 'Aceptable' ? 'bg-green-100 text-green-800' :
-                            evaluacion.aceptabilidad_riesgo === 'Aceptable con controles' ? 'bg-yellow-100 text-yellow-800' :
-                            'bg-red-100 text-red-800'
-                          }`}>
-                            {evaluacion.aceptabilidad_riesgo || 'Sin evaluar'}
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
-                        <div className="bg-slate-50 rounded-lg p-3 text-center">
-                          <div className="text-2xl font-bold text-blue-600">
-                            {evaluacion.nivel_probabilidad || 'N/A'}
-                          </div>
-                          <div className="text-xs text-slate-600">Nivel Probabilidad</div>
-                        </div>
-                        <div className="bg-slate-50 rounded-lg p-3 text-center">
-                          <div className="text-2xl font-bold text-orange-600">
-                            {evaluacion.nivel_consecuencia || 'N/A'}
-                          </div>
-                          <div className="text-xs text-slate-600">Nivel Consecuencia</div>
-                        </div>
-                        <div className="bg-slate-50 rounded-lg p-3 text-center">
-                          <div className="text-2xl font-bold text-red-600">
-                            {evaluacion.nivel_riesgo || 'N/A'}
-                          </div>
-                          <div className="text-xs text-slate-600">Nivel Riesgo</div>
-                        </div>
-                        <div className="bg-slate-50 rounded-lg p-3 text-center">
-                          <div className="text-sm font-semibold text-slate-900">
-                            {evaluacion.interpretacion_riesgo || 'Sin interpretar'}
-                          </div>
-                          <div className="text-xs text-slate-600">Interpretación</div>
-                        </div>
-                      </div>
-
-                      <div className="border-t border-slate-200 pt-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div>
-                            <span className="font-medium text-slate-700">Proceso:</span>
-                            <span className="ml-2 text-slate-900">{evaluacion.proceso || 'No especificado'}</span>
-                          </div>
-                          <div>
-                            <span className="font-medium text-slate-700">Área:</span>
-                            <span className="ml-2 text-slate-900">{evaluacion.area || 'No especificada'}</span>
-                          </div>
-                          <div>
-                            <span className="font-medium text-slate-700">Peligro:</span>
-                            <span className="ml-2 text-slate-900">{evaluacion.peligro_identificado || 'No identificado'}</span>
-                          </div>
-                          <div>
-                            <span className="font-medium text-slate-700">Clasificación:</span>
-                            <span className="ml-2 text-slate-900">{evaluacion.clasificacion_peligro || 'Sin clasificar'}</span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="flex justify-end mt-4 pt-4 border-t border-slate-200">
-                        <button
-                          onClick={() => handleEdit(evaluacion, 'riesgo')}
-                          className="text-purple-600 hover:text-purple-800 px-4 py-2 rounded-lg hover:bg-purple-50 transition-colors font-medium text-sm flex items-center space-x-2"
-                        >
-                          <Icon name="Eye" size={16} />
-                          <span>Ver Detalles</span>
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-4">
-                    <Icon name="BarChart3" size={32} className="text-slate-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-slate-900 mb-2">No hay evaluaciones registradas</h3>
-                  <p className="text-slate-600 mb-6">Las evaluaciones aparecerán aquí una vez que registres riesgos en la matriz</p>
-                  <button
-                    onClick={() => setActiveTab('matriz')}
-                    className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-6 py-3 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 flex items-center space-x-2 mx-auto"
-                  >
-                    <Icon name="Plus" size={20} />
-                    <span>Ir a Matriz de Riesgos</span>
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Modal modernizado */}
+      {/* Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
@@ -927,7 +885,10 @@ const MatrizRiesgosMain = () => {
                 </button>
               </div>
               <p className="text-red-100 mt-2">
-                Los cálculos de nivel de riesgo se realizan automáticamente según la metodología colombiana.
+                {currentForm === 'control'
+                  ? 'Gestión de controles según jerarquía de prevención'
+                  : 'Los cálculos de nivel de riesgo se realizan automáticamente según la metodología colombiana.'
+                }
               </p>
             </div>
 
@@ -1056,422 +1017,223 @@ const MatrizRiesgosMain = () => {
                   </>
                 ) : (
                   <>
-                    {/* Formulario de Riesgo existente */}
-                {/* Información Básica */}
-                <div className="bg-slate-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="FileText" size={20} className="text-red-600" />
-                    <span>Información Básica</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Código del Riesgo *
-                      </label>
-                      <div className="flex space-x-2">
-                        <input
-                          type="text"
-                          value={formData.codigo_riesgo}
-                          onChange={(e) => setFormData({...formData, codigo_riesgo: e.target.value})}
-                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                          placeholder="RG-2024-001"
-                          required
-                        />
-                        <button
-                          type="button"
-                          onClick={generarCodigoRiesgo}
-                          className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                          title="Generar código automático"
-                        >
-                          <Icon name="RefreshCw" size={16} />
-                        </button>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Versión
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.version}
-                        onChange={(e) => setFormData({...formData, version: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Fecha de Evaluación *
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.fecha_evaluacion}
-                        onChange={(e) => setFormData({...formData, fecha_evaluacion: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Identificación del Proceso */}
-                <div className="bg-blue-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="Workflow" size={20} className="text-blue-600" />
-                    <span>Identificación del Proceso</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Proceso *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.proceso}
-                        onChange={(e) => setFormData({...formData, proceso: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Producción, Mantenimiento, Logística"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Actividad *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.actividad}
-                        onChange={(e) => setFormData({...formData, actividad: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Operación de maquinaria, Soldadura"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Tarea Específica
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.tarea}
-                        onChange={(e) => setFormData({...formData, tarea: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Corte de material, Inspección visual"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Área
-                      </label>
-                      <select
-                        value={formData.area}
-                        onChange={(e) => setFormData({...formData, area: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                      >
-                        <option value="">Seleccionar área</option>
-                        {areas.map(area => (
-                          <option key={area} value={area}>{area}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Puesto de Trabajo
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.puesto_trabajo}
-                        onChange={(e) => setFormData({...formData, puesto_trabajo: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                        placeholder="Ej: Operario de máquina, Soldador, Supervisor"
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Identificación de Peligros */}
-                <div className="bg-orange-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="AlertTriangle" size={20} className="text-orange-600" />
-                    <span>Identificación de Peligros</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Peligro Identificado *
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.peligro_identificado}
-                        onChange={(e) => setFormData({...formData, peligro_identificado: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                        placeholder="Ej: Ruido, Vapores químicos, Superficies calientes"
-                        required
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Clasificación del Peligro *
-                      </label>
-                      <select
-                        value={formData.clasificacion_peligro}
-                        onChange={(e) => setFormData({...formData, clasificacion_peligro: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
-                        required
-                      >
-                        {clasificacionesPeligro.map(tipo => (
-                          <option key={tipo} value={tipo}>{tipo}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Descripción del Riesgo *
-                      </label>
-                      <textarea
-                        value={formData.descripcion_riesgo}
-                        onChange={(e) => setFormData({...formData, descripcion_riesgo: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 h-20 resize-none"
-                        placeholder="Describe el riesgo asociado al peligro identificado..."
-                        required
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Evaluación de Exposición */}
-                <div className="bg-purple-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="Users" size={20} className="text-purple-600" />
-                    <span>Evaluación de Exposición</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Personas Expuestas
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.personas_expuestas}
-                        onChange={(e) => setFormData({...formData, personas_expuestas: parseInt(e.target.value) || 1})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                        min="1"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Tiempo de Exposición (horas)
-                      </label>
-                      <input
-                        type="number"
-                        value={formData.tiempo_exposicion_horas}
-                        onChange={(e) => setFormData({...formData, tiempo_exposicion_horas: parseFloat(e.target.value) || 8})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
-                        step="0.5"
-                        min="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Tipo de Exposición
-                      </label>
-                      <div className="flex items-center space-x-4 pt-2">
-                        <label className="flex items-center">
+                    {/* Formulario de Riesgo simplificado - solo campos básicos por espacio */}
+                    <div className="bg-slate-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="FileText" size={20} className="text-red-600" />
+                        <span>Información Básica</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Código del Riesgo *
+                          </label>
                           <input
-                            type="radio"
-                            name="rutinario"
-                            checked={formData.rutinario}
-                            onChange={() => setFormData({...formData, rutinario: true})}
-                            className="text-purple-600 focus:ring-purple-500"
+                            type="text"
+                            value={formData.codigo_riesgo}
+                            onChange={(e) => setFormData({...formData, codigo_riesgo: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="RG-2024-001"
+                            required
                           />
-                          <span className="ml-2 text-sm">Rutinario</span>
-                        </label>
-                        <label className="flex items-center">
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Proceso *
+                          </label>
                           <input
-                            type="radio"
-                            name="rutinario"
-                            checked={!formData.rutinario}
-                            onChange={() => setFormData({...formData, rutinario: false})}
-                            className="text-purple-600 focus:ring-purple-500"
+                            type="text"
+                            value={formData.proceso}
+                            onChange={(e) => setFormData({...formData, proceso: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Ej: Producción, Mantenimiento..."
+                            required
                           />
-                          <span className="ml-2 text-sm">No Rutinario</span>
-                        </label>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Actividad *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.actividad}
+                            onChange={(e) => setFormData({...formData, actividad: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Actividad específica..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Peligro Identificado *
+                          </label>
+                          <input
+                            type="text"
+                            value={formData.peligro_identificado}
+                            onChange={(e) => setFormData({...formData, peligro_identificado: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                            placeholder="Descripción del peligro..."
+                            required
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Clasificación del Peligro
+                          </label>
+                          <select
+                            value={formData.clasificacion_peligro}
+                            onChange={(e) => setFormData({...formData, clasificacion_peligro: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            {clasificacionesPeligro.map(clasificacion => (
+                              <option key={clasificacion} value={clasificacion}>
+                                {clasificacion}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Área
+                          </label>
+                          <select
+                            value={formData.area}
+                            onChange={(e) => setFormData({...formData, area: e.target.value})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          >
+                            {areas.map(area => (
+                              <option key={area} value={area}>
+                                {area}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Evaluación del Riesgo - GTC 45 */}
-                <div className="bg-red-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="Calculator" size={20} className="text-red-600" />
-                    <span>Evaluación del Riesgo (GTC-45)</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nivel de Deficiencia (ND)
-                      </label>
-                      <select
-                        value={formData.nivel_deficiencia}
-                        onChange={(e) => {
-                          const newFormData = {...formData, nivel_deficiencia: parseInt(e.target.value)};
-                          const updatedData = actualizarCalculosRiesgo(newFormData);
-                          setFormData(updatedData);
-                        }}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        {nivelesDeficiencia.map(nivel => (
-                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nivel de Exposición (NE)
-                      </label>
-                      <select
-                        value={formData.nivel_exposicion}
-                        onChange={(e) => {
-                          const newFormData = {...formData, nivel_exposicion: parseInt(e.target.value)};
-                          const updatedData = actualizarCalculosRiesgo(newFormData);
-                          setFormData(updatedData);
-                        }}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        {nivelesExposicion.map(nivel => (
-                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Nivel de Consecuencia (NC)
-                      </label>
-                      <select
-                        value={formData.nivel_consecuencia}
-                        onChange={(e) => {
-                          const newFormData = {...formData, nivel_consecuencia: parseInt(e.target.value)};
-                          const updatedData = actualizarCalculosRiesgo(newFormData);
-                          setFormData(updatedData);
-                        }}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
-                      >
-                        {nivelesConsecuencia.map(nivel => (
-                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
+                    {/* Evaluación GTC-45 */}
+                    <div className="bg-blue-50 rounded-xl p-6">
+                      <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                        <Icon name="Calculator" size={20} className="text-blue-600" />
+                        <span>Evaluación GTC-45</span>
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Deficiencia
+                          </label>
+                          <select
+                            value={formData.nivel_deficiencia}
+                            onChange={(e) => setFormData({...formData, nivel_deficiencia: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesDeficiencia.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Exposición
+                          </label>
+                          <select
+                            value={formData.nivel_exposicion}
+                            onChange={(e) => setFormData({...formData, nivel_exposicion: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesExposicion.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-2">
+                            Nivel de Consecuencia
+                          </label>
+                          <select
+                            value={formData.nivel_consecuencia}
+                            onChange={(e) => setFormData({...formData, nivel_consecuencia: Number(e.target.value)})}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                          >
+                            {nivelesConsecuencia.map(nivel => (
+                              <option key={nivel.valor} value={nivel.valor}>
+                                {nivel.texto}
+                              </option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
 
-                  {/* Resultados Automáticos */}
-                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                    <div className="bg-white rounded-lg p-4 border border-slate-200">
-                      <div className="text-sm text-slate-600">Nivel de Probabilidad</div>
-                      <div className="text-xl font-bold text-slate-900">{formData.nivel_probabilidad || 0}</div>
-                      <div className="text-xs text-slate-500">{formData.interpretacion_probabilidad}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-slate-200">
-                      <div className="text-sm text-slate-600">Nivel de Riesgo</div>
-                      <div className="text-xl font-bold text-slate-900">{formData.nivel_riesgo || 0}</div>
-                      <div className="text-xs text-slate-500">{formData.interpretacion_riesgo}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-slate-200">
-                      <div className="text-sm text-slate-600">Interpretación</div>
-                      <div className="text-sm font-semibold text-slate-900">{formData.interpretacion_consecuencia}</div>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-slate-200">
-                      <div className="text-sm text-slate-600">Aceptabilidad</div>
-                      <div className={`text-sm font-semibold ${
-                        formData.aceptabilidad_riesgo === 'No Aceptable' ? 'text-red-600' :
-                        formData.aceptabilidad_riesgo?.includes('Control') ? 'text-yellow-600' : 'text-green-600'
-                      }`}>
-                        {formData.aceptabilidad_riesgo}
+                      {/* Cálculos automáticos */}
+                      <div className="mt-6 p-4 bg-white rounded-lg border border-blue-200">
+                        <h4 className="text-sm font-semibold text-slate-900 mb-3">Cálculos Automáticos</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+                          <div>
+                            <div className="text-2xl font-bold text-blue-600">
+                              {calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion)}
+                            </div>
+                            <div className="text-xs text-slate-600">Nivel Probabilidad</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">
+                              {interpretarProbabilidad(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion))}
+                            </div>
+                            <div className="text-xs text-slate-600">Interpretación</div>
+                          </div>
+                          <div>
+                            <div className="text-2xl font-bold text-red-600">
+                              {calcularNivelRiesgo(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion), formData.nivel_consecuencia)}
+                            </div>
+                            <div className="text-xs text-slate-600">Nivel Riesgo</div>
+                          </div>
+                          <div>
+                            <div className="text-sm font-semibold text-slate-900">
+                              {interpretarRiesgo(calcularNivelRiesgo(calcularNivelProbabilidad(formData.nivel_deficiencia, formData.nivel_exposicion), formData.nivel_consecuencia))}
+                            </div>
+                            <div className="text-xs text-slate-600">Aceptabilidad</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </div>
 
-                {/* Información Adicional */}
-                <div className="bg-green-50 rounded-xl p-6">
-                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
-                    <Icon name="Settings" size={20} className="text-green-600" />
-                    <span>Información Adicional</span>
-                  </h3>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Responsable de Implementación
-                      </label>
-                      <input
-                        type="text"
-                        value={formData.responsable_implementacion}
-                        onChange={(e) => setFormData({...formData, responsable_implementacion: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                        placeholder="Nombre del responsable"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Fecha de Implementación
-                      </label>
-                      <input
-                        type="date"
-                        value={formData.fecha_implementacion}
-                        onChange={(e) => setFormData({...formData, fecha_implementacion: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Estado del Riesgo
-                      </label>
-                      <select
-                        value={formData.estado_riesgo}
-                        onChange={(e) => setFormData({...formData, estado_riesgo: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                    {/* Botones */}
+                    <div className="flex justify-end space-x-4 pt-6 border-t border-slate-200">
+                      <button
+                        type="button"
+                        onClick={resetForm}
+                        className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
                       >
-                        {estadosRiesgo.map(estado => (
-                          <option key={estado} value={estado} className="capitalize">
-                            {estado.charAt(0).toUpperCase() + estado.slice(1)}
-                          </option>
-                        ))}
-                      </select>
+                        Cancelar
+                      </button>
+                      <button
+                        type="submit"
+                        className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
+                      >
+                        {editingItem ? 'Actualizar' : 'Guardar'} Riesgo
+                      </button>
                     </div>
-                    <div className="md:col-span-2">
-                      <label className="block text-sm font-medium text-slate-700 mb-2">
-                        Observaciones
-                      </label>
-                      <textarea
-                        value={formData.observaciones}
-                        onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 h-20 resize-none"
-                        placeholder="Observaciones adicionales sobre el riesgo..."
-                      />
-                    </div>
-                  </div>
-                </div>
-
-              {/* Footer del formulario */}
-              <div className="flex justify-end space-x-4 p-6 bg-slate-50 border-t border-slate-200">
-                <button
-                  type="button"
-                  onClick={resetForm}
-                  className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
-                >
-                  {editingItem ? 'Actualizar' : 'Guardar'} Riesgo
-                </button>
-              </div>
                   </>
                 )}
               </div>
             </form>
           </div>
+        </div>
+      )}
+
+      {/* Mensaje de estado */}
+      {mensaje && (
+        <div className="fixed bottom-4 right-4 bg-blue-500 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+          {mensaje}
+          <button
+            onClick={() => setMensaje('')}
+            className="ml-2 text-white/80 hover:text-white"
+          >
+            ×
+          </button>
         </div>
       )}
     </div>
