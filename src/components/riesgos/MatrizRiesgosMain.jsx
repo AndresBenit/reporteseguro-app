@@ -15,23 +15,49 @@ const MatrizRiesgosMain = () => {
 
   const [formData, setFormData] = useState({
     codigo_riesgo: '',
+    version: '1.0',
+    fecha_evaluacion: new Date().toISOString().split('T')[0],
     proceso: '',
     actividad: '',
     tarea: '',
-    area: 'Centro Industrial',
+    area: '',
     puesto_trabajo: '',
     peligro_identificado: '',
     clasificacion_peligro: 'Físico',
     descripcion_riesgo: '',
-    efectos_salud: '',
+    efectos_salud: [],
     personas_expuestas: 1,
     tiempo_exposicion_horas: 8,
     rutinario: true,
+    controles_existentes: {
+      medio: [],
+      fuente: [],
+      persona: []
+    },
     nivel_deficiencia: 10,
     nivel_exposicion: 4,
+    nivel_probabilidad: null,
+    interpretacion_probabilidad: '',
     nivel_consecuencia: 25,
+    interpretacion_consecuencia: '',
+    nivel_riesgo: null,
+    interpretacion_riesgo: '',
+    aceptabilidad_riesgo: '',
+    medidas_control_requeridas: {
+      epp: [],
+      ingenieria: [],
+      eliminacion: [],
+      sustitucion: [],
+      administrativas: []
+    },
     responsable_implementacion: '',
     fecha_implementacion: '',
+    nivel_riesgo_residual: null,
+    aceptabilidad_residual: '',
+    seguimiento_medicion: '',
+    fecha_revision: '',
+    responsable_revision: '',
+    estado_riesgo: 'identificado',
     observaciones: ''
   });
 
@@ -47,12 +73,27 @@ const MatrizRiesgosMain = () => {
   });
 
   const clasificacionesPeligro = [
-    'Biológico', 'Físico', 'Químico', 'Psicosocial', 'Biomecánico', 
+    'Biológico', 'Físico', 'Químico', 'Psicosocial', 'Biomecánico',
     'Condiciones de Seguridad', 'Fenómenos Naturales'
   ];
 
+  const areas = [
+    'Centro Industrial', 'Hornos Solera', 'Administrativa', 'Logística',
+    'Mantenimiento', 'Calidad', 'Laboratorio', 'Bodega'
+  ];
+
+  const estadosRiesgo = [
+    'identificado', 'evaluado', 'controlado', 'monitoreado', 'cerrado'
+  ];
+
+  const efectosSalud = [
+    'Lesiones musculoesqueléticas', 'Enfermedades respiratorias',
+    'Dermatitis/Alergias', 'Intoxicaciones', 'Quemaduras', 'Traumatismos',
+    'Estrés/Ansiedad', 'Fatiga', 'Pérdida auditiva', 'Problemas visuales'
+  ];
+
   const tiposControl = [
-    'Eliminación', 'Sustitución', 'Controles de Ingeniería', 
+    'Eliminación', 'Sustitución', 'Controles de Ingeniería',
     'Controles Administrativos', 'EPP'
   ];
 
@@ -119,6 +160,70 @@ const MatrizRiesgosMain = () => {
     setFormData(prev => ({ ...prev, codigo_riesgo: codigo }));
   };
 
+  // Funciones de cálculo según metodología GTC-45
+  const calcularNivelProbabilidad = (deficiencia, exposicion) => {
+    return deficiencia * exposicion;
+  };
+
+  const interpretarProbabilidad = (nivelProbabilidad) => {
+    if (nivelProbabilidad >= 40) return 'Muy Alta (MA)';
+    if (nivelProbabilidad >= 20) return 'Alta (A)';
+    if (nivelProbabilidad >= 10) return 'Media (M)';
+    return 'Baja (B)';
+  };
+
+  const interpretarConsecuencia = (nivelConsecuencia) => {
+    if (nivelConsecuencia >= 100) return 'Mortal o Catastrófico (M)';
+    if (nivelConsecuencia >= 60) return 'Muy Grave (MG)';
+    if (nivelConsecuencia >= 25) return 'Grave (G)';
+    if (nivelConsecuencia >= 10) return 'Leve (L)';
+    return 'Sin Lesión (SL)';
+  };
+
+  const calcularNivelRiesgo = (probabilidad, consecuencia) => {
+    return probabilidad * consecuencia;
+  };
+
+  const interpretarRiesgo = (nivelRiesgo) => {
+    if (nivelRiesgo >= 4000) return 'Crítico (I)';
+    if (nivelRiesgo >= 600) return 'Alto (II)';
+    if (nivelRiesgo >= 150) return 'Medio (III)';
+    return 'Bajo (IV)';
+  };
+
+  const determinarAceptabilidad = (interpretacionRiesgo) => {
+    if (interpretacionRiesgo.includes('Crítico') || interpretacionRiesgo.includes('Alto')) {
+      return 'No Aceptable';
+    }
+    if (interpretacionRiesgo.includes('Medio')) {
+      return 'Aceptable con Control Específico';
+    }
+    return 'Aceptable';
+  };
+
+  const actualizarCalculosRiesgo = (newFormData) => {
+    const deficiencia = parseInt(newFormData.nivel_deficiencia) || 0;
+    const exposicion = parseInt(newFormData.nivel_exposicion) || 0;
+    const consecuencia = parseInt(newFormData.nivel_consecuencia) || 0;
+
+    const probabilidad = calcularNivelProbabilidad(deficiencia, exposicion);
+    const interpretacionProbabilidad = interpretarProbabilidad(probabilidad);
+    const interpretacionConsecuencia = interpretarConsecuencia(consecuencia);
+    const riesgo = calcularNivelRiesgo(probabilidad, consecuencia);
+    const interpretacionRiesgo = interpretarRiesgo(riesgo);
+    const aceptabilidad = determinarAceptabilidad(interpretacionRiesgo);
+
+    return {
+      ...newFormData,
+      nivel_probabilidad: probabilidad,
+      interpretacion_probabilidad: interpretacionProbabilidad,
+      interpretacion_consecuencia: interpretacionConsecuencia,
+      nivel_riesgo: riesgo,
+      interpretacion_riesgo: interpretacionRiesgo,
+      aceptabilidad_riesgo: aceptabilidad
+    };
+  };
+
   const getEstadisticas = () => {
     const totalRiesgos = riesgos.length;
     const riesgosCriticos = riesgos.filter(r => r.interpretacion_riesgo?.includes('Crítico')).length;
@@ -148,19 +253,34 @@ const MatrizRiesgosMain = () => {
     }
   };
 
-  const handleSubmitRiesgo = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (!formData.codigo_riesgo.trim() || !formData.proceso.trim()) {
-      setMensaje('Código de riesgo y proceso son obligatorios');
+
+    // Validaciones de campos obligatorios
+    if (!formData.codigo_riesgo.trim()) {
+      setMensaje('El código de riesgo es obligatorio');
+      return;
+    }
+    if (!formData.proceso.trim()) {
+      setMensaje('El proceso es obligatorio');
+      return;
+    }
+    if (!formData.actividad.trim()) {
+      setMensaje('La actividad es obligatoria');
+      return;
+    }
+    if (!formData.peligro_identificado.trim()) {
+      setMensaje('El peligro identificado es obligatorio');
+      return;
+    }
+    if (!formData.descripcion_riesgo.trim()) {
+      setMensaje('La descripción del riesgo es obligatoria');
       return;
     }
 
     try {
-      const riesgoData = {
-        ...formData,
-        efectos_salud: formData.efectos_salud ? formData.efectos_salud.split(',').map(e => e.trim()).filter(e => e) : []
-      };
+      // Recalcular automáticamente antes de guardar
+      const riesgoData = actualizarCalculosRiesgo(formData);
 
       let result;
       if (editingItem) {
@@ -589,28 +709,420 @@ const MatrizRiesgosMain = () => {
               </p>
             </div>
 
-            <div className="p-6">
-              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                <p className="text-blue-800 text-sm flex items-center space-x-2">
-                  <Icon name="Info" size={16} className="text-blue-600" />
-                  <span>🚧 Formulario completo en desarrollo - Próximamente disponible</span>
-                </p>
+            <form onSubmit={handleSubmit} className="max-h-[calc(90vh-120px)] overflow-y-auto">
+              <div className="p-6 space-y-8">
+                {/* Información Básica */}
+                <div className="bg-slate-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="FileText" size={20} className="text-red-600" />
+                    <span>Información Básica</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Código del Riesgo *
+                      </label>
+                      <div className="flex space-x-2">
+                        <input
+                          type="text"
+                          value={formData.codigo_riesgo}
+                          onChange={(e) => setFormData({...formData, codigo_riesgo: e.target.value})}
+                          className="flex-1 px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                          placeholder="RG-2024-001"
+                          required
+                        />
+                        <button
+                          type="button"
+                          onClick={generarCodigoRiesgo}
+                          className="px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+                          title="Generar código automático"
+                        >
+                          <Icon name="RefreshCw" size={16} />
+                        </button>
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Versión
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.version}
+                        onChange={(e) => setFormData({...formData, version: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Fecha de Evaluación *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.fecha_evaluacion}
+                        onChange={(e) => setFormData({...formData, fecha_evaluacion: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Identificación del Proceso */}
+                <div className="bg-blue-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="Workflow" size={20} className="text-blue-600" />
+                    <span>Identificación del Proceso</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Proceso *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.proceso}
+                        onChange={(e) => setFormData({...formData, proceso: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ej: Producción, Mantenimiento, Logística"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Actividad *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.actividad}
+                        onChange={(e) => setFormData({...formData, actividad: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ej: Operación de maquinaria, Soldadura"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tarea Específica
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.tarea}
+                        onChange={(e) => setFormData({...formData, tarea: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ej: Corte de material, Inspección visual"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Área
+                      </label>
+                      <select
+                        value={formData.area}
+                        onChange={(e) => setFormData({...formData, area: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      >
+                        <option value="">Seleccionar área</option>
+                        {areas.map(area => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Puesto de Trabajo
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.puesto_trabajo}
+                        onChange={(e) => setFormData({...formData, puesto_trabajo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Ej: Operario de máquina, Soldador, Supervisor"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Identificación de Peligros */}
+                <div className="bg-orange-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="AlertTriangle" size={20} className="text-orange-600" />
+                    <span>Identificación de Peligros</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Peligro Identificado *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.peligro_identificado}
+                        onChange={(e) => setFormData({...formData, peligro_identificado: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        placeholder="Ej: Ruido, Vapores químicos, Superficies calientes"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Clasificación del Peligro *
+                      </label>
+                      <select
+                        value={formData.clasificacion_peligro}
+                        onChange={(e) => setFormData({...formData, clasificacion_peligro: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        required
+                      >
+                        {clasificacionesPeligro.map(tipo => (
+                          <option key={tipo} value={tipo}>{tipo}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Descripción del Riesgo *
+                      </label>
+                      <textarea
+                        value={formData.descripcion_riesgo}
+                        onChange={(e) => setFormData({...formData, descripcion_riesgo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 h-20 resize-none"
+                        placeholder="Describe el riesgo asociado al peligro identificado..."
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Evaluación de Exposición */}
+                <div className="bg-purple-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="Users" size={20} className="text-purple-600" />
+                    <span>Evaluación de Exposición</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Personas Expuestas
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.personas_expuestas}
+                        onChange={(e) => setFormData({...formData, personas_expuestas: parseInt(e.target.value) || 1})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        min="1"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tiempo de Exposición (horas)
+                      </label>
+                      <input
+                        type="number"
+                        value={formData.tiempo_exposicion_horas}
+                        onChange={(e) => setFormData({...formData, tiempo_exposicion_horas: parseFloat(e.target.value) || 8})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500"
+                        step="0.5"
+                        min="0"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tipo de Exposición
+                      </label>
+                      <div className="flex items-center space-x-4 pt-2">
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="rutinario"
+                            checked={formData.rutinario}
+                            onChange={() => setFormData({...formData, rutinario: true})}
+                            className="text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="ml-2 text-sm">Rutinario</span>
+                        </label>
+                        <label className="flex items-center">
+                          <input
+                            type="radio"
+                            name="rutinario"
+                            checked={!formData.rutinario}
+                            onChange={() => setFormData({...formData, rutinario: false})}
+                            className="text-purple-600 focus:ring-purple-500"
+                          />
+                          <span className="ml-2 text-sm">No Rutinario</span>
+                        </label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Evaluación del Riesgo - GTC 45 */}
+                <div className="bg-red-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="Calculator" size={20} className="text-red-600" />
+                    <span>Evaluación del Riesgo (GTC-45)</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Nivel de Deficiencia (ND)
+                      </label>
+                      <select
+                        value={formData.nivel_deficiencia}
+                        onChange={(e) => {
+                          const newFormData = {...formData, nivel_deficiencia: parseInt(e.target.value)};
+                          const updatedData = actualizarCalculosRiesgo(newFormData);
+                          setFormData(updatedData);
+                        }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      >
+                        {nivelesDeficiencia.map(nivel => (
+                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Nivel de Exposición (NE)
+                      </label>
+                      <select
+                        value={formData.nivel_exposicion}
+                        onChange={(e) => {
+                          const newFormData = {...formData, nivel_exposicion: parseInt(e.target.value)};
+                          const updatedData = actualizarCalculosRiesgo(newFormData);
+                          setFormData(updatedData);
+                        }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      >
+                        {nivelesExposicion.map(nivel => (
+                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Nivel de Consecuencia (NC)
+                      </label>
+                      <select
+                        value={formData.nivel_consecuencia}
+                        onChange={(e) => {
+                          const newFormData = {...formData, nivel_consecuencia: parseInt(e.target.value)};
+                          const updatedData = actualizarCalculosRiesgo(newFormData);
+                          setFormData(updatedData);
+                        }}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500"
+                      >
+                        {nivelesConsecuencia.map(nivel => (
+                          <option key={nivel.valor} value={nivel.valor}>{nivel.texto}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  {/* Resultados Automáticos */}
+                  <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-lg p-4 border border-slate-200">
+                      <div className="text-sm text-slate-600">Nivel de Probabilidad</div>
+                      <div className="text-xl font-bold text-slate-900">{formData.nivel_probabilidad || 0}</div>
+                      <div className="text-xs text-slate-500">{formData.interpretacion_probabilidad}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-slate-200">
+                      <div className="text-sm text-slate-600">Nivel de Riesgo</div>
+                      <div className="text-xl font-bold text-slate-900">{formData.nivel_riesgo || 0}</div>
+                      <div className="text-xs text-slate-500">{formData.interpretacion_riesgo}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-slate-200">
+                      <div className="text-sm text-slate-600">Interpretación</div>
+                      <div className="text-sm font-semibold text-slate-900">{formData.interpretacion_consecuencia}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-slate-200">
+                      <div className="text-sm text-slate-600">Aceptabilidad</div>
+                      <div className={`text-sm font-semibold ${
+                        formData.aceptabilidad_riesgo === 'No Aceptable' ? 'text-red-600' :
+                        formData.aceptabilidad_riesgo?.includes('Control') ? 'text-yellow-600' : 'text-green-600'
+                      }`}>
+                        {formData.aceptabilidad_riesgo}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Información Adicional */}
+                <div className="bg-green-50 rounded-xl p-6">
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                    <Icon name="Settings" size={20} className="text-green-600" />
+                    <span>Información Adicional</span>
+                  </h3>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Responsable de Implementación
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.responsable_implementacion}
+                        onChange={(e) => setFormData({...formData, responsable_implementacion: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                        placeholder="Nombre del responsable"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Fecha de Implementación
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.fecha_implementacion}
+                        onChange={(e) => setFormData({...formData, fecha_implementacion: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Estado del Riesgo
+                      </label>
+                      <select
+                        value={formData.estado_riesgo}
+                        onChange={(e) => setFormData({...formData, estado_riesgo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                      >
+                        {estadosRiesgo.map(estado => (
+                          <option key={estado} value={estado} className="capitalize">
+                            {estado.charAt(0).toUpperCase() + estado.slice(1)}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Observaciones
+                      </label>
+                      <textarea
+                        value={formData.observaciones}
+                        onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 h-20 resize-none"
+                        placeholder="Observaciones adicionales sobre el riesgo..."
+                      />
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <div className="flex space-x-3">
+              {/* Footer del formulario */}
+              <div className="flex justify-end space-x-4 p-6 bg-slate-50 border-t border-slate-200">
                 <button
+                  type="button"
                   onClick={resetForm}
-                  className="flex-1 px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
+                  className="px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
                 >
                   Cancelar
                 </button>
                 <button
-                  className="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
+                  type="submit"
+                  className="px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
                 >
-                  Guardar Riesgo
+                  {editingItem ? 'Actualizar' : 'Guardar'} Riesgo
                 </button>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       )}
