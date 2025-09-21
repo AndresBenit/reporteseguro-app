@@ -244,268 +244,372 @@ const MatrizRiesgosMain = () => {
 
   if (loading) {
     return (
-      <div style={{ padding: '40px', textAlign: 'center' }}>
-        <div style={{ color: '#64748b' }}>Cargando matriz de riesgos...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 shadow-lg border border-slate-200 text-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-red-500 to-red-600 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+            <Icon name="Loader" size={24} className="text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Cargando Matriz de Riesgos SST</h3>
+          <p className="text-slate-600">Obteniendo datos de riesgos...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <div style={{
-            width: '40px', height: '40px', background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Icon name="AlertTriangle" size={24} color="white" />
-          </div>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#1e293b' }}>
-              Matriz de Riesgos SST
-            </h1>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '16px' }}>
-              Identificación, evaluación y control de riesgos - Metodología GTC 45
-            </p>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-red-50">
+      {/* Header Principal */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-red-700 to-red-700 rounded-2xl p-3 shadow-lg">
+                <Icon name="AlertTriangle" size={32} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-red-700 to-red-700 bg-clip-text text-transparent">
+                  Matriz de Riesgos SST
+                </h1>
+                <p className="text-slate-600 font-medium">
+                  Identificación • Evaluación • Control de Riesgos • Metodología GTC 45
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
+              <div className="text-right">
+                <p className="font-medium">Total de Riesgos</p>
+                <p className="text-2xl font-bold text-red-600">{estadisticas.totalRiesgos}</p>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* Estadísticas */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#2563eb', marginBottom: '4px' }}>
-              {estadisticas.totalRiesgos}
+
+      {/* Estadísticas Dashboard */}
+      <div className="max-w-7xl mx-auto px-6 py-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Total Riesgos</p>
+                <p className="text-3xl font-bold text-blue-600">{estadisticas.totalRiesgos}</p>
+                <p className="text-xs text-slate-500 mt-1">registrados</p>
+              </div>
+              <div className="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-3">
+                <Icon name="FileText" size={24} className="text-white" />
+              </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Total Riesgos</div>
           </div>
 
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#1e1b4b', marginBottom: '4px' }}>
-              {estadisticas.riesgosCriticos}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Riesgos Críticos</p>
+                <p className="text-3xl font-bold text-indigo-900">{estadisticas.riesgosCriticos}</p>
+                <p className="text-xs text-slate-500 mt-1">requieren acción inmediata</p>
+              </div>
+              <div className="bg-gradient-to-br from-indigo-800 to-indigo-900 rounded-lg p-3">
+                <Icon name="AlertTriangle" size={24} className="text-white" />
+              </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Riesgos Críticos</div>
           </div>
 
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#dc2626', marginBottom: '4px' }}>
-              {estadisticas.riesgosAltos}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">Riesgos Altos</p>
+                <p className="text-3xl font-bold text-red-600">{estadisticas.riesgosAltos}</p>
+                <p className="text-xs text-slate-500 mt-1">prioritarios</p>
+              </div>
+              <div className="bg-gradient-to-br from-red-500 to-red-600 rounded-lg p-3">
+                <Icon name="AlertCircle" size={24} className="text-white" />
+              </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Riesgos Altos</div>
           </div>
 
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#ea580c', marginBottom: '4px' }}>
-              {estadisticas.riesgosNoAceptables}
+          <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200">
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-slate-600">No Aceptables</p>
+                <p className="text-3xl font-bold text-orange-600">{estadisticas.riesgosNoAceptables}</p>
+                <p className="text-xs text-slate-500 mt-1">requieren control</p>
+              </div>
+              <div className="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-3">
+                <Icon name="XCircle" size={24} className="text-white" />
+              </div>
             </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>No Aceptables</div>
           </div>
         </div>
       </div>
 
       {mensaje && (
-        <div style={{
-          background: mensaje.includes('Error') ? '#fef2f2' : '#f0fdf4',
-          color: mensaje.includes('Error') ? '#dc2626' : '#166534',
-          padding: '12px 16px', borderRadius: '8px', marginBottom: '24px',
-          border: `1px solid ${mensaje.includes('Error') ? '#fecaca' : '#bbf7d0'}`
-        }}>
-          {mensaje}
+        <div className="max-w-7xl mx-auto px-6">
+          <div className={`${
+            mensaje.includes('Error')
+              ? 'bg-red-50 border-red-200 text-red-800'
+              : 'bg-green-50 border-green-200 text-green-800'
+          } border rounded-lg p-4 mb-6 flex items-center space-x-3`}>
+            <Icon
+              name={mensaje.includes('Error') ? 'AlertCircle' : 'CheckCircle'}
+              size={20}
+              className={mensaje.includes('Error') ? 'text-red-500' : 'text-green-500'}
+            />
+            <span className="font-medium">{mensaje}</span>
+          </div>
         </div>
       )}
 
-      {/* Tabs */}
-      <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '32px' }}>
-          {[
-            { key: 'matriz', label: 'Matriz de Riesgos', icon: 'AlertTriangle' },
-            { key: 'controles', label: 'Controles', icon: 'Shield' },
-            { key: 'evaluaciones', label: 'Evaluaciones', icon: 'BarChart3' }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '12px 0', background: 'none', border: 'none',
-                fontSize: '16px', fontWeight: 500, cursor: 'pointer',
-                color: activeTab === tab.key ? '#dc2626' : '#64748b',
-                borderBottom: activeTab === tab.key ? '2px solid #dc2626' : '2px solid transparent'
-              }}
-            >
-              <Icon name={tab.icon} size={20} />
-              {tab.label}
-            </button>
-          ))}
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex space-x-1">
+            {[
+              { key: 'matriz', label: 'Matriz de Riesgos', icon: 'AlertTriangle', color: 'from-red-600 to-red-700' },
+              { key: 'controles', label: 'Controles', icon: 'Shield', color: 'from-red-700 to-red-800' },
+              { key: 'evaluaciones', label: 'Evaluaciones', icon: 'BarChart3', color: 'from-orange-600 to-red-600' }
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`
+                  flex items-center space-x-3 px-6 py-4 rounded-t-xl font-semibold transition-all duration-300
+                  ${
+                    activeTab === tab.key
+                      ? `bg-gradient-to-r ${tab.color} text-white shadow-lg transform scale-105`
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }
+                `}
+              >
+                <Icon
+                  name={tab.icon}
+                  size={20}
+                  className={activeTab === tab.key ? 'text-white' : 'text-slate-500'}
+                />
+                <span>{tab.label}</span>
+                {activeTab === tab.key && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 
       {/* Botón Nuevo */}
-      <div style={{ marginBottom: '24px' }}>
+      <div className="max-w-7xl mx-auto px-6 py-6">
         <button
           onClick={() => {
             const formMap = { 'matriz': 'riesgo', 'controles': 'control', 'evaluaciones': 'evaluacion' };
             setCurrentForm(formMap[activeTab]);
             setShowModal(true);
           }}
-          style={{
-            background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-            color: 'white', border: 'none', padding: '12px 24px',
-            borderRadius: '8px', fontSize: '16px', fontWeight: 600,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
-          }}
+          className="bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white px-6 py-3 rounded-xl font-semibold transition-all duration-300 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
         >
-          <Icon name="Plus" size={20} />
-          {activeTab === 'matriz' ? 'Nuevo Riesgo' : 
-           activeTab === 'controles' ? 'Nuevo Control' : 'Nueva Evaluación'}
+          <Icon name="Plus" size={20} className="text-white" />
+          <span>
+            {activeTab === 'matriz' ? 'Nuevo Riesgo' :
+             activeTab === 'controles' ? 'Nuevo Control' : 'Nueva Evaluación'}
+          </span>
         </button>
       </div>
 
       {/* Contenido por Tab */}
-      {activeTab === 'matriz' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          {riesgos.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <Icon name="AlertTriangle" size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>No hay riesgos identificados</h3>
-              <p>Comienza la identificación del primer riesgo</p>
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Riesgo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Proceso</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Clasificación</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Nivel de Riesgo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Aceptabilidad</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {riesgos.map((riesgo) => {
-                    const riesgoColor = getRiesgoColor(riesgo.interpretacion_riesgo);
-                    const aceptabilidadColor = getAceptabilidadColor(riesgo.aceptabilidad_riesgo);
-                    return (
-                      <tr key={riesgo.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                        <td style={{ padding: '16px' }}>
-                          <div>
-                            <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
-                              {riesgo.codigo_riesgo}
+      <div className="max-w-7xl mx-auto px-6 pb-8">
+        {activeTab === 'matriz' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200">
+            {riesgos.length === 0 ? (
+              <div className="text-center py-20">
+                <div className="mx-auto w-24 h-24 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                  <Icon name="AlertTriangle" size={32} className="text-slate-400" />
+                </div>
+                <h3 className="text-xl font-semibold text-slate-900 mb-2">No hay riesgos identificados</h3>
+                <p className="text-slate-600 mb-6">Comienza la identificación del primer riesgo</p>
+                <button
+                  onClick={() => {
+                    setCurrentForm('riesgo');
+                    setShowModal(true);
+                  }}
+                  className="bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-lg font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300"
+                >
+                  Identificar Primer Riesgo
+                </button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="bg-slate-50 border-b border-slate-200">
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Riesgo</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Proceso</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Clasificación</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Nivel de Riesgo</th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold text-slate-900">Aceptabilidad</th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold text-slate-900">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {riesgos.map((riesgo) => {
+                      const riesgoColor = getRiesgoColor(riesgo.interpretacion_riesgo);
+                      const aceptabilidadColor = getAceptabilidadColor(riesgo.aceptabilidad_riesgo);
+                      return (
+                        <tr key={riesgo.id} className="hover:bg-slate-50 transition-colors duration-200">
+                          <td className="px-6 py-4">
+                            <div>
+                              <div className="font-semibold text-slate-900 mb-1">
+                                {riesgo.codigo_riesgo}
+                              </div>
+                              <div className="text-sm text-slate-600">
+                                {riesgo.peligro_identificado}
+                              </div>
                             </div>
-                            <div style={{ fontSize: '14px', color: '#64748b' }}>
-                              {riesgo.peligro_identificado}
+                          </td>
+                          <td className="px-6 py-4 text-slate-700">{riesgo.proceso}</td>
+                          <td className="px-6 py-4 text-slate-700">{riesgo.clasificacion_peligro}</td>
+                          <td className="px-6 py-4">
+                            <span
+                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
+                              style={{
+                                backgroundColor: riesgoColor.bg,
+                                color: riesgoColor.color,
+                                border: `1px solid ${riesgoColor.border}`
+                              }}
+                            >
+                              {riesgo.interpretacion_riesgo || 'No Evaluado'}
+                            </span>
+                            <div className="text-xs text-slate-500 mt-1">
+                              NR: {riesgo.nivel_riesgo || 'N/A'}
                             </div>
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px', color: '#64748b' }}>{riesgo.proceso}</td>
-                        <td style={{ padding: '16px', color: '#64748b' }}>{riesgo.clasificacion_peligro}</td>
-                        <td style={{ padding: '16px' }}>
-                          <span style={{
-                            padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600,
-                            background: riesgoColor.bg, color: riesgoColor.color,
-                            border: `1px solid ${riesgoColor.border}`
-                          }}>
-                            {riesgo.interpretacion_riesgo || 'No Evaluado'}
-                          </span>
-                          <div style={{ fontSize: '12px', color: '#64748b', marginTop: '4px' }}>
-                            NR: {riesgo.nivel_riesgo || 'N/A'}
-                          </div>
-                        </td>
-                        <td style={{ padding: '16px' }}>
-                          <span style={{
-                            padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600,
-                            background: aceptabilidadColor.bg, color: aceptabilidadColor.color
-                          }}>
-                            {riesgo.aceptabilidad_riesgo || 'No Evaluado'}
-                          </span>
-                        </td>
-                        <td style={{ padding: '16px' }}>
-                          <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                            <button
-                              onClick={() => handleEdit(riesgo, 'riesgo')}
+                          </td>
+                          <td className="px-6 py-4">
+                            <span
+                              className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold"
                               style={{
-                                background: 'none', border: 'none', cursor: 'pointer',
-                                padding: '8px', borderRadius: '6px', color: '#6b7280'
+                                backgroundColor: aceptabilidadColor.bg,
+                                color: aceptabilidadColor.color
                               }}
-                              title="Editar"
                             >
-                              <Icon name="Edit" size={16} />
-                            </button>
-                            <button
-                              onClick={() => handleDelete(riesgo.id, 'matriz_riesgos')}
-                              style={{
-                                background: 'none', border: 'none', cursor: 'pointer',
-                                padding: '8px', borderRadius: '6px', color: '#ef4444'
-                              }}
-                              title="Eliminar"
-                            >
-                              <Icon name="Trash2" size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+                              {riesgo.aceptabilidad_riesgo || 'No Evaluado'}
+                            </span>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex justify-center space-x-2">
+                              <button
+                                onClick={() => handleEdit(riesgo, 'riesgo')}
+                                className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors duration-200"
+                                title="Editar"
+                              >
+                                <Icon name="Edit" size={16} />
+                              </button>
+                              <button
+                                onClick={() => handleDelete(riesgo.id, 'matriz_riesgos')}
+                                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors duration-200"
+                                title="Eliminar"
+                              >
+                                <Icon name="Trash2" size={16} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Contenido simplificado para otros tabs */}
+        {activeTab === 'controles' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-green-100 to-green-200 rounded-full flex items-center justify-center mb-4">
+                <Icon name="Shield" size={24} className="text-green-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Controles de Riesgo - {controles.length} controles
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Jerarquía de controles: Eliminación, Sustitución, Ingeniería, Administrativos, EPP
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm">
+                  🚧 Módulo en desarrollo - Próximamente disponible
+                </p>
+              </div>
             </div>
-          )}
-        </div>
-      )}
+          </div>
+        )}
 
-      {/* Contenido simplificado para otros tabs */}
-      {activeTab === 'controles' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px' }}>
-          <h3>Controles de Riesgo - {controles.length} controles</h3>
-          <p style={{ color: '#64748b' }}>Jerarquía de controles: Eliminación, Sustitución, Ingeniería, Administrativos, EPP</p>
-        </div>
-      )}
+        {activeTab === 'evaluaciones' && (
+          <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8">
+            <div className="text-center">
+              <div className="mx-auto w-16 h-16 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full flex items-center justify-center mb-4">
+                <Icon name="BarChart3" size={24} className="text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Evaluaciones de Riesgo - {evaluaciones.length} evaluaciones
+              </h3>
+              <p className="text-slate-600 mb-6">
+                Historial de evaluaciones con metodología GTC 45
+              </p>
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <p className="text-blue-800 text-sm">
+                  🚧 Módulo en desarrollo - Próximamente disponible
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
 
-      {activeTab === 'evaluaciones' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0', padding: '24px' }}>
-          <h3>Evaluaciones de Riesgo - {evaluaciones.length} evaluaciones</h3>
-          <p style={{ color: '#64748b' }}>Historial de evaluaciones con metodología GTC 45</p>
-        </div>
-      )}
-
-      {/* Modal simplificado */}
+      {/* Modal modernizado */}
       {showModal && (
-        <div style={{
-          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-          background: 'rgba(0, 0, 0, 0.5)', display: 'flex',
-          alignItems: 'center', justifyContent: 'center', zIndex: 1000
-        }}>
-          <div style={{
-            background: 'white', borderRadius: '12px', width: '90%',
-            maxWidth: '600px', maxHeight: '90vh', overflow: 'auto', padding: '24px'
-          }}>
-            <h2 style={{ marginBottom: '16px' }}>
-              {editingItem ? 'Editar' : 'Nuevo'} Riesgo - Metodología GTC 45
-            </h2>
-            <p style={{ color: '#64748b', marginBottom: '16px' }}>
-              Los cálculos de nivel de riesgo se realizan automáticamente según la metodología colombiana.
-            </p>
-            
-            <div style={{ display: 'flex', gap: '12px', marginTop: '24px' }}>
-              <button
-                onClick={resetForm}
-                style={{
-                  padding: '12px 24px', border: '1px solid #d1d5db',
-                  background: 'white', borderRadius: '8px', cursor: 'pointer'
-                }}
-              >
-                Cancelar
-              </button>
-              <button
-                style={{
-                  padding: '12px 24px', background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-                  color: 'white', border: 'none', borderRadius: '8px', cursor: 'pointer', fontWeight: 600
-                }}
-              >
-                Guardar Riesgo
-              </button>
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl">
+            <div className="bg-gradient-to-r from-red-600 to-red-700 p-6 rounded-t-2xl">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <Icon name="AlertTriangle" size={24} className="text-white" />
+                  <h2 className="text-xl font-bold text-white">
+                    {editingItem ? 'Editar' : 'Nuevo'} Riesgo - Metodología GTC 45
+                  </h2>
+                </div>
+                <button
+                  onClick={resetForm}
+                  className="text-white/80 hover:text-white p-2 rounded-lg hover:bg-white/10 transition-colors"
+                >
+                  <Icon name="X" size={20} />
+                </button>
+              </div>
+              <p className="text-red-100 mt-2">
+                Los cálculos de nivel de riesgo se realizan automáticamente según la metodología colombiana.
+              </p>
+            </div>
+
+            <div className="p-6">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                <p className="text-blue-800 text-sm flex items-center space-x-2">
+                  <Icon name="Info" size={16} className="text-blue-600" />
+                  <span>🚧 Formulario completo en desarrollo - Próximamente disponible</span>
+                </p>
+              </div>
+
+              <div className="flex space-x-3">
+                <button
+                  onClick={resetForm}
+                  className="flex-1 px-6 py-3 border border-slate-300 text-slate-700 rounded-xl font-semibold hover:bg-slate-50 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  className="flex-1 bg-gradient-to-r from-red-600 to-red-700 text-white px-6 py-3 rounded-xl font-semibold hover:from-red-700 hover:to-red-800 transition-all duration-300 shadow-lg"
+                >
+                  Guardar Riesgo
+                </button>
+              </div>
             </div>
           </div>
         </div>
