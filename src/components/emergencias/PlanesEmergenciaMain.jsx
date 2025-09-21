@@ -766,342 +766,112 @@ const PlanesEmergenciaMain = () => {
   }
 
   return (
-    <div style={{ padding: '24px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{ marginBottom: '32px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
-          <div style={{
-            width: '40px', height: '40px', background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-            borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center'
-          }}>
-            <Icon name="Shield" size={24} color="white" />
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-rose-50">
+      {/* Header Principal */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-rose-700 to-red-700 rounded-2xl p-3 shadow-lg">
+                <Icon name="Shield" size={32} className="text-white" />
+              </div>
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-rose-700 to-red-700 bg-clip-text text-transparent">
+                  Sistema de Planes de Emergencia SST
+                </h1>
+                <p className="text-slate-600 font-medium">
+                  Preparación • Respuesta • Brigadas de Emergencia • Simulacros • Continuidad Operacional
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-rose-500 rounded-full animate-pulse"></div>
+                <span className="font-medium">Sistema Emergencias Activo</span>
+              </div>
+              <div className="w-px h-6 bg-slate-300"></div>
+              <span className="font-medium">
+                {new Date().toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
+            </div>
           </div>
-          <div>
-            <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 700, color: '#1e293b' }}>
-              Planes de Emergencia SST
-            </h1>
-            <p style={{ margin: 0, color: '#64748b', fontSize: '16px' }}>
-              Gestión integral de emergencias y brigadas de respuesta
+        </div>
+      </div>
+
+      {/* Navigation Tabs */}
+      <div className="bg-white border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex space-x-1">
+            {vistas.map(vista => (
+              <button
+                key={vista.id}
+                onClick={() => setVistaActiva(vista.id)}
+                className={`
+                  flex items-center space-x-3 px-6 py-4 rounded-t-xl font-semibold transition-all duration-300
+                  ${vistaActiva === vista.id
+                    ? `bg-gradient-to-r ${vista.color} text-white shadow-lg transform scale-105`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
+                  }
+                `}
+              >
+                <Icon
+                  name={vista.icon}
+                  size={20}
+                  className={vistaActiva === vista.id ? 'text-white' : 'text-slate-500'}
+                />
+                <span>{vista.label}</span>
+                {vistaActiva === vista.id && (
+                  <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                )}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Vista Activa Info */}
+      <div className="bg-gradient-to-r from-slate-50 to-rose-50 border-b border-slate-200">
+        <div className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center space-x-3">
+            <Icon name="Info" size={16} className="text-slate-500" />
+            <p className="text-slate-700 font-medium">
+              {vistaActual?.description}
             </p>
           </div>
         </div>
-
-        {/* Estadísticas */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginTop: '24px' }}>
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#dc2626', marginBottom: '4px' }}>
-              {estadisticas.planesActivos}
-            </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Planes Activos</div>
-          </div>
-
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#ea580c', marginBottom: '4px' }}>
-              {estadisticas.simulacrosEsteAno}
-            </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Simulacros Este Año</div>
-          </div>
-
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#0d9488', marginBottom: '4px' }}>
-              {estadisticas.brigadistasActivos}
-            </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Brigadistas Activos</div>
-          </div>
-
-          <div style={{ background: 'white', padding: '20px', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-            <div style={{ fontSize: '24px', fontWeight: 700, color: '#7c3aed', marginBottom: '4px' }}>
-              {estadisticas.simulacrosPendientes}
-            </div>
-            <div style={{ fontSize: '14px', color: '#64748b' }}>Simulacros Pendientes</div>
-          </div>
-        </div>
       </div>
 
-      {mensaje && (
-        <div style={{
-          background: mensaje.includes('Error') ? '#fef2f2' : '#f0fdf4',
-          color: mensaje.includes('Error') ? '#dc2626' : '#166534',
-          padding: '12px 16px', borderRadius: '8px', marginBottom: '24px',
-          border: `1px solid ${mensaje.includes('Error') ? '#fecaca' : '#bbf7d0'}`
-        }}>
-          {mensaje}
-        </div>
-      )}
+      {/* Contenido Principal */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {mensaje && (
+          <div className={`
+            mb-6 p-4 rounded-xl border
+            ${
+              mensaje.includes('Error')
+                ? 'bg-red-50 border-red-200 text-red-800'
+                : 'bg-green-50 border-green-200 text-green-800'
+            }
+          `}>
+            <div className="flex items-center space-x-2">
+              <Icon
+                name={mensaje.includes('Error') ? 'AlertCircle' : 'CheckCircle'}
+                size={16}
+                className={mensaje.includes('Error') ? 'text-red-600' : 'text-green-600'}
+              />
+              <span className="font-medium">{mensaje}</span>
+            </div>
+          </div>
+        )}
 
-      {/* Tabs */}
-      <div style={{ borderBottom: '1px solid #e2e8f0', marginBottom: '24px' }}>
-        <div style={{ display: 'flex', gap: '32px' }}>
-          {[
-            { key: 'planes', label: 'Planes de Emergencia', icon: 'FileText' },
-            { key: 'simulacros', label: 'Simulacros', icon: 'Clock' },
-            { key: 'brigadas', label: 'Brigadas', icon: 'Users' }
-          ].map(tab => (
-            <button
-              key={tab.key}
-              onClick={() => setVistaActiva(tab.key)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: '8px',
-                padding: '12px 0', background: 'none', border: 'none',
-                fontSize: '16px', fontWeight: 500, cursor: 'pointer',
-                color: vistaActiva === tab.key ? '#dc2626' : '#64748b',
-                borderBottom: vistaActiva === tab.key ? '2px solid #dc2626' : '2px solid transparent'
-              }}
-            >
-              <Icon name={tab.icon} size={20} />
-              {tab.label}
-            </button>
-          ))}
-        </div>
+        {renderContent()}
       </div>
 
-      {/* Botón Nuevo */}
-      <div style={{ marginBottom: '24px' }}>
-        <button
-          onClick={() => {
-            setCurrentForm(vistaActiva === 'planes' ? 'plan' : vistaActiva === 'simulacros' ? 'simulacro' : 'brigada');
-            setShowModal(true);
-          }}
-          style={{
-            background: 'linear-gradient(135deg, #dc2626 0%, #ef4444 100%)',
-            color: 'white', border: 'none', padding: '12px 24px',
-            borderRadius: '8px', fontSize: '16px', fontWeight: 600,
-            cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px'
-          }}
-        >
-          <Icon name="Plus" size={20} />
-          {vistaActiva === 'planes' ? 'Nuevo Plan' : vistaActiva === 'simulacros' ? 'Nuevo Simulacro' : 'Nuevo Brigadista'}
-        </button>
-      </div>
-
-      {/* Contenido por Tab */}
-      {vistaActiva === 'planes' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          {planes.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <Icon name="FileText" size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>No hay planes de emergencia</h3>
-              <p>Crea el primer plan de emergencia para tu organización</p>
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Plan</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Tipo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Área</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Estado</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Versión</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {planes.map((plan, index) => (
-                    <tr key={plan.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '16px' }}>
-                        <div>
-                          <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>{plan.nombre}</div>
-                          {plan.alcance && <div style={{ fontSize: '14px', color: '#64748b' }}>{plan.alcance}</div>}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{plan.tipo_emergencia}</td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{plan.area_aplicacion}</td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600,
-                          background: plan.activo ? '#dcfce7' : '#fef2f2',
-                          color: plan.activo ? '#166534' : '#dc2626'
-                        }}>
-                          {plan.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{plan.version}</td>
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                          <button
-                            onClick={() => handleEdit(plan, 'plan')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#6b7280'
-                            }}
-                            title="Editar"
-                          >
-                            <Icon name="Edit" size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(plan.id, 'planes_emergencia_sst')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#ef4444'
-                            }}
-                            title="Eliminar"
-                          >
-                            <Icon name="Trash2" size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {vistaActiva === 'simulacros' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          {simulacros.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <Icon name="Clock" size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>No hay simulacros registrados</h3>
-              <p>Programa el primer simulacro de emergencia</p>
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Plan</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Fecha</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Tipo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Estado</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Responsable</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {simulacros.map((simulacro) => (
-                    <tr key={simulacro.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ fontWeight: 600, color: '#1e293b' }}>
-                          {simulacro.planes_emergencia_sst?.nombre || 'Plan no encontrado'}
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>
-                        {new Date(simulacro.fecha_simulacro).toLocaleDateString()}
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{simulacro.tipo_simulacro}</td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600,
-                          background: simulacro.estado === 'ejecutado' ? '#dcfce7' : simulacro.estado === 'programado' ? '#fef3c7' : '#ddd6fe',
-                          color: simulacro.estado === 'ejecutado' ? '#166534' : simulacro.estado === 'programado' ? '#92400e' : '#5b21b6'
-                        }}>
-                          {simulacro.estado.charAt(0).toUpperCase() + simulacro.estado.slice(1)}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{simulacro.responsable_simulacro}</td>
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                          <button
-                            onClick={() => handleEdit(simulacro, 'simulacro')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#6b7280'
-                            }}
-                            title="Editar"
-                          >
-                            <Icon name="Edit" size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(simulacro.id, 'simulacros_emergencia')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#ef4444'
-                            }}
-                            title="Eliminar"
-                          >
-                            <Icon name="Trash2" size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
-
-      {vistaActiva === 'brigadas' && (
-        <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #e2e8f0' }}>
-          {brigadas.length === 0 ? (
-            <div style={{ padding: '60px', textAlign: 'center', color: '#64748b' }}>
-              <Icon name="Users" size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
-              <h3 style={{ marginBottom: '8px', fontSize: '18px' }}>No hay brigadistas registrados</h3>
-              <p>Registra el primer miembro de la brigada de emergencia</p>
-            </div>
-          ) : (
-            <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                <thead>
-                  <tr style={{ background: '#f8fafc' }}>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Brigadista</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Tipo Brigada</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Cargo</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Área</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'left', fontWeight: 600, color: '#374151' }}>Estado</th>
-                    <th style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 600, color: '#374151' }}>Acciones</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {brigadas.map((brigada) => (
-                    <tr key={brigada.id} style={{ borderTop: '1px solid #f1f5f9' }}>
-                      <td style={{ padding: '16px' }}>
-                        <div>
-                          <div style={{ fontWeight: 600, color: '#1e293b', marginBottom: '4px' }}>
-                            {brigada.colaboradores?.nombre_completo || 'Colaborador no encontrado'}
-                          </div>
-                          <div style={{ fontSize: '14px', color: '#64748b' }}>{brigada.nombre}</div>
-                        </div>
-                      </td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{brigada.tipo_brigada}</td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{brigada.cargo_brigada}</td>
-                      <td style={{ padding: '16px', color: '#64748b' }}>{brigada.area_responsabilidad}</td>
-                      <td style={{ padding: '16px' }}>
-                        <span style={{
-                          padding: '4px 12px', borderRadius: '16px', fontSize: '12px', fontWeight: 600,
-                          background: brigada.activo ? '#dcfce7' : '#fef2f2',
-                          color: brigada.activo ? '#166534' : '#dc2626'
-                        }}>
-                          {brigada.activo ? 'Activo' : 'Inactivo'}
-                        </span>
-                      </td>
-                      <td style={{ padding: '16px' }}>
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: '8px' }}>
-                          <button
-                            onClick={() => handleEdit(brigada, 'brigada')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#6b7280'
-                            }}
-                            title="Editar"
-                          >
-                            <Icon name="Edit" size={16} />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(brigada.id, 'brigadas_emergencia')}
-                            style={{
-                              background: 'none', border: 'none', cursor: 'pointer',
-                              padding: '8px', borderRadius: '6px', color: '#ef4444'
-                            }}
-                            title="Eliminar"
-                          >
-                            <Icon name="Trash2" size={16} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Modal para formularios */}
       {showModal && (

@@ -242,829 +242,555 @@ const ReportesLegalesMain = () => {
 
   if (loading) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
-        <div>Cargando...</div>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50 flex items-center justify-center">
+        <div className="bg-white rounded-xl p-8 shadow-lg border border-slate-200 text-center">
+          <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-spin">
+            <Icon name="Loader" size={24} className="text-white" />
+          </div>
+          <h3 className="text-lg font-semibold text-slate-900 mb-2">Cargando Reportes Legales SST</h3>
+          <p className="text-slate-600">Obteniendo datos de reportes...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '30px'
-      }}>
-        <div>
-          <h1 style={{ 
-            fontSize: '2rem', 
-            fontWeight: '700', 
-            color: '#1e293b',
-            margin: '0 0 8px 0'
-          }}>
-            Reportes Legales SST
-          </h1>
-          <p style={{ 
-            color: '#64748b', 
-            margin: 0,
-            fontSize: '1rem'
-          }}>
-            Generación y gestión de reportes para cumplimiento normativo SST
-          </p>
-        </div>
-        
-        <button
-          onClick={() => {
-            setShowForm(true);
-            resetForm();
-          }}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            background: '#7c3aed',
-            color: 'white',
-            border: 'none',
-            borderRadius: '8px',
-            padding: '12px 20px',
-            fontSize: '14px',
-            fontWeight: '500',
-            cursor: 'pointer'
-          }}
-        >
-          <Icon name="Plus" size={16} />
-          Nuevo Reporte
-        </button>
-      </div>
-
-      {/* Dashboard Estadísticas */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-        gap: '20px',
-        marginBottom: '30px'
-      }}>
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#6b7280' }}>
-            {reportesEsteAno}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Reportes {new Date().getFullYear()}</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#f59e0b' }}>
-            {reportesBorrador}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>En Borrador</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#059669' }}>
-            {reportesAprobados}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Aprobados</div>
-        </div>
-
-        <div style={{
-          background: 'white',
-          padding: '20px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: '2rem', fontWeight: '700', color: '#3b82f6' }}>
-            {reportesEnviados}
-          </div>
-          <div style={{ color: '#374151', fontWeight: '600' }}>Enviados</div>
-        </div>
-      </div>
-
-      {/* Botones de Reportes Rápidos */}
-      <div style={{
-        background: 'white',
-        padding: '20px',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        marginBottom: '30px'
-      }}>
-        <h3 style={{
-          fontSize: '1.125rem',
-          fontWeight: '600',
-          color: '#1e293b',
-          marginBottom: '16px'
-        }}>
-          Generar Reporte Rápido
-        </h3>
-        
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-          gap: '12px'
-        }}>
-          <button
-            onClick={() => generarReporteRapido('Mensual Accidentalidad')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              background: 'white',
-              color: '#374151',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontSize: '14px'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#3b82f6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'white';
-              e.target.style.borderColor = '#e2e8f0';
-            }}
-          >
-            <Icon name="FileText" size={16} />
-            Reporte Mensual
-          </button>
-
-          <button
-            onClick={() => generarReporteRapido('Trimestral Estadísticas')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              background: 'white',
-              color: '#374151',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontSize: '14px'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#3b82f6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'white';
-              e.target.style.borderColor = '#e2e8f0';
-            }}
-          >
-            <Icon name="BarChart" size={16} />
-            Reporte Trimestral
-          </button>
-
-          <button
-            onClick={() => generarReporteRapido('Anual Gestión SST')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              background: 'white',
-              color: '#374151',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontSize: '14px'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#3b82f6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'white';
-              e.target.style.borderColor = '#e2e8f0';
-            }}
-          >
-            <Icon name="TrendingUp" size={16} />
-            Reporte Anual
-          </button>
-
-          <button
-            onClick={() => generarReporteRapido('Indicadores Cumplimiento')}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '12px 16px',
-              border: '1px solid #e2e8f0',
-              borderRadius: '8px',
-              background: 'white',
-              color: '#374151',
-              cursor: 'pointer',
-              transition: 'all 0.2s',
-              fontSize: '14px'
-            }}
-            onMouseOver={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#3b82f6';
-            }}
-            onMouseOut={(e) => {
-              e.target.style.background = 'white';
-              e.target.style.borderColor = '#e2e8f0';
-            }}
-          >
-            <Icon name="CheckCircle" size={16} />
-            Indicadores
-          </button>
-        </div>
-      </div>
-
-      {/* Mensaje */}
-      {mensaje && (
-        <div style={{
-          padding: '12px 16px',
-          borderRadius: '8px',
-          marginBottom: '20px',
-          background: mensaje.includes('Error') ? '#fef2f2' : '#f0fdf4',
-          border: `1px solid ${mensaje.includes('Error') ? '#fecaca' : '#bbf7d0'}`,
-          color: mensaje.includes('Error') ? '#dc2626' : '#166534'
-        }}>
-          {mensaje}
-        </div>
-      )}
-
-      {/* Formulario */}
-      {showForm && (
-        <div style={{
-          background: 'white',
-          padding: '24px',
-          borderRadius: '12px',
-          border: '1px solid #e2e8f0',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.06)',
-          marginBottom: '30px'
-        }}>
-          <h3 style={{
-            fontSize: '1.25rem',
-            fontWeight: '600',
-            color: '#1e293b',
-            marginBottom: '20px'
-          }}>
-            {editingReporte ? 'Editar Reporte Legal' : 'Nuevo Reporte Legal SST'}
-          </h3>
-
-          <form onSubmit={handleSubmit}>
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-              gap: '20px',
-              marginBottom: '20px'
-            }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Tipo de Reporte *
-                </label>
-                <select
-                  value={formData.tipo_reporte}
-                  onChange={(e) => setFormData({...formData, tipo_reporte: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                >
-                  <option value="">Seleccionar tipo</option>
-                  {tiposReporte.map(tipo => (
-                    <option key={tipo} value={tipo}>{tipo}</option>
-                  ))}
-                </select>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-purple-50">
+      {/* Header Principal */}
+      <div className="bg-white border-b border-slate-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-6 py-8">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-purple-700 to-violet-700 rounded-2xl p-3 shadow-lg">
+                <Icon name="FileText" size={32} className="text-white" />
               </div>
-
               <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Período *
-                </label>
-                <input
-                  type="text"
-                  value={formData.periodo}
-                  onChange={(e) => setFormData({...formData, periodo: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  placeholder="2024-01 / 2024-Q1 / 2024"
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Fecha de Inicio *
-                </label>
-                <input
-                  type="date"
-                  value={formData.fecha_inicio}
-                  onChange={(e) => setFormData({...formData, fecha_inicio: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Fecha de Fin *
-                </label>
-                <input
-                  type="date"
-                  value={formData.fecha_fin}
-                  onChange={(e) => setFormData({...formData, fecha_fin: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                  required
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Área
-                </label>
-                <select
-                  value={formData.area}
-                  onChange={(e) => setFormData({...formData, area: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                >
-                  <option value="">Seleccionar área</option>
-                  {areas.map(area => (
-                    <option key={area} value={area}>{area}</option>
-                  ))}
-                </select>
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Estado
-                </label>
-                <select
-                  value={formData.estado}
-                  onChange={(e) => setFormData({...formData, estado: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px'
-                  }}
-                >
-                  {estados.map(estado => (
-                    <option key={estado} value={estado}>{estado}</option>
-                  ))}
-                </select>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-violet-700 bg-clip-text text-transparent">
+                  Reportes Legales SST
+                </h1>
+                <p className="text-slate-600 font-medium">
+                  Cumplimiento Normativo • Estadísticas • Indicadores • Gestión Documental
+                </p>
               </div>
             </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '20px',
-              marginBottom: '20px'
-            }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Datos del Reporte (JSON)
-                </label>
-                <textarea
-                  value={typeof formData.datos_reporte === 'string' ? formData.datos_reporte : JSON.stringify(formData.datos_reporte, null, 2)}
-                  onChange={(e) => setFormData({...formData, datos_reporte: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    minHeight: '120px',
-                    resize: 'vertical',
-                    fontFamily: 'monospace'
-                  }}
-                  placeholder='{"total_trabajadores": 100, "horas_trabajadas": 176000}'
-                />
+            <div className="hidden md:flex items-center space-x-4 text-sm text-slate-600">
+              <div className="flex items-center space-x-2">
+                <div className="w-2 h-2 bg-purple-500 rounded-full animate-pulse"></div>
+                <span className="font-medium">Sistema Activo</span>
               </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Indicadores (JSON)
-                </label>
-                <textarea
-                  value={typeof formData.indicadores === 'string' ? formData.indicadores : JSON.stringify(formData.indicadores, null, 2)}
-                  onChange={(e) => setFormData({...formData, indicadores: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    minHeight: '120px',
-                    resize: 'vertical',
-                    fontFamily: 'monospace'
-                  }}
-                  placeholder='{"indice_frecuencia": 2.5, "indice_severidad": 45.2}'
-                />
-              </div>
+              <div className="w-px h-6 bg-slate-300"></div>
+              <span className="font-medium">
+                {new Date().toLocaleDateString('es-ES', {
+                  weekday: 'long',
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </span>
             </div>
+          </div>
 
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr 1fr',
-              gap: '20px',
-              marginBottom: '20px'
-            }}>
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Observaciones
-                </label>
-                <textarea
-                  value={formData.observaciones}
-                  onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    minHeight: '80px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="Observaciones relevantes del período..."
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Conclusiones
-                </label>
-                <textarea
-                  value={formData.conclusiones}
-                  onChange={(e) => setFormData({...formData, conclusiones: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    minHeight: '80px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="Conclusiones del análisis..."
-                />
-              </div>
-
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  color: '#374151',
-                  marginBottom: '6px'
-                }}>
-                  Recomendaciones
-                </label>
-                <textarea
-                  value={formData.recomendaciones}
-                  onChange={(e) => setFormData({...formData, recomendaciones: e.target.value})}
-                  style={{
-                    width: '100%',
-                    padding: '10px 12px',
-                    border: '1px solid #d1d5db',
-                    borderRadius: '8px',
-                    fontSize: '14px',
-                    minHeight: '80px',
-                    resize: 'vertical'
-                  }}
-                  placeholder="Recomendaciones y plan de acción..."
-                />
-              </div>
-            </div>
-
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: '#374151',
-                marginBottom: '6px'
-              }}>
-                URL del Archivo
-              </label>
-              <input
-                type="url"
-                value={formData.archivo_url}
-                onChange={(e) => setFormData({...formData, archivo_url: e.target.value})}
-                style={{
-                  width: '100%',
-                  padding: '10px 12px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px'
-                }}
-                placeholder="https://drive.google.com/..."
-              />
-            </div>
-
-            <div style={{ display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+          {/* Navegación de pestañas */}
+          <div className="flex space-x-1 mt-8 bg-slate-100 p-1 rounded-xl">
+            {[
+              { id: 'reportes', label: 'Reportes', icon: 'FileText', color: 'from-purple-600 to-purple-700' },
+              { id: 'plantillas', label: 'Plantillas', icon: 'Layout', color: 'from-violet-600 to-violet-700' },
+              { id: 'dashboard', label: 'Dashboard', icon: 'BarChart3', color: 'from-indigo-600 to-indigo-700' }
+            ].map((tab) => (
               <button
-                type="button"
-                onClick={cancelarForm}
-                style={{
-                  padding: '10px 20px',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  background: 'white',
-                  color: '#374151',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
-                }}
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`flex items-center space-x-2 px-6 py-3 rounded-lg transition-all duration-300 font-medium ${
+                  activeTab === tab.id
+                    ? `bg-gradient-to-r ${tab.color} text-white shadow-lg scale-105`
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-white/50'
+                }`}
               >
-                Cancelar
+                <Icon name={tab.icon} size={18} />
+                <span>{tab.label}</span>
               </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Contenido Principal */}
+      <div className="max-w-7xl mx-auto px-6 py-8">
+        {activeTab === 'reportes' && (
+          <div className="space-y-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-slate-900">Gestión de Reportes</h2>
+                <p className="text-slate-600">Generación y gestión de reportes legales SST</p>
+              </div>
               <button
-                type="submit"
-                style={{
-                  padding: '10px 20px',
-                  border: 'none',
-                  borderRadius: '8px',
-                  background: '#7c3aed',
-                  color: 'white',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
+                onClick={() => {
+                  setShowForm(true);
+                  resetForm();
                 }}
+                className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white px-4 py-2 rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg"
               >
-                {editingReporte ? 'Actualizar' : 'Guardar'}
+                <Icon name="Plus" size={20} />
+                <span>Nuevo Reporte</span>
               </button>
             </div>
-          </form>
-        </div>
-      )}
 
-      {/* Lista de Reportes */}
-      <div style={{
-        background: 'white',
-        borderRadius: '12px',
-        border: '1px solid #e2e8f0',
-        boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        overflow: 'hidden'
-      }}>
-        <div style={{ padding: '20px', borderBottom: '1px solid #e2e8f0' }}>
-          <h3 style={{
-            fontSize: '1.125rem',
-            fontWeight: '600',
-            color: '#1e293b',
-            margin: 0
-          }}>
-            Reportes Legales Registrados
-          </h3>
-        </div>
+            {/* Dashboard Estadísticas */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow text-center">
+                <div className="flex items-center justify-center space-x-3 mb-2">
+                  <div className="p-2 bg-gradient-to-r from-purple-500 to-violet-500 rounded-lg">
+                    <Icon name="FileText" size={20} className="text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-slate-600 mb-1">
+                  {reportesEsteAno}
+                </div>
+                <p className="text-sm font-semibold text-slate-700">Reportes {new Date().getFullYear()}</p>
+              </div>
 
-        {reportes.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <div style={{ fontSize: '3rem', marginBottom: '16px', opacity: 0.3 }}>📊</div>
-            <h3 style={{ color: '#6b7280', marginBottom: '8px' }}>No hay reportes registrados</h3>
-            <p style={{ color: '#9ca3af', fontSize: '14px' }}>
-              Comience creando su primer reporte legal SST
-            </p>
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow text-center">
+                <div className="flex items-center justify-center space-x-3 mb-2">
+                  <div className="p-2 bg-gradient-to-r from-amber-500 to-amber-600 rounded-lg">
+                    <Icon name="Edit" size={20} className="text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-amber-600 mb-1">
+                  {reportesBorrador}
+                </div>
+                <p className="text-sm font-semibold text-slate-700">En Borrador</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow text-center">
+                <div className="flex items-center justify-center space-x-3 mb-2">
+                  <div className="p-2 bg-gradient-to-r from-emerald-500 to-emerald-600 rounded-lg">
+                    <Icon name="CheckCircle" size={20} className="text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-emerald-600 mb-1">
+                  {reportesAprobados}
+                </div>
+                <p className="text-sm font-semibold text-slate-700">Aprobados</p>
+              </div>
+
+              <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow text-center">
+                <div className="flex items-center justify-center space-x-3 mb-2">
+                  <div className="p-2 bg-gradient-to-r from-blue-500 to-blue-600 rounded-lg">
+                    <Icon name="Send" size={20} className="text-white" />
+                  </div>
+                </div>
+                <div className="text-3xl font-bold text-blue-600 mb-1">
+                  {reportesEnviados}
+                </div>
+                <p className="text-sm font-semibold text-slate-700">Enviados</p>
+              </div>
+            </div>
+
+            {/* Botones de Reportes Rápidos */}
+            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-200 mb-8">
+              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center space-x-2">
+                <Icon name="Zap" size={20} className="text-purple-600" />
+                <span>Generar Reporte Rápido</span>
+              </h3>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+                <button
+                  onClick={() => generarReporteRapido('Mensual Accidentalidad')}
+                  className="flex items-center space-x-2 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-700 hover:bg-slate-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
+                >
+                  <Icon name="FileText" size={16} />
+                  <span>Reporte Mensual</span>
+                </button>
+
+                <button
+                  onClick={() => generarReporteRapido('Trimestral Estadísticas')}
+                  className="flex items-center space-x-2 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-700 hover:bg-slate-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
+                >
+                  <Icon name="BarChart" size={16} />
+                  <span>Reporte Trimestral</span>
+                </button>
+
+                <button
+                  onClick={() => generarReporteRapido('Anual Gestión SST')}
+                  className="flex items-center space-x-2 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-700 hover:bg-slate-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
+                >
+                  <Icon name="TrendingUp" size={16} />
+                  <span>Reporte Anual</span>
+                </button>
+
+                <button
+                  onClick={() => generarReporteRapido('Indicadores Cumplimiento')}
+                  className="flex items-center space-x-2 px-4 py-3 border border-slate-200 rounded-lg bg-white text-slate-700 hover:bg-slate-50 hover:border-purple-300 transition-all duration-200 text-sm font-medium"
+                >
+                  <Icon name="CheckCircle" size={16} />
+                  <span>Indicadores</span>
+                </button>
+              </div>
+            </div>
+
+            {/* Mensaje */}
+            {mensaje && (
+              <div className={`px-4 py-3 rounded-lg mb-6 ${
+                mensaje.includes('Error')
+                  ? 'bg-red-50 border border-red-200 text-red-700'
+                  : 'bg-green-50 border border-green-200 text-green-700'
+              }`}>
+                <div className="flex items-center space-x-2">
+                  <Icon
+                    name={mensaje.includes('Error') ? 'AlertCircle' : 'CheckCircle'}
+                    size={18}
+                  />
+                  <span className="font-medium">{mensaje}</span>
+                </div>
+              </div>
+            )}
+
+            {/* Formulario */}
+            {showForm && (
+              <div className="bg-white rounded-xl p-6 shadow-lg border border-slate-200 mb-8">
+                <div className="flex items-center justify-between mb-6">
+                  <h3 className="text-xl font-semibold text-slate-900">
+                    {editingReporte ? 'Editar Reporte Legal' : 'Nuevo Reporte Legal SST'}
+                  </h3>
+                  <button
+                    onClick={cancelarForm}
+                    className="p-2 text-slate-400 hover:text-slate-600 hover:bg-slate-100 rounded-lg transition-all"
+                  >
+                    <Icon name="X" size={20} />
+                  </button>
+                </div>
+
+                <form onSubmit={handleSubmit}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Tipo de Reporte *
+                      </label>
+                      <select
+                        value={formData.tipo_reporte}
+                        onChange={(e) => setFormData({...formData, tipo_reporte: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        required
+                      >
+                        <option value="">Seleccionar tipo</option>
+                        {tiposReporte.map(tipo => (
+                          <option key={tipo} value={tipo}>{tipo}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Período *
+                      </label>
+                      <input
+                        type="text"
+                        value={formData.periodo}
+                        onChange={(e) => setFormData({...formData, periodo: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        placeholder="2024-01 / 2024-Q1 / 2024"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Fecha de Inicio *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.fecha_inicio}
+                        onChange={(e) => setFormData({...formData, fecha_inicio: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Fecha de Fin *
+                      </label>
+                      <input
+                        type="date"
+                        value={formData.fecha_fin}
+                        onChange={(e) => setFormData({...formData, fecha_fin: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                        required
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Área
+                      </label>
+                      <select
+                        value={formData.area}
+                        onChange={(e) => setFormData({...formData, area: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      >
+                        <option value="">Seleccionar área</option>
+                        {areas.map(area => (
+                          <option key={area} value={area}>{area}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Estado
+                      </label>
+                      <select
+                        value={formData.estado}
+                        onChange={(e) => setFormData({...formData, estado: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      >
+                        {estados.map(estado => (
+                          <option key={estado} value={estado}>{estado}</option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Datos del Reporte (JSON)
+                      </label>
+                      <textarea
+                        value={typeof formData.datos_reporte === 'string' ? formData.datos_reporte : JSON.stringify(formData.datos_reporte, null, 2)}
+                        onChange={(e) => setFormData({...formData, datos_reporte: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors min-h-[120px] resize-y font-mono text-sm"
+                        placeholder='{"total_trabajadores": 100, "horas_trabajadas": 176000}'
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Indicadores (JSON)
+                      </label>
+                      <textarea
+                        value={typeof formData.indicadores === 'string' ? formData.indicadores : JSON.stringify(formData.indicadores, null, 2)}
+                        onChange={(e) => setFormData({...formData, indicadores: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors min-h-[120px] resize-y font-mono text-sm"
+                        placeholder='{"indice_frecuencia": 2.5, "indice_severidad": 45.2}'
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Observaciones
+                      </label>
+                      <textarea
+                        value={formData.observaciones}
+                        onChange={(e) => setFormData({...formData, observaciones: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors min-h-[80px] resize-y"
+                        placeholder="Observaciones relevantes del período..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Conclusiones
+                      </label>
+                      <textarea
+                        value={formData.conclusiones}
+                        onChange={(e) => setFormData({...formData, conclusiones: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors min-h-[80px] resize-y"
+                        placeholder="Conclusiones del análisis..."
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-slate-700 mb-2">
+                        Recomendaciones
+                      </label>
+                      <textarea
+                        value={formData.recomendaciones}
+                        onChange={(e) => setFormData({...formData, recomendaciones: e.target.value})}
+                        className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors min-h-[80px] resize-y"
+                        placeholder="Recomendaciones y plan de acción..."
+                      />
+                    </div>
+                  </div>
+
+                  <div className="mb-6">
+                    <label className="block text-sm font-medium text-slate-700 mb-2">
+                      URL del Archivo
+                    </label>
+                    <input
+                      type="url"
+                      value={formData.archivo_url}
+                      onChange={(e) => setFormData({...formData, archivo_url: e.target.value})}
+                      className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                      placeholder="https://drive.google.com/..."
+                    />
+                  </div>
+
+                  <div className="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      onClick={cancelarForm}
+                      className="px-4 py-2 border border-slate-300 rounded-lg text-slate-700 bg-white hover:bg-slate-50 transition-colors font-medium"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg font-medium"
+                    >
+                      {editingReporte ? 'Actualizar' : 'Guardar'}
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
+
+            {/* Lista de Reportes */}
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+              <div className="px-6 py-4 border-b border-slate-200">
+                <h3 className="text-lg font-semibold text-slate-900 flex items-center space-x-2">
+                  <Icon name="FileText" size={20} className="text-purple-600" />
+                  <span>Reportes Legales Registrados</span>
+                </h3>
+              </div>
+
+              {reportes.length === 0 ? (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <Icon name="FileText" size={32} className="text-slate-400" />
+                  </div>
+                  <h3 className="text-lg font-medium text-slate-600 mb-2">No hay reportes registrados</h3>
+                  <p className="text-slate-500 text-sm">
+                    Comience creando su primer reporte legal SST
+                  </p>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50">
+                      <tr>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Reporte
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Período
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Área
+                        </th>
+                        <th className="px-4 py-3 text-left text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Estado
+                        </th>
+                        <th className="px-4 py-3 text-center text-xs font-medium text-slate-500 uppercase tracking-wide">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-slate-200">
+                      {reportes.map((reporte) => (
+                        <tr key={reporte.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-4">
+                            <div>
+                              <div className="font-medium text-slate-900">
+                                {reporte.tipo_reporte}
+                              </div>
+                              <div className="text-xs text-slate-500">
+                                {reporte.fecha_inicio} - {reporte.fecha_fin}
+                              </div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-700">
+                            {reporte.periodo}
+                          </td>
+                          <td className="px-4 py-4 text-sm text-slate-700">
+                            {reporte.area || 'No especificada'}
+                          </td>
+                          <td className="px-4 py-4">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                              reporte.estado === 'enviado'
+                                ? 'bg-green-100 text-green-800 border border-green-200'
+                                : reporte.estado === 'aprobado'
+                                ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                : reporte.estado === 'revision'
+                                ? 'bg-yellow-100 text-yellow-800 border border-yellow-200'
+                                : 'bg-gray-100 text-gray-800 border border-gray-200'
+                            }`}>
+                              {reporte.estado}
+                            </span>
+                          </td>
+                          <td className="px-4 py-4 text-center">
+                            <div className="flex items-center justify-center space-x-2">
+                              {reporte.archivo_url && (
+                                <a
+                                  href={reporte.archivo_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="p-2 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="Ver archivo"
+                                >
+                                  <Icon name="ExternalLink" size={14} />
+                                </a>
+                              )}
+                              <button
+                                onClick={() => editarReporte(reporte)}
+                                className="p-2 text-slate-600 hover:text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                                title="Editar reporte"
+                              >
+                                <Icon name="Edit" size={14} />
+                              </button>
+                              <button
+                                onClick={() => eliminarReporte(reporte.id)}
+                                className="p-2 text-red-600 hover:text-red-800 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Eliminar reporte"
+                              >
+                                <Icon name="Trash2" size={14} />
+                              </button>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
           </div>
-        ) : (
-          <div style={{ overflowX: 'auto' }}>
-            <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-              <thead>
-                <tr style={{ background: '#f8fafc' }}>
-                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                    Reporte
-                  </th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                    Período
-                  </th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                    Área
-                  </th>
-                  <th style={{ padding: '16px', textAlign: 'left', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                    Estado
-                  </th>
-                  <th style={{ padding: '16px', textAlign: 'center', fontWeight: '600', color: '#374151', fontSize: '14px', borderBottom: '1px solid #e2e8f0' }}>
-                    Acciones
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {reportes.map((reporte) => (
-                  <tr key={reporte.id} style={{ borderBottom: '1px solid #f1f5f9' }}>
-                    <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
-                      <div>
-                        <div style={{ fontWeight: '500', color: '#1e293b' }}>
-                          {reporte.tipo_reporte}
-                        </div>
-                        <div style={{ fontSize: '12px', color: '#6b7280' }}>
-                          {reporte.fecha_inicio} - {reporte.fecha_fin}
-                        </div>
-                      </div>
-                    </td>
-                    <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
-                      {reporte.periodo}
-                    </td>
-                    <td style={{ padding: '16px', color: '#374151', fontSize: '14px' }}>
-                      {reporte.area || 'No especificada'}
-                    </td>
-                    <td style={{ padding: '16px', fontSize: '14px' }}>
-                      <span style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        padding: '4px 8px',
-                        borderRadius: '6px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        background: reporte.estado === 'enviado' ? '#f0fdf4' : 
-                                   reporte.estado === 'aprobado' ? '#eff6ff' :
-                                   reporte.estado === 'revision' ? '#fef3c7' : '#f3f4f6',
-                        color: reporte.estado === 'enviado' ? '#166534' : 
-                               reporte.estado === 'aprobado' ? '#2563eb' :
-                               reporte.estado === 'revision' ? '#92400e' : '#374151',
-                        border: `1px solid ${reporte.estado === 'enviado' ? '#bbf7d0' : 
-                                            reporte.estado === 'aprobado' ? '#c7d2fe' :
-                                            reporte.estado === 'revision' ? '#fcd34d' : '#d1d5db'}`
-                      }}>
-                        {reporte.estado}
-                      </span>
-                    </td>
-                    <td style={{ padding: '16px', textAlign: 'center' }}>
-                      <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                        {reporte.archivo_url && (
-                          <a
-                            href={reporte.archivo_url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            style={{
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              width: '32px',
-                              height: '32px',
-                              border: 'none',
-                              borderRadius: '6px',
-                              background: '#eff6ff',
-                              color: '#2563eb',
-                              cursor: 'pointer',
-                              textDecoration: 'none'
-                            }}
-                            title="Ver archivo"
-                          >
-                            <Icon name="ExternalLink" size={14} />
-                          </a>
-                        )}
-                        <button
-                          onClick={() => editarReporte(reporte)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            border: 'none',
-                            borderRadius: '6px',
-                            background: '#f3f4f6',
-                            color: '#374151',
-                            cursor: 'pointer'
-                          }}
-                          title="Editar reporte"
-                        >
-                          <Icon name="Edit" size={14} />
-                        </button>
-                        <button
-                          onClick={() => eliminarReporte(reporte.id)}
-                          style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: '32px',
-                            height: '32px',
-                            border: 'none',
-                            borderRadius: '6px',
-                            background: '#fef2f2',
-                            color: '#dc2626',
-                            cursor: 'pointer'
-                          }}
-                          title="Eliminar reporte"
-                        >
-                          <Icon name="Trash2" size={14} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+        )}
+
+        {activeTab === 'plantillas' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="Layout" size={32} className="text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Plantillas de Reportes</h3>
+              <p className="text-slate-600 mb-4">
+                Gestione las plantillas predefinidas para diferentes tipos de reportes legales SST
+              </p>
+              <button className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg font-medium">
+                Gestionar Plantillas
+              </button>
+            </div>
+          </div>
+        )}
+
+        {activeTab === 'dashboard' && (
+          <div className="space-y-6">
+            <div className="bg-white rounded-xl p-8 shadow-sm border border-slate-200 text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-purple-100 to-violet-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Icon name="BarChart3" size={32} className="text-purple-600" />
+              </div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">Dashboard Analítico</h3>
+              <p className="text-slate-600 mb-4">
+                Visualice estadísticas avanzadas, métricas de cumplimiento y tendencias de reportes SST
+              </p>
+              <button className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition-all shadow-lg font-medium">
+                Ver Dashboard
+              </button>
+            </div>
           </div>
         )}
       </div>
