@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '../common/Icons';
 import { supabase } from '../../services/supabase';
+import { useNotifications } from '../common/NotificationSystem';
 
 const ControlesForm = () => {
+  const { success, error, warning, info } = useNotifications();
   const [controles, setControles] = useState([]);
   const [riesgos, setRiesgos] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -92,6 +94,12 @@ const ControlesForm = () => {
           .eq('id', controlSeleccionado.id);
 
         if (error) throw error;
+
+        success('Control de riesgo actualizado', {
+          title: 'Control Modificado',
+          details: `Control ${formData.tipo_control} actualizado exitosamente`
+        });
+
         setMensaje('Control actualizado exitosamente');
       } else {
         controlToSave.created_at = new Date().toISOString();
@@ -100,6 +108,25 @@ const ControlesForm = () => {
           .insert([controlToSave]);
 
         if (error) throw error;
+
+        // Notificación basada en el tipo de control
+        if (formData.tipo_control === 'Eliminación') {
+          success('¡Control de máxima eficacia registrado!', {
+            title: 'Eliminación del Riesgo',
+            details: 'Se ha registrado una medida de eliminación, la más efectiva en la jerarquía de controles'
+          });
+        } else if (formData.tipo_control === 'Equipos de Protección Personal') {
+          warning('Control EPP registrado', {
+            title: 'Medida de Último Recurso',
+            details: 'Recuerde que los EPP son la última línea de defensa. Considere controles de mayor jerarquía.'
+          });
+        } else {
+          info('Control de riesgo registrado', {
+            title: 'Nueva Medida de Control',
+            details: `Se ha implementado un control de tipo: ${formData.tipo_control}`
+          });
+        }
+
         setMensaje('Control guardado exitosamente');
       }
 
@@ -107,6 +134,10 @@ const ControlesForm = () => {
       await cargarDatos();
     } catch (error) {
       console.error('Error al guardar control:', error);
+      error('Error al guardar el control', {
+        title: 'Error en la Operación',
+        details: 'No se pudo guardar el control de riesgo. Verifique los datos e intente nuevamente.'
+      });
       setMensaje('Error al guardar el control');
     } finally {
       setLoading(false);

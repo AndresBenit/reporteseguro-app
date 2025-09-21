@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Icon } from '../common/Icons';
 import { supabase } from '../../services/supabase';
+import { useNotifications } from '../common/NotificationSystem';
 
 const EvaluacionForm = () => {
+  const { success, error, warning, info } = useNotifications();
   const [riesgos, setRiesgos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -157,6 +159,12 @@ const EvaluacionForm = () => {
           .eq('id', riesgoSeleccionado.id);
 
         if (error) throw error;
+
+        success('Evaluación de riesgo actualizada exitosamente', {
+          title: 'Riesgo Actualizado',
+          details: `El riesgo ${formData.codigo_riesgo} ha sido actualizado con nivel ${interpretacionRiesgo}`
+        });
+
         setMensaje('Riesgo actualizado exitosamente');
       } else {
         riesgoToSave.created_at = new Date().toISOString();
@@ -165,6 +173,25 @@ const EvaluacionForm = () => {
           .insert([riesgoToSave]);
 
         if (error) throw error;
+
+        // Notificación basada en el nivel de riesgo
+        if (nivelRiesgo >= 600) {
+          warning('¡Riesgo crítico registrado!', {
+            title: 'Atención Urgente Requerida',
+            details: `Se ha identificado un riesgo crítico: ${formData.codigo_riesgo}. Requiere acción inmediata.`
+          });
+        } else if (nivelRiesgo >= 150) {
+          info('Riesgo alto registrado', {
+            title: 'Control Necesario',
+            details: `Riesgo ${formData.codigo_riesgo} requiere controles específicos según GTC-45`
+          });
+        } else {
+          success('Evaluación de riesgo completada', {
+            title: 'Riesgo Registrado',
+            details: `El riesgo ${formData.codigo_riesgo} ha sido registrado exitosamente en la matriz`
+          });
+        }
+
         setMensaje('Riesgo guardado exitosamente');
       }
 
@@ -172,6 +199,10 @@ const EvaluacionForm = () => {
       await cargarRiesgos();
     } catch (error) {
       console.error('Error al guardar riesgo:', error);
+      error('Error al guardar la evaluación', {
+        title: 'Error en la Operación',
+        details: 'No se pudo guardar la evaluación de riesgo. Verifique los datos e intente nuevamente.'
+      });
       setMensaje('Error al guardar el riesgo');
     } finally {
       setLoading(false);
