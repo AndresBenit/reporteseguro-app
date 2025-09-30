@@ -160,6 +160,9 @@ const AnalisisEPP = () => {
       return acc;
     }, {});
 
+    console.log('[EPP ANÁLISIS] Total elementos extraídos:', todosLosElementos.length);
+    console.log('[EPP ANÁLISIS] Elementos agrupados:', elementosMasPedidos);
+
     const top5Elementos = Object.entries(elementosMasPedidos)
       .sort(([,a], [,b]) => b - a)
       .slice(0, 5)
