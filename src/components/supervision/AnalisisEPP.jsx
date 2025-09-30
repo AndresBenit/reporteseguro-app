@@ -142,7 +142,8 @@ const AnalisisEPP = () => {
     const totalEntregas = reportesValidos.length;
     const elementosUnicos = Array.from(todosLosNombresElementos);
     const personasAtendidas = [...new Set(reportesValidos.map(r => r?.colaboradorinvolucrado).filter(Boolean))];
-    const areasAtendidas = [...new Set(reportesValidos.map(r => r?.area).filter(Boolean))];
+    // Áreas únicas de colaboradores (no del reporte)
+    const areasAtendidas = [...new Set(todosLosElementos.map(e => e.area).filter(a => a && a !== 'Sin área'))];
 
     // 2. EPP más pedidos (Top 5) - usando cantidades reales
     const elementosMasPedidos = todosLosElementos.reduce((acc, elem) => {
