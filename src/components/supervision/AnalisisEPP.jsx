@@ -90,6 +90,8 @@ const AnalisisEPP = () => {
 
   // 📊 ANÁLISIS DE DATOS EPP
   const analisisEPP = useMemo(() => {
+    console.log('[EPP ANÁLISIS] Re-calculando análisis con', reportesFiltrados.length, 'reportes filtrados');
+
     // Validar que reportesFiltrados sea un array
     const reportesValidos = Array.isArray(reportesFiltrados) ? reportesFiltrados : [];
 
