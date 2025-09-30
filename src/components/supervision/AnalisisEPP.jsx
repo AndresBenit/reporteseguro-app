@@ -50,11 +50,11 @@ const AnalisisEPP = () => {
     });
   }, [reportesEPP, fechaInicio, fechaFin]);
 
-  // Funciones auxiliares de colores (DEBE estar antes del useMemo)
-  const getColorByElement = (elemento) => {
+  // Funciones auxiliares de colores (Memorizadas para evitar re-renders)
+  const getColorByElement = React.useCallback((elemento) => {
     const colors = {
       'Casco': '#ef4444',
-      'Guantes': '#3b82f6', 
+      'Guantes': '#3b82f6',
       'Botas': '#8b5cf6',
       'Chaleco': '#f59e0b',
       'Gafas': '#10b981',
@@ -62,34 +62,72 @@ const AnalisisEPP = () => {
       'Auriculares': '#6366f1'
     };
     return colors[elemento] || '#6b7280';
-  };
+  }, []);
 
-  const getColorByArea = (area) => {
+  const getColorByArea = React.useCallback((area) => {
     const hash = area.split('').reduce((a, b) => {
       a = ((a << 5) - a) + b.charCodeAt(0);
       return a & a;
     }, 0);
     const colors = ['#3b82f6', '#ef4444', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899'];
     return colors[Math.abs(hash) % colors.length];
-  };
+  }, []);
 
   // 📊 ANÁLISIS DE DATOS EPP
   const analisisEPP = useMemo(() => {
     // Validar que reportesFiltrados sea un array
     const reportesValidos = Array.isArray(reportesFiltrados) ? reportesFiltrados : [];
-    
+
+    // Extraer todos los elementos EPP normalizando formato antiguo y nuevo
+    const todosLosElementos = [];
+    const todosLosNombresElementos = new Set();
+
+    reportesValidos.forEach(reporte => {
+      const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
+      const area = reporte?.area || 'Sin área';
+      const fecha = reporte?.created_at;
+
+      // FORMATO NUEVO: elementos_epp es un array
+      if (Array.isArray(reporte?.elementos_epp) && reporte.elementos_epp.length > 0) {
+        reporte.elementos_epp.forEach(elem => {
+          const nombreElem = elem?.nombre || 'Sin especificar';
+          const cantidadElem = Number(elem?.cantidad) || 1;
+
+          todosLosElementos.push({
+            nombre: nombreElem,
+            cantidad: cantidadElem > 0 ? cantidadElem : 1,
+            persona,
+            area,
+            fecha
+          });
+          todosLosNombresElementos.add(nombreElem);
+        });
+      }
+      // FORMATO ANTIGUO: elemento_epp es string y cantidad es campo directo
+      else if (reporte?.elemento_epp) {
+        const nombreElem = reporte.elemento_epp;
+        const cantidadElem = Number(reporte?.cantidad) || 1;
+
+        todosLosElementos.push({
+          nombre: nombreElem,
+          cantidad: cantidadElem > 0 ? cantidadElem : 1,
+          persona,
+          area,
+          fecha
+        });
+        todosLosNombresElementos.add(nombreElem);
+      }
+    });
+
     // 1. Estadísticas generales
     const totalEntregas = reportesValidos.length;
-    const elementosUnicos = [...new Set(reportesValidos.map(r => r?.elemento_epp).filter(Boolean))];
+    const elementosUnicos = Array.from(todosLosNombresElementos);
     const personasAtendidas = [...new Set(reportesValidos.map(r => r?.colaboradorinvolucrado).filter(Boolean))];
     const areasAtendidas = [...new Set(reportesValidos.map(r => r?.area).filter(Boolean))];
 
-    // 2. EPP más pedidos (Top 5)
-    const elementosMasPedidos = reportesValidos.reduce((acc, reporte) => {
-      const elemento = reporte?.elemento_epp || 'Sin especificar';
-      const cantidad = parseInt(reporte?.cantidad);
-      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
-      acc[elemento] = (acc[elemento] || 0) + cantidadValida;
+    // 2. EPP más pedidos (Top 5) - usando cantidades reales
+    const elementosMasPedidos = todosLosElementos.reduce((acc, elem) => {
+      acc[elem.nombre] = (acc[elem.nombre] || 0) + elem.cantidad;
       return acc;
     }, {});
 
@@ -103,12 +141,9 @@ const AnalisisEPP = () => {
       }))
       .filter(item => item.cantidad > 0);
 
-    // 3. Entregas por área
-    const entregasPorArea = reportesValidos.reduce((acc, reporte) => {
-      const area = reporte?.area || 'Sin área';
-      const cantidad = parseInt(reporte?.cantidad);
-      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
-      acc[area] = (acc[area] || 0) + cantidadValida;
+    // 3. Entregas por área - usando cantidades reales
+    const entregasPorArea = todosLosElementos.reduce((acc, elem) => {
+      acc[elem.area] = (acc[elem.area] || 0) + elem.cantidad;
       return acc;
     }, {});
 
@@ -121,12 +156,9 @@ const AnalisisEPP = () => {
       }))
       .filter(item => item.cantidad > 0);
 
-    // 4. Personas que han pedido EPP
-    const personasConEPP = reportesValidos.reduce((acc, reporte) => {
-      const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
-      const cantidad = parseInt(reporte?.cantidad);
-      const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
-      acc[persona] = (acc[persona] || 0) + cantidadValida;
+    // 4. Personas que han pedido EPP - usando cantidades reales
+    const personasConEPP = todosLosElementos.reduce((acc, elem) => {
+      acc[elem.persona] = (acc[elem.persona] || 0) + elem.cantidad;
       return acc;
     }, {});
 
@@ -139,26 +171,25 @@ const AnalisisEPP = () => {
       }))
       .filter(item => item.cantidad > 0);
 
-    // 5. Entregas por mes (últimos 6 meses)
+    // 5. Entregas por mes (últimos 6 meses) - usando cantidades reales
     const entregasPorMes = [];
     for (let i = 5; i >= 0; i--) {
       const fecha = new Date();
       fecha.setMonth(fecha.getMonth() - i);
       const mesYear = `${fecha.toLocaleDateString('es-ES', { month: 'short' })} ${fecha.getFullYear()}`;
-      
-      const entregasDelMes = reportesValidos.filter(r => {
-        const fechaReporte = new Date(r?.created_at);
-        return fechaReporte.getMonth() === fecha.getMonth() && 
-               fechaReporte.getFullYear() === fecha.getFullYear();
-      }).reduce((sum, r) => {
-        const cantidad = parseInt(r?.cantidad);
-        const cantidadValida = isNaN(cantidad) ? 1 : Math.max(cantidad, 1);
-        return sum + cantidadValida;
-      }, 0);
+
+      const entregasDelMes = todosLosElementos
+        .filter(elem => {
+          if (!elem.fecha) return false;
+          const fechaElem = new Date(elem.fecha);
+          return fechaElem.getMonth() === fecha.getMonth() &&
+                 fechaElem.getFullYear() === fecha.getFullYear();
+        })
+        .reduce((sum, elem) => sum + elem.cantidad, 0);
 
       entregasPorMes.push({
         mes: mesYear,
-        entregas: isNaN(entregasDelMes) ? 0 : entregasDelMes
+        entregas: entregasDelMes
       });
     }
 
