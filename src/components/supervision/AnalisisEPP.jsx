@@ -232,7 +232,7 @@ const AnalisisEPP = () => {
       topPersonas: topPersonas || [],
       entregasPorMes: entregasPorMes || []
     };
-  }, [reportesFiltrados, getColorByElement, getColorByArea]);
+  }, [reportesFiltrados, getColorByElement, getColorByArea, colaboradoresMap]);
 
 
   if (loading || loadingColaboradores) {
