@@ -19,25 +19,17 @@ export const useReportes = () => {
         schema: 'public', 
         table: 'reportes' 
       }, (payload) => {
-        console.log('[REALTIME] Real-time update:', payload);
-        
         switch (payload.eventType) {
           case 'INSERT':
             setReportes(prev => [payload.new, ...prev]);
-            console.log('[REALTIME] Reporte agregado en tiempo real');
             break;
           case 'UPDATE':
-            setReportes(prev => prev.map(r => 
+            setReportes(prev => prev.map(r =>
               r.id === payload.new.id ? { ...r, ...payload.new } : r
             ));
-            console.log('[REALTIME] Reporte actualizado en tiempo real');
             break;
           case 'DELETE':
             setReportes(prev => prev.filter(r => r.id !== payload.old.id));
-            console.log('[REALTIME] Reporte eliminado en tiempo real');
-            break;
-          default:
-            console.log('[REALTIME] Evento no manejado:', payload.eventType);
             break;
         }
       })
@@ -51,20 +43,16 @@ export const useReportes = () => {
   const loadReportes = async () => {
     try {
       setLoading(true);
-      console.log('[REPORTES] Cargando reportes desde Supabase...');
-
       const data = await dbHelpers.getAll('reportes', {
         orderBy: 'created_at',
         ascending: false
       });
-
-      console.log('[REPORTES] Reportes cargados:', data.length);
-      console.log('[REPORTES] Datos completos:', data);
       setReportes(data);
       setError(null);
     } catch (err) {
-      console.error("[REPORTES] Error cargando reportes:", err);
-      console.error("[REPORTES] Detalles del error:", err.message, err.stack);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[REPORTES] Error cargando reportes:", err);
+      }
       setError("Error conectando con la base de datos");
     } finally {
       setLoading(false);
@@ -74,19 +62,13 @@ export const useReportes = () => {
   const eliminarReporte = async (id) => {
     if (window.confirm("¿Seguro que deseas eliminar este reporte? Esta acción no se puede deshacer.")) {
       try {
-        console.log(`🗑️ Eliminando reporte ${id} de Supabase...`);
         setUpdating(prev => new Set([...prev, id]));
-        
         await dbHelpers.delete('reportes', id);
-        
-        // Actualizar estado local inmediatamente
         setReportes(prev => prev.filter(reporte => reporte.id !== id));
-        
-        console.log(`[REPORTES] Reporte ${id} eliminado exitosamente`);
-        
       } catch (err) {
-        console.error("[REPORTES] Error eliminando reporte:", err);
-        console.error("Error al eliminar el reporte:", err.message);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("[REPORTES] Error eliminando reporte:", err);
+        }
       } finally {
         setUpdating(prev => {
           const newSet = new Set(prev);
@@ -99,29 +81,19 @@ export const useReportes = () => {
 
   const actualizarEstado = async (id, estado) => {
     try {
-      // Normalizar el estado antes de enviarlo
       const estadoNormalizado = reporteUtils.normalizeEstado(estado);
-      console.log(`[REPORTES] Actualizando reporte ${id} al estado: ${estado} (normalizado: ${estadoNormalizado})`);
-      
       setUpdating(prev => new Set([...prev, id]));
-      
-      // ✅ SOLO usar campos que existen en la base de datos actual
-      const updateData = { 
-        estado: estadoNormalizado
-      };
-      
+
+      const updateData = { estado: estadoNormalizado };
       const updatedReporte = await dbHelpers.update('reportes', id, updateData);
-      
-      // ✅ Actualización inmediata local (fallback si realtime falla)
-      setReportes(prev => prev.map(r => 
+
+      setReportes(prev => prev.map(r =>
         r.id === id ? { ...r, ...updatedReporte } : r
       ));
-      
-      console.log(`[REPORTES] Estado actualizado exitosamente a ${estadoNormalizado}`);
-      
     } catch (err) {
-      console.error("[REPORTES] Error actualizando estado:", err);
-      console.error("Error al actualizar el estado:", err.message);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("[REPORTES] Error actualizando estado:", err);
+      }
     } finally {
       setUpdating(prev => {
         const newSet = new Set(prev);

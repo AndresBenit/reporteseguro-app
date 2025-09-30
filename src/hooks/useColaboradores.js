@@ -19,22 +19,18 @@ export const useColaboradores = () => {
     
     // Suscripción en tiempo real
     const subscription = dbHelpers.subscribe('colaboradores', (payload) => {
-      console.log('🔄 Real-time update colaboradores:', payload);
-      
       switch (payload.eventType) {
         case 'INSERT':
           setColaboradores(prev => [payload.new, ...prev]);
-          loadColaboradoresStats(); // Recargar stats
+          loadColaboradoresStats();
           break;
         case 'UPDATE':
           setColaboradores(prev => prev.map(c => c.id === payload.new.id ? payload.new : c));
-          loadColaboradoresStats(); // Recargar stats
+          loadColaboradoresStats();
           break;
         case 'DELETE':
           setColaboradores(prev => prev.filter(c => c.id !== payload.old.id));
-          loadColaboradoresStats(); // Recargar stats
-          break;
-        default:
+          loadColaboradoresStats();
           break;
       }
     });
@@ -47,18 +43,16 @@ export const useColaboradores = () => {
   const loadColaboradores = async () => {
     try {
       setLoading(true);
-      console.log('🔄 Cargando colaboradores desde Supabase...');
-      
       const data = await dbHelpers.getAll('colaboradores', {
         orderBy: 'nombre',
         ascending: true
       });
-      
-      console.log('✅ Colaboradores cargados:', data.length);
       setColaboradores(data);
       setError(null);
     } catch (err) {
-      console.error("❌ Error cargando colaboradores:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error cargando colaboradores:", err);
+      }
       setError("Error conectando con la base de datos");
     } finally {
       setLoading(false);
@@ -67,41 +61,28 @@ export const useColaboradores = () => {
 
   const loadColaboradoresStats = async () => {
     try {
-      console.log('🔄 Calculando estadísticas de colaboradores...');
-      
-      // Obtener todos los colaboradores activos
       const colaboradoresActivos = await dbHelpers.getAll('colaboradores', {
         filters: { activo: true }
       });
-      
-      // Contar total
+
       const total = await dbHelpers.count('colaboradores');
       const activos = colaboradoresActivos.length;
-      
-      // Contar por área/centro
-      const centroIndustrial = colaboradoresActivos.filter(c => 
-        c.area?.toLowerCase().includes('centro') || 
+
+      const centroIndustrial = colaboradoresActivos.filter(c =>
+        c.area?.toLowerCase().includes('centro') ||
         c.area?.toLowerCase().includes('industrial')
       ).length;
-      
-      const hornosSolera = colaboradoresActivos.filter(c => 
-        c.area?.toLowerCase().includes('horno') || 
+
+      const hornosSolera = colaboradoresActivos.filter(c =>
+        c.area?.toLowerCase().includes('horno') ||
         c.area?.toLowerCase().includes('solera')
       ).length;
-      
-      const stats = {
-        total,
-        activos,
-        centroIndustrial,
-        hornosSolera
-      };
-      
-      console.log('✅ Stats colaboradores:', stats);
-      setColaboradoresStats(stats);
-      
+
+      setColaboradoresStats({ total, activos, centroIndustrial, hornosSolera });
     } catch (err) {
-      console.error('❌ Error calculando estadísticas:', err);
-      // Mantener stats anteriores en caso de error
+      if (process.env.NODE_ENV === 'development') {
+        console.error('Error calculando estadísticas:', err);
+      }
     }
   };
 
@@ -118,12 +99,11 @@ export const useColaboradores = () => {
       };
 
       const result = await dbHelpers.create('colaboradores', nuevoColaborador);
-      console.log('✅ Colaborador creado:', result.id);
-      
       return result;
-      
     } catch (err) {
-      console.error("❌ Error creando colaborador:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error creando colaborador:", err);
+      }
       throw new Error("Error al crear el colaborador: " + err.message);
     } finally {
       setUpdating(prev => {
@@ -144,12 +124,11 @@ export const useColaboradores = () => {
       };
 
       const result = await dbHelpers.update('colaboradores', id, datosActualizacion);
-      console.log('✅ Colaborador actualizado:', id);
-      
       return result;
-      
     } catch (err) {
-      console.error("❌ Error actualizando colaborador:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error actualizando colaborador:", err);
+      }
       throw new Error("Error al actualizar el colaborador: " + err.message);
     } finally {
       setUpdating(prev => {
@@ -166,12 +145,11 @@ export const useColaboradores = () => {
         setUpdating(prev => new Set([...prev, id]));
         
         await dbHelpers.delete('colaboradores', id);
-        
-        console.log(`✅ Colaborador ${id} eliminado exitosamente`);
         alert("Colaborador eliminado exitosamente");
-        
       } catch (err) {
-        console.error("❌ Error eliminando colaborador:", err);
+        if (process.env.NODE_ENV === 'development') {
+          console.error("Error eliminando colaborador:", err);
+        }
         alert("Error al eliminar el colaborador: " + err.message);
       } finally {
         setUpdating(prev => {
@@ -193,7 +171,9 @@ export const useColaboradores = () => {
       });
       
     } catch (err) {
-      console.error("❌ Error cambiando estado activo:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error cambiando estado activo:", err);
+      }
       throw new Error("Error al cambiar estado del colaborador");
     }
   };
@@ -254,12 +234,11 @@ export const useColaboradores = () => {
           });
         }
       }
-
-      console.log('📊 Resultado importación:', resultados);
       return resultados;
-      
     } catch (err) {
-      console.error("❌ Error en importación masiva:", err);
+      if (process.env.NODE_ENV === 'development') {
+        console.error("Error en importación masiva:", err);
+      }
       throw new Error("Error en la importación masiva");
     } finally {
       setUpdating(prev => {
