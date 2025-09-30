@@ -1,15 +1,15 @@
 import React, { useState, useMemo } from 'react';
-import { 
-  BarChart, 
-  Bar, 
-  PieChart, 
-  Pie, 
-  Cell, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import {
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   LineChart,
   Line,
@@ -18,10 +18,12 @@ import {
   AreaChart
 } from 'recharts';
 import { useReportes } from '../../hooks/useReportes';
+import { useColaboradores } from '../../hooks/useColaboradores';
 import { Icon } from '../common/Icons';
 
 const AnalisisEPP = () => {
   const { reportes, loading } = useReportes();
+  const { colaboradores } = useColaboradores();
   const [fechaInicio, setFechaInicio] = useState(() => {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - 30);
@@ -35,6 +37,19 @@ const AnalisisEPP = () => {
   const reportesEPP = useMemo(() => {
     return reportes.filter(r => r.tipo === 'epp' || r.tipo_reporte === 'epp');
   }, [reportes]);
+
+  // Mapa de colaboradores para lookup rápido
+  const colaboradoresMap = useMemo(() => {
+    const map = {};
+    if (Array.isArray(colaboradores)) {
+      colaboradores.forEach(c => {
+        if (c?.nombre) {
+          map[c.nombre.toUpperCase().trim()] = c;
+        }
+      });
+    }
+    return map;
+  }, [colaboradores]);
 
   // Filtros de fecha por rango
   const reportesFiltrados = useMemo(() => {
@@ -84,7 +99,11 @@ const AnalisisEPP = () => {
 
     reportesValidos.forEach(reporte => {
       const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
-      const area = reporte?.area || 'Sin área';
+
+      // Buscar área del colaborador (más precisa que área del reporte)
+      const colaborador = colaboradoresMap[persona.toUpperCase().trim()];
+      const area = colaborador?.area || reporte?.area || 'Sin área';
+
       const fecha = reporte?.created_at;
 
       // FORMATO NUEVO: elementos_epp es un array
