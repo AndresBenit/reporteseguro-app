@@ -23,7 +23,7 @@ import { Icon } from '../common/Icons';
 
 const AnalisisEPP = () => {
   const { reportes, loading } = useReportes();
-  const { colaboradores } = useColaboradores();
+  const { colaboradores, loading: loadingColaboradores } = useColaboradores();
   const [fechaInicio, setFechaInicio] = useState(() => {
     const fecha = new Date();
     fecha.setDate(fecha.getDate() - 30);
@@ -228,14 +228,17 @@ const AnalisisEPP = () => {
   }, [reportesFiltrados, getColorByElement, getColorByArea]);
 
 
-  if (loading) {
+  if (loading || loadingColaboradores) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50 flex items-center justify-center">
         <div className="text-center">
           <div className="bg-white rounded-2xl p-8 shadow-xl">
             <Icon name="Shield" size={64} className="mx-auto text-slate-400 mb-4" />
             <h3 className="text-xl font-semibold text-slate-700 mb-2">Cargando Análisis EPP</h3>
-            <p className="text-slate-500">Procesando datos de elementos de protección...</p>
+            <p className="text-slate-500">
+              {loading && loadingColaboradores ? 'Cargando datos...' :
+               loading ? 'Cargando reportes...' : 'Cargando colaboradores...'}
+            </p>
           </div>
         </div>
       </div>
