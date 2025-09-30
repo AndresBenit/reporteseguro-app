@@ -101,7 +101,14 @@ const AnalisisEPP = () => {
       const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
 
       // Buscar área del colaborador (SOLO usar área del colaborador, no del reporte)
-      const colaborador = colaboradoresMap[persona.toUpperCase().trim()];
+      const personaKey = persona.toUpperCase().trim();
+      const colaborador = colaboradoresMap[personaKey];
+
+      // Debug temporal
+      if (!colaborador && persona !== 'Anónimo') {
+        console.log('[EPP DEBUG] No encontrado:', persona, '| Key buscada:', personaKey, '| Keys disponibles:', Object.keys(colaboradoresMap).slice(0, 5));
+      }
+
       const area = colaborador?.area || 'Sin área'; // Solo área del colaborador
 
       const fecha = reporte?.created_at;

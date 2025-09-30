@@ -144,7 +144,8 @@ const ControlEPP = () => {
   const seleccionarColaborador = (colaborador) => {
     setForm({
       ...form,
-      nombre: colaborador.nombre
+      nombre: colaborador.nombre,
+      area: colaborador.area || form.area  // ✅ Auto-completar área del colaborador
     });
     setSearchTerm(colaborador.nombre);
     setShowSugerencias(false);
