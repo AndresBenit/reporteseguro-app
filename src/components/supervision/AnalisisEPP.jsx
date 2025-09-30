@@ -148,7 +148,7 @@ const AnalisisEPP = () => {
     });
 
     // 1. Estadísticas generales
-    const totalEntregas = reportesValidos.length;
+    const totalElementosEntregados = todosLosElementos.reduce((sum, elem) => sum + elem.cantidad, 0);
     const elementosUnicos = Array.from(todosLosNombresElementos);
     const personasAtendidas = [...new Set(reportesValidos.map(r => r?.colaboradorinvolucrado).filter(Boolean))];
     // Áreas únicas de colaboradores (extraídas de todosLosElementos que ya tiene área del colaborador)
@@ -227,7 +227,7 @@ const AnalisisEPP = () => {
 
     return {
       estadisticas: {
-        totalEntregas: isNaN(totalEntregas) ? 0 : totalEntregas,
+        totalElementosEntregados: isNaN(totalElementosEntregados) ? 0 : totalElementosEntregados,
         elementosUnicos: isNaN(elementosUnicos.length) ? 0 : elementosUnicos.length,
         personasAtendidas: isNaN(personasAtendidas.length) ? 0 : personasAtendidas.length,
         areasAtendidas: isNaN(areasAtendidas.length) ? 0 : areasAtendidas.length
@@ -368,8 +368,8 @@ const AnalisisEPP = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {[
             {
-              titulo: 'Total Entregas',
-              valor: analisisEPP.estadisticas.totalEntregas,
+              titulo: 'Elementos Entregados',
+              valor: analisisEPP.estadisticas.totalElementosEntregados,
               icon: 'Package',
               color: 'from-blue-500 to-blue-600',
               bgColor: 'bg-blue-50',
