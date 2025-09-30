@@ -3,7 +3,7 @@ import { Icon } from '../common/Icons';
 import AnalisisSupervision from './AnalisisSupervision';
 import AnalisisEPP from './AnalisisEPP';
 
-const SupervisionMain = () => {
+const SupervisionMain = ({ reportes }) => {
   const [vistaActiva, setVistaActiva] = useState('general');
 
   const vistas = [
@@ -109,8 +109,8 @@ const SupervisionMain = () => {
 
       {/* Contenido Principal */}
       <div className="max-w-7xl mx-auto px-6 py-8">
-        {vistaActiva === 'general' && <AnalisisSupervision />}
-        {vistaActiva === 'epp' && <AnalisisEPP />}
+        {vistaActiva === 'general' && <AnalisisSupervision reportes={reportes} />}
+        {vistaActiva === 'epp' && <AnalisisEPP reportes={reportes} />}
       </div>
     </div>
   );

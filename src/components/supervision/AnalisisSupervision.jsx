@@ -21,9 +21,10 @@ import { useReportes } from '../../hooks/useReportes';
 import { dbHelpers } from '../../services/supabase';
 import { Icon } from '../common/Icons';
 
-const AnalisisSupervision = () => {
-  // Hooks para datos
-  const { reportes, loading: reportesLoading } = useReportes();
+const AnalisisSupervision = ({ reportes: reportesProp }) => {
+  // Usar reportes desde props (viene de App.jsx con realtime activo)
+  const reportes = reportesProp || [];
+  const reportesLoading = false; // Ya no necesitamos loading porque los reportes vienen cargados
   const [supervisionCampo, setSupervisionCampo] = useState([]);
   const [abordajesCampo, setAbordajesCampo] = useState([]);
   const [loading, setLoading] = useState(true);

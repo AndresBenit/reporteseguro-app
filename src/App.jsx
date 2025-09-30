@@ -251,7 +251,7 @@ function App() {
                   } />
                   
                   {/* Módulo de Supervisión */}
-                  <Route path="/supervision" element={<SupervisionMain />} />
+                  <Route path="/supervision" element={<SupervisionMain reportes={reportes} />} />
                   
                   {/* Módulo de Colaboradores */}
                   <Route path="/colaboradores" element={<ColaboradoresMain />} />

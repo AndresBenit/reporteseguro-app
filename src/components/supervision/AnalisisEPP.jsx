@@ -21,8 +21,10 @@ import { useReportes } from '../../hooks/useReportes';
 import { useColaboradores } from '../../hooks/useColaboradores';
 import { Icon } from '../common/Icons';
 
-const AnalisisEPP = () => {
-  const { reportes, loading } = useReportes();
+const AnalisisEPP = ({ reportes: reportesProp }) => {
+  // Usar reportes desde props (viene de App.jsx con realtime activo)
+  const reportes = reportesProp || [];
+  const loading = false; // Ya no necesitamos loading porque los reportes vienen cargados
   const { colaboradores, loading: loadingColaboradores } = useColaboradores();
   const [fechaInicio, setFechaInicio] = useState(() => {
     const fecha = new Date();
