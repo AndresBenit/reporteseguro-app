@@ -100,9 +100,9 @@ const AnalisisEPP = () => {
     reportesValidos.forEach(reporte => {
       const persona = reporte?.colaboradorinvolucrado || 'Anónimo';
 
-      // Buscar área del colaborador (más precisa que área del reporte)
+      // Buscar área del colaborador (SOLO usar área del colaborador, no del reporte)
       const colaborador = colaboradoresMap[persona.toUpperCase().trim()];
-      const area = colaborador?.area || reporte?.area || 'Sin área';
+      const area = colaborador?.area || 'Sin área'; // Solo área del colaborador
 
       const fecha = reporte?.created_at;
 
