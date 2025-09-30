@@ -79,14 +79,11 @@ const ControlEPP = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        console.log('Cargando datos...');
-        
         // Cargar colaboradores
         const colaboradoresData = await dbHelpers.getAll('colaboradores', {
           orderBy: 'nombre',
           ascending: true
         });
-        console.log('Colaboradores cargados:', colaboradoresData.length);
         setColaboradores(colaboradoresData);
 
         // Cargar productos EPP
@@ -95,10 +92,9 @@ const ControlEPP = () => {
           orderBy: 'nombre',
           ascending: true
         });
-        console.log('Productos EPP cargados:', productosData.length);
         setProductosEPP(productosData);
         setCargandoProductos(false);
-        
+
       } catch (error) {
         console.error('Error cargando datos:', error);
         setCargandoProductos(false);
@@ -110,13 +106,11 @@ const ControlEPP = () => {
 
   // Filtrar colaboradores cuando cambia el término de búsqueda
   useEffect(() => {
-    console.log('Filtrando colaboradores:', { searchTerm, colaboradores: colaboradores.length });
     if (searchTerm.length >= 2) {
       const filtrados = colaboradores.filter((colaborador) =>
         colaborador.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         colaborador.area.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      console.log('Colaboradores filtrados:', filtrados.length);
       setColaboradoresFiltrados(filtrados);
       setShowSugerencias(filtrados.length > 0);
     } else {
@@ -128,7 +122,6 @@ const ControlEPP = () => {
   // Manejar búsqueda de colaborador
   const handleSearchChange = (e) => {
     const value = e.target.value;
-    console.log('Search term cambiado:', value);
     setSearchTerm(value);
 
     // Si borra el texto, limpiar selección
@@ -185,17 +178,15 @@ const ControlEPP = () => {
       );
 
       if (!producto) {
-        console.log('Creando producto nuevo:', nombreProducto);
         const nuevoProducto = await dbHelpers.create('epp_productos', {
           nombre: nombreProducto,
           stock_actual: 0,
           stock_minimo: 5,
           activo: true
         });
-        
+
         // Agregar a la lista local
         setProductosEPP([...productosEPP, nuevoProducto]);
-        console.log('Producto creado:', nuevoProducto);
         return nuevoProducto;
       }
       

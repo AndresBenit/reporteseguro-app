@@ -92,8 +92,6 @@ const AnalisisEPP = ({ reportes: reportesProp }) => {
 
   // 📊 ANÁLISIS DE DATOS EPP
   const analisisEPP = useMemo(() => {
-    console.log('[EPP ANÁLISIS] Re-calculando análisis con', reportesFiltrados.length, 'reportes filtrados');
-
     // Validar que reportesFiltrados sea un array
     const reportesValidos = Array.isArray(reportesFiltrados) ? reportesFiltrados : [];
 
@@ -107,12 +105,6 @@ const AnalisisEPP = ({ reportes: reportesProp }) => {
       // Buscar área del colaborador (SOLO usar área del colaborador, no del reporte)
       const personaKey = persona.toUpperCase().trim();
       const colaborador = colaboradoresMap[personaKey];
-
-      // Debug temporal
-      if (!colaborador && persona !== 'Anónimo') {
-        console.log('[EPP DEBUG] No encontrado:', persona, '| Key buscada:', personaKey, '| Keys disponibles:', Object.keys(colaboradoresMap).slice(0, 5));
-      }
-
       const area = colaborador?.area || 'Sin área'; // Solo área del colaborador
 
       const fecha = reporte?.created_at;
@@ -161,9 +153,6 @@ const AnalisisEPP = ({ reportes: reportesProp }) => {
       acc[elem.nombre] = (acc[elem.nombre] || 0) + elem.cantidad;
       return acc;
     }, {});
-
-    console.log('[EPP ANÁLISIS] Total elementos extraídos:', todosLosElementos.length);
-    console.log('[EPP ANÁLISIS] Elementos agrupados:', elementosMasPedidos);
 
     const top5Elementos = Object.entries(elementosMasPedidos)
       .sort(([,a], [,b]) => b - a)

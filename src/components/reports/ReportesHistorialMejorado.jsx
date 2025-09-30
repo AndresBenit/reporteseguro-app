@@ -1,24 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { supabase, dbHelpers } from '../../services/supabase';
-import { useReportes } from '../../hooks/useReportes';
 import { Icon } from '../common/Icons';
 
-const ReportesHistorialMejorado = () => {
-  const {
-    reportes,
-    loading,
-    actualizarEstado,
-    eliminarReporte,
-    isUpdating
-  } = useReportes();
-
-  // Debug logs
-  console.log('[HISTORIAL] Estado actual:', {
-    reportes: reportes,
-    reportesCount: reportes?.length || 0,
-    loading,
-    isArray: Array.isArray(reportes)
-  });
+const ReportesHistorialMejorado = ({
+  reportes: reportesProp,
+  actualizarEstado,
+  eliminarReporte,
+  isUpdating
+}) => {
+  // Usar props en lugar del hook
+  const reportes = reportesProp || [];
+  const loading = false;
 
   // Cargar datos de supervision y abordajes
   useEffect(() => {

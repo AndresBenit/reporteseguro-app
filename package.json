@@ -39,6 +39,7 @@
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
+    "@alloc/quick-lru": "^5.2.0",
     "@tailwindcss/forms": "^0.5.10",
     "@tailwindcss/typography": "^0.5.16",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
@@ -56,42 +57,14 @@
     "vite": "^5.4.19"
   },
   "scripts": {
-    "dev": "npx vite",
+    "dev": "vite",
     "build": "vite build",
-    "build:vercel": "node scripts/vercel-build.cjs",
-    "build:secure": "npm run security:audit && npm run lint && npm run build",
-    "preview": "npx vite preview",
-    "lint": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
-    "lint:check": "eslint src --ext .js,.jsx,.ts,.tsx",
-    "format": "prettier --write \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,ts,tsx,json,css,md}\"",
-    "security:audit": "npm audit --audit-level moderate",
-    "security:audit-fix": "npm audit fix",
-    "security:audit-high": "npm audit --audit-level high",
-    "security:scan": "npm run security:audit && npm run lint:security",
-    "lint:security": "eslint src --ext .js,.jsx,.ts,.tsx --no-fix --config .eslintrc.security.js",
-    "env:check": "node scripts/check-env.js",
-    "env:validate": "node scripts/validate-env.js",
-    "config:verify": "npm run env:check && npm run supabase:verify",
-    "supabase:verify": "node scripts/verify-supabase.js",
-    "supabase:migrate": "node scripts/migrate-from-firebase.js",
-    "supabase:setup": "node scripts/setup-supabase.js",
-    "test": "echo 'Tests not configured yet'",
-    "test:unit": "echo 'Unit tests not configured yet'",
-    "test:integration": "echo 'Integration tests not configured yet'",
-    "test:e2e": "echo 'E2E tests not configured yet'",
-    "test:security": "echo 'Security tests not configured yet'",
-    "test:all": "npm run test:unit && npm run test:integration && npm run security:scan",
-    "deploy": "npm run build:secure && vercel --prod",
-    "deploy:staging": "npm run build && vercel",
-    "deploy:production": "npm run build:secure && vercel --prod",
-    "analyze": "npm run build && npx vite-bundle-analyzer dist",
-    "clean": "rm -rf dist node_modules/.vite",
-    "reinstall": "npm run clean && npm install",
-    "setup": "npm install && npm run env:check && npm run config:verify",
-    "setup:dev": "npm run setup && npm run supabase:setup",
-    "docs:serve": "echo 'Documentation server not configured'",
-    "docs:build": "echo 'Documentation build not configured'"
+    "preview": "vite preview",
+    "lint": "eslint src --ext .js,.jsx --fix",
+    "lint:check": "eslint src --ext .js,.jsx",
+    "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
+    "format:check": "prettier --check \"src/**/*.{js,jsx,json,css,md}\"",
+    "clean": "rm -rf dist node_modules/.vite"
   },
   "engines": {
     "node": ">=18.0.0",
@@ -115,21 +88,5 @@
     "singleQuote": true,
     "printWidth": 80,
     "tabWidth": 2
-  },
-  "pnpm": {
-    "auditConfig": {
-      "ignoreCves": []
-    }
-  },
-  "config": {
-    "commitizen": {
-      "path": "./node_modules/cz-conventional-changelog"
-    }
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run lint:check && npm run security:audit",
-      "pre-push": "npm run test:all"
-    }
   }
 }
