@@ -1,34 +1,36 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, lazy, Suspense } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { supabase, authHelpers } from "./services/supabase";
 import { NotificationProvider } from "./components/common/NotificationSystem";
 
-// Componentes principales
+// Componentes críticos (carga inmediata)
 import LoginMejorado from "./components/auth/LoginMejorado";
 import MainLayoutEnterprise from "./components/common/MainLayoutEnterprise";
 import MainDashboard from "./components/dashboard/MainDashboard";
-import ReportTypeSelector from "./components/reports/ReportTypeSelector";
-import ReporteList from "./components/reports/ReporteList";
-import ColaboradoresMain from "./components/collaborators/ColaboradoresMain";
-import SupervisionMain from "./components/supervision/SupervisionMain";
-import SupervisionCampo from "./components/supervision/SupervisionCampo";
-import AbordajeCampo from "./components/supervision/AbordajeCampo";
-import ControlEPP from "./components/supervision/ControlEPP";
-import InventarioMain from "./components/inventory/InventarioMain";
-import CapacitacionesMain from "./components/capacitaciones/CapacitacionesMain";
-import ExamenesMedicosMain from "./components/examenes/ExamenesMedicosMain";
-import COPASSTMain from "./components/copasst/COPASSTMain";
-import ReportesLegalesMain from "./components/reportes-legales/ReportesLegalesMain";
-import PlanesEmergenciaMain from "./components/emergencias/PlanesEmergenciaMain";
-import InspeccionesMain from "./components/inspecciones/InspeccionesMain";
-import InvestigacionAccidentesMain from "./components/investigacion/InvestigacionAccidentesMain";
-import AuditoriasMain from "./components/auditorias/AuditoriasMain";
-import MatrizRiesgosMain from "./components/riesgos/MatrizRiesgosMain";
-import IncidentReportForm from "./components/reports/forms/IncidentReportForm";
-import ReportesHistorialMejorado from "./components/reports/ReportesHistorialMejorado";
-import ReportesHistorial from "./components/reports/ReportesHistorial";
-import ComponenteMigracion from "./components/reports/ComponenteMigracion";
 import ErrorBoundary from "./components/common/ErrorBoundary";
+
+// Componentes lazy-loaded (carga bajo demanda)
+const ReportTypeSelector = lazy(() => import("./components/reports/ReportTypeSelector"));
+const ReporteList = lazy(() => import("./components/reports/ReporteList"));
+const ColaboradoresMain = lazy(() => import("./components/collaborators/ColaboradoresMain"));
+const SupervisionMain = lazy(() => import("./components/supervision/SupervisionMain"));
+const SupervisionCampo = lazy(() => import("./components/supervision/SupervisionCampo"));
+const AbordajeCampo = lazy(() => import("./components/supervision/AbordajeCampo"));
+const ControlEPP = lazy(() => import("./components/supervision/ControlEPP"));
+const InventarioMain = lazy(() => import("./components/inventory/InventarioMain"));
+const CapacitacionesMain = lazy(() => import("./components/capacitaciones/CapacitacionesMain"));
+const ExamenesMedicosMain = lazy(() => import("./components/examenes/ExamenesMedicosMain"));
+const COPASSTMain = lazy(() => import("./components/copasst/COPASSTMain"));
+const ReportesLegalesMain = lazy(() => import("./components/reportes-legales/ReportesLegalesMain"));
+const PlanesEmergenciaMain = lazy(() => import("./components/emergencias/PlanesEmergenciaMain"));
+const InspeccionesMain = lazy(() => import("./components/inspecciones/InspeccionesMain"));
+const InvestigacionAccidentesMain = lazy(() => import("./components/investigacion/InvestigacionAccidentesMain"));
+const AuditoriasMain = lazy(() => import("./components/auditorias/AuditoriasMain"));
+const MatrizRiesgosMain = lazy(() => import("./components/riesgos/MatrizRiesgosMain"));
+const IncidentReportForm = lazy(() => import("./components/reports/forms/IncidentReportForm"));
+const ReportesHistorialMejorado = lazy(() => import("./components/reports/ReportesHistorialMejorado"));
+const ReportesHistorial = lazy(() => import("./components/reports/ReportesHistorial"));
+const ComponenteMigracion = lazy(() => import("./components/reports/ComponenteMigracion"));
 
 // Hooks y servicios
 import { useReportes } from "./hooks/useReportes";
@@ -138,23 +140,54 @@ function App() {
     );
   }
 
+  // Componente de Loading para Suspense
+  const LoadingFallback = () => (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      minHeight: '400px',
+      color: '#64748b'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{
+          width: '40px',
+          height: '40px',
+          border: '4px solid #e2e8f0',
+          borderTop: '4px solid #3b82f6',
+          borderRadius: '50%',
+          animation: 'spin 1s linear infinite',
+          margin: '0 auto 12px'
+        }}></div>
+        <p>Cargando módulo...</p>
+      </div>
+    </div>
+  );
+
   return (
     <NotificationProvider>
       <div className="app fade-in">
+        <style>{`
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+        `}</style>
         <Routes>
         {/* Ruta de login */}
         <Route
           path="/login"
           element={!user ? <LoginMejorado /> : <Navigate to="/" replace />}
         />
-        
+
         {/* Rutas protegidas */}
         <Route
           path="/*"
           element={
             user ? (
               <MainLayoutEnterprise user={user} onLogout={handleLogout} reportes={reportes}>
-                <Routes>
+                <Suspense fallback={<LoadingFallback />}>
+                  <Routes>
                   {/* Dashboard principal */}
                   <Route
                     path="/"
@@ -281,6 +314,7 @@ function App() {
                   {/* Redirección por defecto */}
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>
+                </Suspense>
               </MainLayoutEnterprise>
             ) : (
               <Navigate to="/login" replace />
