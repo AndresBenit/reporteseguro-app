@@ -35,7 +35,7 @@ const ExecutiveAlerts = ({ reportes = [] }) => {
       areasProblematicas,
       totalReportes: reportesValidos.length,
     };
-  }, [reportesValidos]);
+  }, [reportes]);
 
   // 🎯 GENERAR ALERTAS INTELIGENTES
   const alerts = useMemo(() => {
