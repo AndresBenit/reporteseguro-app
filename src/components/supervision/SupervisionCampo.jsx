@@ -199,15 +199,19 @@ const SupervisionCampo = () => {
       };
 
       const progressInterval = simulateProgress();
+
+      // 🔧 FIX: Upload retorna { path }, luego obtenemos URL pública
       const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, selectedImage);
+      const publicUrl = storageHelpers.getPublicUrl('reportes-firmas', uploadResult.path);
 
       clearInterval(progressInterval);
       setUploadProgress(100);
       setUploadingImage(false);
 
-      return uploadResult.publicUrl || uploadResult.fullPath;
+      console.log('✅ Imagen subida correctamente:', publicUrl);
+      return publicUrl;
     } catch (error) {
-      console.error('Error uploading image:', error);
+      console.error('❌ Error uploading image:', error);
       setUploadingImage(false);
       setUploadProgress(0);
       throw error;
@@ -274,12 +278,11 @@ const SupervisionCampo = () => {
       }
 
       // Subir firma si existe
-      if (signatureData) {
+      if (signatureData && signatureData.url) {
         setMensaje("Guardando firma...");
-        const blob = await fetch(signatureData).then(r => r.blob());
-        const fileName = `firma_supervision_${Date.now()}.png`;
-        const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, blob);
-        firmaUrl = uploadResult.publicUrl || uploadResult.fullPath;
+        // 🔧 FIX: signatureData.url ya viene del SignaturePad component
+        firmaUrl = signatureData.url;
+        console.log('✅ Firma obtenida desde SignaturePad:', firmaUrl);
       }
 
       setMensaje("Registrando supervisión...");

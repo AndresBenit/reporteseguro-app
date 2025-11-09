@@ -130,12 +130,11 @@ const AbordajeCampo = () => {
       let firmaUrl = null;
 
       // Subir firma si existe
-      if (signatureData) {
+      if (signatureData && signatureData.url) {
         setMensaje('Guardando firma...');
-        const blob = await fetch(signatureData).then(r => r.blob());
-        const fileName = `firma_abordaje_${Date.now()}.png`;
-        const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, blob);
-        firmaUrl = uploadResult.publicUrl || uploadResult.fullPath;
+        // 🔧 FIX: signatureData.url ya viene del SignaturePad component
+        firmaUrl = signatureData.url;
+        console.log('✅ Firma obtenida desde SignaturePad:', firmaUrl);
       }
 
       setMensaje('Registrando abordaje...');
