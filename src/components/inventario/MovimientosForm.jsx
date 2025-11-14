@@ -41,11 +41,11 @@ const MovimientosForm = () => {
 
       const [productosRes, colaboradoresRes, movimientosRes] = await Promise.all([
         supabase.from('epp_productos').select('*').eq('activo', true).order('nombre'),
-        supabase.from('colaboradores').select('id, nombre_completo').eq('activo', true).order('nombre_completo'),
+        supabase.from('colaboradores').select('id, nombre').eq('activo', true).order('nombre'),
         supabase.from('movimientos_inventario').select(`
           *,
           epp_productos(nombre),
-          colaboradores(nombre_completo)
+          colaboradores(nombre)
         `).order('created_at', { ascending: false }).limit(50)
       ]);
 
@@ -352,7 +352,7 @@ const MovimientosForm = () => {
                 required
                 options={colaboradores.map(colaborador => ({
                   value: colaborador.id,
-                  label: colaborador.nombre_completo
+                  label: colaborador.nombre
                 }))}
                 placeholder="Seleccionar colaborador"
               />
@@ -521,9 +521,9 @@ const MovimientosForm = () => {
                   </td>
                   <td className="py-3 px-4">
                     <div className="text-sm text-slate-900">{movimiento.responsable}</div>
-                    {movimiento.colaboradores?.nombre_completo && (
+                    {movimiento.colaboradores?.nombre && (
                       <div className="text-xs text-slate-500">
-                        → {movimiento.colaboradores.nombre_completo}
+                        → {movimiento.colaboradores.nombre}
                       </div>
                     )}
                   </td>
