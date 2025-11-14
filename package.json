@@ -59,6 +59,7 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
+    "build:vercel": "vite build",
     "preview": "vite preview",
     "lint": "eslint src --ext .js,.jsx --fix",
     "lint:check": "eslint src --ext .js,.jsx",
