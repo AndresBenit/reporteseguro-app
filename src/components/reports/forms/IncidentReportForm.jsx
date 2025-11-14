@@ -211,12 +211,14 @@ const IncidentReportForm = () => {
     setUploadingImage(true);
     try {
       const fileName = `incident-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
+      // 🔧 FIX: Usar reportes-fotos (bucket dedicado para fotos de incidentes)
       const uploadResult = await storageHelpers.upload('reportes-fotos', fileName, selectedImage);
       const imageUrl = storageHelpers.getPublicUrl('reportes-fotos', uploadResult.path);
       setUploadingImage(false);
+      console.log('✅ Imagen de incidente subida correctamente:', imageUrl);
       return imageUrl;
     } catch (error) {
-      console.error('Error subiendo imagen:', error);
+      console.error('❌ Error subiendo imagen de incidente:', error);
       setUploadingImage(false);
       throw error;
     }
@@ -263,7 +265,6 @@ const IncidentReportForm = () => {
         reportante: form.reportante || "Anónimo",
         colaborador_id: form.colaboradorId,
         colaborador_nombre: form.colaboradorNombre,
-        colaborador_area: form.colaboradorArea,
         estado: "pendiente",
         tipo_reporte: "incidencia",
         prioridad: form.severidad === "critica" ? "urgente" : form.severidad === "alta" ? "alta" : "normal",

@@ -290,7 +290,6 @@ const SupervisionCampo = () => {
       const supervisionData = {
         colaborador_id: form.colaboradorId,
         colaborador_nombre: form.colaboradorNombre,
-        colaborador_area: form.colaboradorArea,
         supervisor_reporta: form.supervisorReporta,
         lugar_labor: form.lugarLabor,
         hallazgo: form.hallazgo,
