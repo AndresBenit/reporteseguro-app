@@ -211,9 +211,9 @@ const IncidentReportForm = () => {
     setUploadingImage(true);
     try {
       const fileName = `incident-${Date.now()}-${Math.random().toString(36).substr(2, 9)}.jpg`;
-      // 🔧 FIX: Usar reportes-firmas que ya existe (en lugar de reportes-fotos que no existe)
-      const uploadResult = await storageHelpers.upload('reportes-firmas', fileName, selectedImage);
-      const imageUrl = storageHelpers.getPublicUrl('reportes-firmas', uploadResult.path);
+      // 🔧 FIX: Usar reportes-fotos (bucket dedicado para fotos de incidentes)
+      const uploadResult = await storageHelpers.upload('reportes-fotos', fileName, selectedImage);
+      const imageUrl = storageHelpers.getPublicUrl('reportes-fotos', uploadResult.path);
       setUploadingImage(false);
       console.log('✅ Imagen de incidente subida correctamente:', imageUrl);
       return imageUrl;
