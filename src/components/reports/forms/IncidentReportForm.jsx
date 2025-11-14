@@ -265,7 +265,6 @@ const IncidentReportForm = () => {
         reportante: form.reportante || "Anónimo",
         colaborador_id: form.colaboradorId,
         colaborador_nombre: form.colaboradorNombre,
-        colaborador_area: form.colaboradorArea,
         estado: "pendiente",
         tipo_reporte: "incidencia",
         prioridad: form.severidad === "critica" ? "urgente" : form.severidad === "alta" ? "alta" : "normal",
